@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+
+Sitemap: https://enginow-ignite.com/sitemap.xml
