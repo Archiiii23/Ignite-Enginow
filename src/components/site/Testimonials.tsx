@@ -36,7 +36,7 @@ export function Testimonials() {
   return (
     <section className="py-24 md:py-32 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-14">
-        <span className="text-eyebrow text-primary-glow">
+        <span className="text-eyebrow text-primary font-semibold">
           — Voices
         </span>
         <h2 className="mt-3 text-section-title">
@@ -52,11 +52,11 @@ export function Testimonials() {
           {loop.map((t, i) => (
             <figure
               key={i}
-              className="flex-none w-[380px] bg-surface/60 backdrop-blur border border-foreground/5 rounded-3xl p-8"
+              className="flex-none w-[380px] bg-card border border-border rounded-3xl p-8 shadow-sm dark:shadow-md"
             >
               <blockquote className="text-foreground/90 leading-relaxed">"{t.quote}"</blockquote>
               <figcaption className="mt-8 flex items-center gap-3">
-                <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary-glow grid place-items-center text-sm font-semibold">
+                <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary-glow grid place-items-center text-sm font-semibold text-primary-foreground shadow-sm">
                   {t.name.charAt(0)}
                 </div>
                 <div className="flex flex-col">

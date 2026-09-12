@@ -31,7 +31,7 @@ export function FAQ() {
     <section className="py-24 md:py-32 border-t border-border">
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-14">
-          <span className="text-eyebrow text-primary-glow">
+          <span className="text-eyebrow text-primary font-semibold">
             — FAQ
           </span>
           <h2 className="mt-3 text-section-title">
@@ -48,12 +48,12 @@ export function FAQ() {
                   onClick={() => setOpen(isOpen ? null : i)}
                   className="w-full py-6 flex items-center justify-between gap-6 text-left group"
                 >
-                  <span className="font-display text-[1.0625rem] font-medium tracking-[-0.015em] group-hover:text-primary-glow transition-colors">
+                  <span className="font-display text-[1.0625rem] font-medium tracking-[-0.015em] group-hover:text-primary transition-colors">
                     {f.q}
                   </span>
                   <Plus
                     className={`size-5 shrink-0 text-muted-foreground transition-transform duration-300 ${
-                      isOpen ? "rotate-45 text-primary-glow" : ""
+                      isOpen ? "rotate-45 text-primary" : ""
                     }`}
                   />
                 </button>

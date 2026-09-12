@@ -8,21 +8,17 @@ import { Footer } from "@/components/site/Footer";
  */
 export function PageShell({
   children,
-  variant = "light",
 }: {
   children: ReactNode;
   variant?: "light" | "dark";
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <FloatingNav overDark={variant === "dark"} />
-      <main className={variant === "dark" ? "theme-dark bg-background text-foreground" : ""}>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <FloatingNav />
+      <main>
         {children}
-
       </main>
-      <div className="theme-dark bg-background text-foreground">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

@@ -46,79 +46,81 @@
   --shadow-card: 0 1px 0 oklch(0.15 0.005 285 / 0.04), 0 1px 2px oklch(0.15 0.005 285 / 0.05), 0 10px 28px -14px oklch(0.15 0.005 285 / 0.10);
   --shadow-card-dark: inset 0 1px 0 oklch(1 0 0 / 0.04), 0 1px 2px oklch(0 0 0 / 0.35), 0 12px 40px -16px oklch(0 0 0 / 0.55);
 
-  --gradient-brand: linear-gradient(180deg, oklch(0.30 0.02 285), oklch(0.15 0.01 285));
-  --gradient-radial-brand: radial-gradient(circle at center, oklch(0.62 0.24 300 / 0.20), transparent 60%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.58 0.25 292), oklch(0.60 0.27 322));
+  --gradient-radial-brand: radial-gradient(circle at center, oklch(0.62 0.25 300 / 0.25), transparent 65%);
 }
 
-/* Light-default premium theme (black + white combination)
-   Contrast targets: body ≥ 15:1, muted ≥ 4.6:1, hairline borders. */
+/* Light-default elegant theme (Ivory Alabaster + Royal Violet / Amethyst) */
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.995 0.001 285);
-  --foreground: oklch(0.145 0.006 285);
+  --background: oklch(0.988 0.005 285);
+  --foreground: oklch(0.145 0.035 285);
 
-  --surface: oklch(0.975 0.002 285);
+  --surface: oklch(0.962 0.010 285);
   --surface-elevated: oklch(1 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.006 285);
+  --card-foreground: oklch(0.145 0.035 285);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0.006 285);
+  --popover-foreground: oklch(0.145 0.035 285);
 
-  --primary: oklch(0.16 0.006 285);
+  --primary: oklch(0.54 0.24 292);
   --primary-foreground: oklch(0.99 0 0);
-  --primary-glow: oklch(0.32 0.006 285);
+  --primary-glow: oklch(0.58 0.25 305);
 
-  --secondary: oklch(0.955 0.003 285);
-  --secondary-foreground: oklch(0.20 0.006 285);
-  --muted: oklch(0.96 0.003 285);
-  --muted-foreground: oklch(0.42 0.010 285);
-  --accent: oklch(0.955 0.003 285);
-  --accent-foreground: oklch(0.16 0.006 285);
+  --secondary: oklch(0.948 0.014 285);
+  --secondary-foreground: oklch(0.22 0.04 285);
+  --muted: oklch(0.952 0.009 285);
+  --muted-foreground: oklch(0.48 0.028 285);
+  --accent: oklch(0.945 0.022 292);
+  --accent-foreground: oklch(0.42 0.23 292);
   --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.145 0.006 285 / 0.09);
-  --input: oklch(0.145 0.006 285 / 0.14);
-  --ring: oklch(0.16 0.006 285);
+  --border: oklch(0.20 0.035 285 / 0.10);
+  --input: oklch(0.20 0.035 285 / 0.14);
+  --ring: oklch(0.54 0.24 292);
 
-  --live: oklch(0.58 0.22 15);
-  --closing: oklch(0.62 0.16 60);
+  --live: oklch(0.58 0.24 15);
+  --closing: oklch(0.64 0.18 55);
+
+  --shadow-card: 0 1px 3px oklch(0.2 0.04 285 / 0.05), 0 8px 24px -6px oklch(0.2 0.04 285 / 0.08);
 }
 
-/* Inverted (dark) scope — apply to any section wrapper to flip to dark chrome.
-   Contrast targets: body ≥ 16:1, muted ≥ 5:1, hairline borders. */
+/* Dark theme (Velvet Obsidian Midnight + Radiant Electric Violet / Magenta) */
+.dark,
+:root.dark,
 .theme-dark {
-  --background: oklch(0.115 0.006 285);
-  --foreground: oklch(0.985 0.003 285);
+  --background: oklch(0.122 0.020 285);
+  --foreground: oklch(0.985 0.006 285);
 
-  --surface: oklch(0.155 0.007 285);
-  --surface-elevated: oklch(0.185 0.008 285);
+  --surface: oklch(0.158 0.024 285);
+  --surface-elevated: oklch(0.188 0.028 285);
 
-  --card: oklch(0.16 0.007 285);
-  --card-foreground: oklch(0.985 0.003 285);
-  --popover: oklch(0.17 0.007 285);
-  --popover-foreground: oklch(0.985 0.003 285);
+  --card: oklch(0.162 0.025 285);
+  --card-foreground: oklch(0.985 0.006 285);
+  --popover: oklch(0.175 0.026 285);
+  --popover-foreground: oklch(0.985 0.006 285);
 
-  --primary: oklch(0.985 0.003 285);
-  --primary-foreground: oklch(0.115 0.006 285);
-  --primary-glow: oklch(0.82 0.008 285);
+  --primary: oklch(0.66 0.24 295);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-glow: oklch(0.72 0.23 312);
 
-  --secondary: oklch(0.205 0.008 285);
-  --secondary-foreground: oklch(0.985 0.003 285);
-  --muted: oklch(0.205 0.008 285);
-  --muted-foreground: oklch(0.735 0.010 285);
-  --accent: oklch(0.225 0.009 285);
-  --accent-foreground: oklch(0.985 0.003 285);
+  --secondary: oklch(0.205 0.026 285);
+  --secondary-foreground: oklch(0.985 0.006 285);
+  --muted: oklch(0.205 0.024 285);
+  --muted-foreground: oklch(0.71 0.022 285);
+  --accent: oklch(0.235 0.036 295);
+  --accent-foreground: oklch(0.985 0.006 285);
   --destructive: oklch(0.66 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(1 0 0 / 0.09);
-  --input: oklch(1 0 0 / 0.14);
-  --ring: oklch(0.985 0.003 285);
+  --border: oklch(0.48 0.065 295 / 0.18);
+  --input: oklch(0.48 0.065 295 / 0.24);
+  --ring: oklch(0.66 0.24 295);
 
-  --shadow-card: var(--shadow-card-dark);
+  --shadow-card: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 4px 20px -4px oklch(0 0 0 / 0.6), 0 16px 40px -12px oklch(0.5 0.12 295 / 0.16);
 
   color: var(--foreground);
   background-color: var(--background);
@@ -146,6 +148,7 @@
     font-variant-ligatures: common-ligatures contextual;
     letter-spacing: -0.005em;
     text-wrap: pretty;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
@@ -176,7 +179,7 @@
 }
 
 @utility text-gradient-brand {
-  background: linear-gradient(180deg, var(--foreground), color-mix(in oklch, var(--foreground) 78%, var(--background)));
+  background: linear-gradient(135deg, oklch(0.64 0.25 295), oklch(0.68 0.25 325));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

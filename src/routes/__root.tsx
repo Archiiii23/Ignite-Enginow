@@ -21,6 +21,30 @@ import "@fontsource/manrope/700.css";
 import appCss from "../styles.css?url";
 import { ComingSoonGate } from "../components/site/ComingSoonGate";
 import { ldScript, organizationLd, websiteLd } from "../lib/jsonld";
+import { ThemeProvider } from "../components/theme/ThemeProvider";
+import { AuthProvider } from "../lib/auth-context";
+import { PlatformStoreProvider } from "../lib/platform-store";
+import { NotificationProvider } from "../lib/notifications";
+import { SmoothScroll } from "../components/motion/SmoothScroll";
+
+const themeInitScript = `
+  (function() {
+    try {
+      var stored = localStorage.getItem('ignite-theme');
+      var isDark = stored === 'dark' || (!stored && true);
+      if (stored === 'system') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch (e) {}
+  })();
+`;
 
 function NotFoundComponent() {
   return (
@@ -118,11 +142,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-background text-foreground antialiased min-h-screen">
         {children}
         <Scripts />
       </body>
@@ -135,10 +160,20 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <ComingSoonGate>
-        <Outlet />
-      </ComingSoonGate>
+      <ThemeProvider>
+        <AuthProvider>
+          <PlatformStoreProvider>
+            <NotificationProvider>
+              <SmoothScroll>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <ComingSoonGate>
+                  <Outlet />
+                </ComingSoonGate>
+              </SmoothScroll>
+            </NotificationProvider>
+          </PlatformStoreProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
