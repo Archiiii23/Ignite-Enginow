@@ -16,6 +16,7 @@ import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { PinnedStorySection } from "@/components/motion/PinnedStorySection";
+import { HorizontalStorySection } from "@/components/motion/HorizontalStorySection";
 import { ThreeRoleEcosystem } from "@/components/motion/ThreeRoleEcosystem";
 
 export const Route = createFileRoute("/")({
@@ -44,6 +45,7 @@ function Landing() {
       <CategoriesGrid />
       <Timeline />
       <PinnedStorySection />
+      <HorizontalStorySection />
       <ThreeRoleEcosystem />
       <Features />
       <PopularOrganizers />

@@ -1,5 +1,20 @@
 [
   {
+    "id": "usr_1789321357101",
+    "name": "student.demo",
+    "email": "student.demo@gmail.com",
+    "role": "student",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "google_1789208881293",
+    "name": "Sarah Chen (Admin)",
+    "email": "sarah.chen@enginow.io",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+    "role": "admin",
+    "headline": "Platform Operations & Governance Lead"
+  },
+  {
     "id": "usr_1789320218764",
     "name": "tester",
     "email": "tester@enginow.io",

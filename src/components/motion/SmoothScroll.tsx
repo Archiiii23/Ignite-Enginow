@@ -13,34 +13,44 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
   const routerState = useRouterState();
 
   useEffect(() => {
-    // Disable smooth scroll if reduced motion is requested
-    if (getPrefersReducedMotion()) return;
+    // Disable smooth scroll if reduced motion is requested or in SSR
+    if (typeof window === "undefined" || getPrefersReducedMotion()) return;
 
-    const lenis = new Lenis(lenisDefaultOptions);
-    lenisRef.current = lenis;
+    try {
+      const lenis = new Lenis(lenisDefaultOptions);
+      lenisRef.current = lenis;
 
-    // Connect Lenis to GSAP ScrollTrigger
-    lenis.on("scroll", ScrollTrigger.update);
+      // Connect Lenis to GSAP ScrollTrigger
+      lenis.on("scroll", ScrollTrigger.update);
 
-    const updateGSAP = (time: number) => {
-      lenis.raf(time * 1000);
-    };
+      const updateGSAP = (time: number) => {
+        lenis.raf(time * 1000);
+      };
 
-    gsap.ticker.add(updateGSAP);
-    gsap.ticker.lagSmoothing(0);
+      gsap.ticker.add(updateGSAP);
+      gsap.ticker.lagSmoothing(0);
 
-    return () => {
-      gsap.ticker.remove(updateGSAP);
-      lenis.destroy();
-      lenisRef.current = null;
-    };
+      return () => {
+        try {
+          gsap.ticker.remove(updateGSAP);
+          lenis.destroy();
+        } catch {}
+        lenisRef.current = null;
+      };
+    } catch (err) {
+      console.warn("SmoothScroll failed to initialize, falling back to native scroll:", err);
+    }
   }, []);
 
   // Reset scroll position smoothly on route changes
   useEffect(() => {
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(0, { immediate: true });
-    }
+    try {
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { immediate: true });
+      } else if (typeof window !== "undefined") {
+        window.scrollTo(0, 0);
+      }
+    } catch {}
   }, [routerState.location.pathname]);
 
   return <>{children}</>;

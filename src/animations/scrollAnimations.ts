@@ -18,14 +18,25 @@ export function useGSAPScrollTrigger(
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (getPrefersReducedMotion() || !containerRef.current) return;
+    if (typeof window === "undefined" || getPrefersReducedMotion() || !containerRef.current) return;
 
-    const ctx = gsap.context(() => {
-      callback(ctx, ScrollTrigger);
-    }, containerRef);
+    let ctx: gsap.Context | undefined;
+    try {
+      ctx = gsap.context((self) => {
+        try {
+          callback(self, ScrollTrigger);
+        } catch (callbackErr) {
+          console.warn("GSAP animation callback error:", callbackErr);
+        }
+      }, containerRef);
+    } catch (err) {
+      console.warn("GSAP ScrollTrigger context initialization failed:", err);
+    }
 
     return () => {
-      ctx.revert();
+      try {
+        ctx?.revert();
+      } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

@@ -72,10 +72,11 @@ export function PinnedStorySection() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   const containerRef = useGSAPScrollTrigger((ctx, ScrollTrigger) => {
+    if (!containerRef.current) return;
     const totalSteps = storySteps.length;
 
     ScrollTrigger.create({
-      trigger: ".pinned-story-wrapper",
+      trigger: containerRef.current,
       start: "top top",
       end: `+=${totalSteps * 90}%`,
       pin: true,
