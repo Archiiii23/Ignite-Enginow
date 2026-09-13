@@ -326,21 +326,32 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/events")
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("Backend unavailable"))))
-      .then((backendEvents: PlatformEvent[]) => {
-        if (!cancelled && Array.isArray(backendEvents)) setEvents(backendEvents);
+
+    Promise.allSettled([
+      fetch("/api/events").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/registrations").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/organizers").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/categories").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/announcements").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([evRes, regRes, orgRes, catRes, annRes]) => {
+        if (cancelled) return;
+        if (evRes.status === "fulfilled" && Array.isArray(evRes.value)) setEvents(evRes.value);
+        if (regRes.status === "fulfilled" && Array.isArray(regRes.value)) setRegistrations(regRes.value);
+        if (orgRes.status === "fulfilled" && Array.isArray(orgRes.value)) setOrganizers(orgRes.value);
+        if (catRes.status === "fulfilled" && Array.isArray(catRes.value)) setCategories(catRes.value);
+        if (annRes.status === "fulfilled" && Array.isArray(annRes.value)) setAnnouncements(annRes.value);
       })
-      .catch(() => undefined)
       .finally(() => {
         if (!cancelled) setBackendReady(true);
       });
+
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Sync to local storage
+  // Sync to local storage & backend
   useEffect(() => {
     if (!backendReady) return;
     try {
@@ -354,16 +365,28 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
   }, [events, backendReady]);
 
   useEffect(() => {
+    if (!backendReady) return;
     try {
       window.localStorage.setItem(STORAGE_KEY_REGISTRATIONS, JSON.stringify(registrations));
     } catch {}
-  }, [registrations]);
+    fetch("/api/registrations", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(registrations),
+    }).catch(() => undefined);
+  }, [registrations, backendReady]);
 
   useEffect(() => {
+    if (!backendReady) return;
     try {
       window.localStorage.setItem(STORAGE_KEY_ORGANIZERS, JSON.stringify(organizers));
     } catch {}
-  }, [organizers]);
+    fetch("/api/organizers", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(organizers),
+    }).catch(() => undefined);
+  }, [organizers, backendReady]);
 
   useEffect(() => {
     try {
@@ -372,16 +395,28 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
   }, [favorites]);
 
   useEffect(() => {
+    if (!backendReady) return;
     try {
       window.localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
     } catch {}
-  }, [categories]);
+    fetch("/api/categories", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(categories),
+    }).catch(() => undefined);
+  }, [categories, backendReady]);
 
   useEffect(() => {
+    if (!backendReady) return;
     try {
       window.localStorage.setItem(STORAGE_KEY_ANNOUNCEMENTS, JSON.stringify(announcements));
     } catch {}
-  }, [announcements]);
+    fetch("/api/announcements", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(announcements),
+    }).catch(() => undefined);
+  }, [announcements, backendReady]);
 
   // STUDENT ACTIONS
   const registerForEvent = useCallback(

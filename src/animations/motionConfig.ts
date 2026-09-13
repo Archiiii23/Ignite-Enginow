@@ -1,9 +1,11 @@
-import type { Options } from "lenis";
+import Lenis from "lenis";
+
+export type LenisOptions = NonNullable<ConstructorParameters<typeof Lenis>[0]>;
 
 /**
  * Global Lenis smooth scroll configuration
  */
-export const lenisDefaultOptions: Options = {
+export const lenisDefaultOptions: LenisOptions = {
   duration: 1.2,
   easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential ease out
   orientation: "vertical",

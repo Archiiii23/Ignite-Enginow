@@ -2,7 +2,6 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { readBackendEvents, writeBackendEvents, type BackendEvent } from "./lib/backend-events";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -38,31 +37,12 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
-async function handleEventsApi(request: Request): Promise<Response | undefined> {
-  const url = new URL(request.url);
-  if (!url.pathname.startsWith("/api/events")) return undefined;
-
-  if (request.method === "GET") {
-    const events = await readBackendEvents();
-    const slug = url.pathname.split("/").filter(Boolean)[2];
-    const result = slug ? events.find((event) => event.slug === slug) : events;
-    if (!result) return Response.json({ error: "Event not found" }, { status: 404 });
-    return Response.json(result);
-  }
-
-  if (request.method === "PUT") {
-    const events = (await request.json()) as BackendEvent[];
-    if (!Array.isArray(events)) return Response.json({ error: "Events must be an array" }, { status: 400 });
-    return Response.json(await writeBackendEvents(events));
-  }
-
-  return Response.json({ error: "Method not allowed" }, { status: 405 });
-}
+import { handleApiRequest } from "./server/api-router";
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const apiResponse = await handleEventsApi(request);
+      const apiResponse = await handleApiRequest(request);
       if (apiResponse) return apiResponse;
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "c1",
+    "name": "Hackathon",
+    "description": "Multi-day building competitions & prize challenges",
+    "active": true
+  },
+  {
+    "id": "c2",
+    "name": "Workshop",
+    "description": "Hands-on practical sessions guided by domain experts",
+    "active": true
+  },
+  {
+    "id": "c3",
+    "name": "Webinar",
+    "description": "Interactive live masterclasses and industry panels",
+    "active": true
+  },
+  {
+    "id": "c4",
+    "name": "Bootcamp",
+    "description": "Intensive multi-week skill acceleration cohorts",
+    "active": true
+  },
+  {
+    "id": "c5",
+    "name": "Conference",
+    "description": "Keynotes, showcases, and networking summits",
+    "active": true
+  },
+  {
+    "id": "c6",
+    "name": "Meetup",
+    "description": "Local and regional community gatherings",
+    "active": true
+  }
+]

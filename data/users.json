@@ -1,0 +1,48 @@
+[
+  {
+    "id": "usr_1789320218764",
+    "name": "tester",
+    "email": "tester@enginow.io",
+    "role": "student",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "usr_student_1",
+    "name": "Aarav Sharma",
+    "email": "aarav.sharma@campus.edu",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "role": "student",
+    "headline": "CS & AI Undergraduate · Hackathon Enthusiast",
+    "college": "Indian Institute of Technology (IIT)",
+    "bio": "Passionate about machine learning, distributed systems, and competitive coding. Built 3 hackathon-winning projects.",
+    "skills": [
+      "Python",
+      "PyTorch",
+      "React",
+      "TypeScript",
+      "FastAPI"
+    ],
+    "github": "github.com/aaravsharma",
+    "linkedin": "linkedin.com/in/aaravsharma"
+  },
+  {
+    "id": "usr_org_1",
+    "name": "DevSphere Foundation",
+    "email": "events@devsphere.org",
+    "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+    "role": "organizer",
+    "headline": "Global Technical Community & Hackathon Organizers",
+    "orgName": "DevSphere Foundation",
+    "orgWebsite": "https://devsphere.org",
+    "orgBio": "Empowering 50,000+ engineers worldwide through open hackathons, bootcamps, and developer workshops.",
+    "verificationStatus": "verified"
+  },
+  {
+    "id": "usr_admin_1",
+    "name": "Sarah Chen (Admin)",
+    "email": "sarah.chen@enginow.io",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+    "role": "admin",
+    "headline": "Platform Operations & Governance Lead"
+  }
+]

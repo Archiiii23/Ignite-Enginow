@@ -117,6 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: preferredRole,
     };
     setUser(googleUser);
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: googleUser.email, role: googleUser.role }),
+    }).catch(() => undefined);
     return googleUser;
   }, []);
 
@@ -130,6 +135,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role,
     };
     setUser(newUser);
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, role }),
+    }).catch(() => undefined);
     return newUser;
   }, []);
 
@@ -143,24 +153,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role,
     };
     setUser(newUser);
+    fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, email, role }),
+    }).catch(() => undefined);
     return newUser;
   }, []);
 
   const switchRole = useCallback((newRole: UserRole) => {
     setUser((current) => {
       const base = defaultProfiles[newRole];
-      return {
+      const updated = {
         ...base,
-        // preserve current user name if desired
         id: current ? current.id : base.id,
       };
+      fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(updated),
+      }).catch(() => undefined);
+      return updated;
     });
   }, []);
 
   const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
     setUser((current) => {
       if (!current) return current;
-      return { ...current, ...updates };
+      const updated = { ...current, ...updates };
+      fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(updated),
+      }).catch(() => undefined);
+      return updated;
     });
   }, []);
 
