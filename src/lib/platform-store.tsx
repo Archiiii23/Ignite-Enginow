@@ -322,12 +322,36 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const [backendReady, setBackendReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/events")
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("Backend unavailable"))))
+      .then((backendEvents: PlatformEvent[]) => {
+        if (!cancelled && Array.isArray(backendEvents)) setEvents(backendEvents);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setBackendReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Sync to local storage
   useEffect(() => {
+    if (!backendReady) return;
     try {
       window.localStorage.setItem(STORAGE_KEY_EVENTS, JSON.stringify(events));
     } catch {}
-  }, [events]);
+    fetch("/api/events", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(events),
+    }).catch(() => undefined);
+  }, [events, backendReady]);
 
   useEffect(() => {
     try {

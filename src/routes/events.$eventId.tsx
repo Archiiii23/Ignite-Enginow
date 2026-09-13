@@ -16,8 +16,17 @@ import { useNotifications } from "@/lib/notifications";
 import { TicketModal } from "@/components/events/TicketModal";
 
 export const Route = createFileRoute("/events/$eventId")({
-  loader: ({ params }): { event: EventItem } => {
+  loader: async ({ params }): Promise<{ event: EventItem }> => {
     const event = events.find((e) => e.slug === params.eventId);
+    if (typeof window === "undefined" && event) return { event };
+
+    try {
+      const response = await fetch(`/api/events/${params.eventId}`);
+      if (response.ok) return { event: (await response.json()) as EventItem };
+    } catch {
+      // Use the seed event when the API is unavailable during local development.
+    }
+
     if (!event) throw notFound();
     return { event };
   },
