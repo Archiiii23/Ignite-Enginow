@@ -21,7 +21,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, user } = useAuth();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, user, isAuthenticated, isLoading } = useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [selectedRole, setSelectedRole] = useState<UserRole>("student");
@@ -31,10 +31,12 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // If already authenticated and role selected, redirect to dashboard
-  if (user && user.isRoleSelected !== false) {
-    navigate({ to: "/dashboard" });
-  }
+  // If already authenticated and role selected, redirect to landing page
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user && user.isRoleSelected !== false) {
+      navigate({ to: "/" });
+    }
+  }, [isLoading, isAuthenticated, user, navigate]);
 
   const handleGoogleSignIn = () => {
     setGoogleLoading(true);
@@ -47,7 +49,7 @@ function AuthPage() {
     try {
       await loginWithGoogle(asRole || "student");
       toast.success("Signed in successfully via Google session!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/" });
     } catch (err: any) {
       toast.error(err.message || "Google authentication failed.");
     } finally {
@@ -69,7 +71,8 @@ function AuthPage() {
       } else {
         await loginWithEmail(email, password);
       }
-      navigate({ to: "/dashboard" });
+      toast.success("Welcome to Ignite!");
+      navigate({ to: "/" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Authentication failed";
       toast.error(

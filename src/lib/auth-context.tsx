@@ -34,6 +34,7 @@ export interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   loginWithGoogle: (preferredRole?: UserRole) => Promise<UserProfile>;
   loginWithEmail: (email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   signupWithEmail: (name: string, email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
@@ -64,6 +65,7 @@ async function authRequest<T>(path: string, body?: unknown) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -97,15 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(profile);
         return profile;
       }
+      setUser(null);
       return null;
     } catch {
+      setUser(null);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   // On initial mount, fetch current authenticated session
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
     refreshUser();
   }, [refreshUser]);
 
@@ -178,6 +187,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     void fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
+    if (typeof window !== "undefined") {
+      window.location.href = "/auth";
+    }
   }, []);
 
   return (
@@ -185,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: !!user,
+        isLoading,
         loginWithGoogle,
         loginWithEmail,
         signupWithEmail,

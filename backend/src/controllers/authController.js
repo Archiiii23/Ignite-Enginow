@@ -198,7 +198,7 @@ export const googleAuthSuccess = (req, res) => {
   if (req.user) {
     if (req.session) req.session.userId = req.user._id.toString();
     const needsRole = req.user.isRoleSelected === false;
-    res.redirect(`${clientUrl}/dashboard${needsRole ? "?select_role=true" : ""}`);
+    res.redirect(`${clientUrl}/${needsRole ? "?select_role=true" : ""}`);
   } else {
     res.redirect(`${clientUrl}/auth?error=oauth_failed`);
   }

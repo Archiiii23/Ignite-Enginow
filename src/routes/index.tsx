@@ -1,4 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
 import { canonical, pageMeta } from "@/lib/seo";
 import { homeDescription } from "@/lib/seo-descriptions";
 import { FloatingNav } from "@/components/site/FloatingNav";
@@ -34,8 +37,36 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate({ to: "/auth" });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <div className="relative flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full bg-primary/20 animate-pulse" />
+        </div>
+        <p className="mt-4 text-xs tracking-wider uppercase font-semibold text-muted-foreground animate-pulse">
+          Authenticating...
+        </p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      {user && user.isRoleSelected === false && <RoleSelectionModal isOpen={true} />}
       <ScrollProgress />
       <AnnouncementBanner />
       <FloatingNav />
@@ -56,3 +87,4 @@ function Landing() {
     </main>
   );
 }
+
