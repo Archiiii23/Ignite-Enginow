@@ -137,7 +137,14 @@ function EventsPage() {
 
     // Category
     if (selectedCategory) {
-      list = list.filter((e) => e.category === selectedCategory);
+      const selNorm = selectedCategory.toLowerCase().replace(/s$/, "");
+      list = list.filter((e) => {
+        const catNorm = e.category.toLowerCase().replace(/s$/, "");
+        return (
+          e.category.toLowerCase() === selectedCategory.toLowerCase() ||
+          catNorm === selNorm
+        );
+      });
     }
 
     // Mode
