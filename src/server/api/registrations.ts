@@ -1,8 +1,12 @@
 import { db } from "../db";
 import { readBackendEvents, writeBackendEvents } from "@/lib/backend-events";
 import type { Registration } from "@/lib/platform-store";
+import { requireRole } from "../auth";
 
-export async function handleRegistrationsApi(request: Request, pathParts: string[]): Promise<Response> {
+export async function handleRegistrationsApi(
+  request: Request,
+  pathParts: string[],
+): Promise<Response> {
   const method = request.method;
   const id = pathParts[2]; // e.g. /api/registrations/reg_123
 
@@ -29,6 +33,8 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
   }
 
   if (method === "POST") {
+    const auth = await requireRole(request, ["student"]);
+    if (auth.response) return auth.response;
     const body = (await request.json()) as {
       eventId: string;
       userId?: string;
@@ -48,11 +54,14 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
     }
 
     const registrations = await db.getRegistrations();
-    const uid = body.userId || "guest_user";
+    const uid = auth.user.id;
 
     // Check if already registered
     const existing = registrations.find(
-      (r) => (r.eventId === event.id || r.eventId === event.slug) && r.userId === uid && r.status !== "cancelled"
+      (r) =>
+        (r.eventId === event.id || r.eventId === event.slug) &&
+        r.userId === uid &&
+        r.status !== "cancelled",
     );
     if (existing) {
       return Response.json(existing, { status: 200 });
@@ -83,7 +92,7 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
 
     // Increment registered count on event
     const updatedEvents = events.map((e) =>
-      e.id === event.id ? { ...e, registered: (e.registered || 0) + 1 } : e
+      e.id === event.id ? { ...e, registered: (e.registered || 0) + 1 } : e,
     );
     await writeBackendEvents(updatedEvents);
 
@@ -91,6 +100,8 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
   }
 
   if (method === "DELETE") {
+    const auth = await requireRole(request, ["student", "admin"]);
+    if (auth.response) return auth.response;
     if (!id) {
       return Response.json({ error: "Missing registration ID" }, { status: 400 });
     }
@@ -100,6 +111,8 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
     if (!target) {
       return Response.json({ error: "Registration not found" }, { status: 404 });
     }
+    if (auth.user.role !== "admin" && target.userId !== auth.user.id)
+      return Response.json({ error: "Forbidden" }, { status: 403 });
 
     const updated = registrations.filter((r) => r.id !== id);
     await db.setRegistrations(updated);
@@ -107,7 +120,7 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
     // Decrement registered count on event
     const events = await readBackendEvents();
     const updatedEvents = events.map((e) =>
-      e.id === target.eventId ? { ...e, registered: Math.max(0, (e.registered || 1) - 1) } : e
+      e.id === target.eventId ? { ...e, registered: Math.max(0, (e.registered || 1) - 1) } : e,
     );
     await writeBackendEvents(updatedEvents);
 
@@ -115,6 +128,8 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
   }
 
   if (method === "PATCH") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     if (!id) {
       return Response.json({ error: "Missing registration ID" }, { status: 400 });
     }
@@ -125,6 +140,12 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
     if (index === -1) {
       return Response.json({ error: "Registration not found" }, { status: 404 });
     }
+    if (auth.user.role !== "admin") {
+      const events = await readBackendEvents();
+      const event = events.find((item) => item.id === registrations[index].eventId);
+      if (event?.organizerId !== auth.user.id)
+        return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     registrations[index] = { ...registrations[index], ...body };
     await db.setRegistrations(registrations);
@@ -132,9 +153,26 @@ export async function handleRegistrationsApi(request: Request, pathParts: string
   }
 
   if (method === "PUT") {
+    const auth = await requireRole(request, ["student", "organizer", "admin"]);
+    if (auth.response) return auth.response;
     const body = await request.json();
     if (Array.isArray(body)) {
-      const saved = await db.setRegistrations(body as Registration[]);
+      const incoming = body as Registration[];
+      const current = await db.getRegistrations();
+      const saved =
+        auth.user.role === "admin"
+          ? await db.setRegistrations(incoming)
+          : await db.setRegistrations(
+              current.map((registration) => {
+                const candidate = incoming.find((item) => item.id === registration.id);
+                if (!candidate) return registration;
+                if (auth.user.role === "student")
+                  return candidate.userId === auth.user.id
+                    ? { ...registration, ...candidate, userId: auth.user.id }
+                    : registration;
+                return registration;
+              }),
+            );
       return Response.json(saved);
     }
     return Response.json({ error: "Expected array of registrations" }, { status: 400 });

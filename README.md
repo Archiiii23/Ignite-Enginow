@@ -81,6 +81,12 @@ Website Name
 
 Enginow Ignite
 
+## Local backend setup
+
+The application uses Postgres for users, sessions, events, and platform collections. Copy `.env.example` to `.env`, set `DATABASE_URL`, and start the app with `npm run dev`. Passwords are stored as scrypt hashes and sessions use an HttpOnly cookie; signup creates student accounts, while organizer/admin accounts must be provisioned server-side.
+
+`SEED_PASSWORD_HASH` is optional and only provisions the bundled seed personas when the users table is empty. Generate a scrypt hash outside the application and provide it as a secret environment variable.
+
 Tagline:
 
 Ignite Ideas. Build Communities. Create Impact.

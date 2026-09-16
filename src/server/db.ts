@@ -1,5 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { Pool } from "pg";
 import type { BackendEvent } from "@/lib/backend-events";
 import type {
   Registration,
@@ -9,10 +8,14 @@ import type {
 } from "@/lib/platform-store";
 import type { UserProfile } from "@/lib/auth-context";
 
-const DATA_DIR = join(process.cwd(), "data");
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+});
 
-// Initial Organizers Seed
-const defaultOrganizersSeed: OrganizerRecord[] = [
+let schemaPromise: Promise<void> | undefined;
+
+const defaultOrganizers: OrganizerRecord[] = [
   {
     id: "org_rec_1",
     userId: "usr_org_1",
@@ -21,7 +24,7 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
     orgName: "DevSphere Foundation",
     website: "https://devsphere.org",
     verificationStatus: "verified",
-    documentsSubmitted: "Certificate of Incorporation & Gov ID (Verified by Admin on Aug 2026)",
+    documentsSubmitted: "Verification documents approved",
     eventsCount: 4,
     joinedAt: "2026-07-10",
   },
@@ -33,7 +36,7 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
     orgName: "OpenKernel Community",
     website: "https://openkernel.org",
     verificationStatus: "pending",
-    documentsSubmitted: "Open Source Non-Profit Registration PDF & Domain TXT verification",
+    documentsSubmitted: "Registration documents submitted",
     eventsCount: 2,
     joinedAt: "2026-08-28",
   },
@@ -45,19 +48,18 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
     orgName: "Apex AI Labs",
     website: "https://apexlabs.ai",
     verificationStatus: "pending",
-    documentsSubmitted: "Corporate Entity License #APX-9921",
+    documentsSubmitted: "Corporate registration submitted",
     eventsCount: 1,
     joinedAt: "2026-09-01",
   },
 ];
 
-// Initial Registrations Seed
-const defaultRegistrationsSeed: Registration[] = [
+const defaultRegistrations: Registration[] = [
   {
     id: "reg_1",
     eventId: "e1",
     eventTitle: "Quantum Hack 2026",
-    eventDate: "Aug 14 – 16, 2026",
+    eventDate: "Aug 14 - 16, 2026",
     eventLocation: "Bengaluru + Online",
     userId: "usr_student_1",
     userName: "Aarav Sharma",
@@ -87,7 +89,7 @@ const defaultRegistrationsSeed: Registration[] = [
     id: "reg_3",
     eventId: "e1",
     eventTitle: "Quantum Hack 2026",
-    eventDate: "Aug 14 – 16, 2026",
+    eventDate: "Aug 14 - 16, 2026",
     eventLocation: "Bengaluru + Online",
     userId: "usr_student_2",
     userName: "Priya Sundaram",
@@ -100,128 +102,204 @@ const defaultRegistrationsSeed: Registration[] = [
   },
 ];
 
-// Initial Categories Seed
-const defaultCategoriesSeed: CategoryItem[] = [
-  { id: "c1", name: "Hackathon", description: "Multi-day building competitions & prize challenges", active: true },
-  { id: "c2", name: "Workshop", description: "Hands-on practical sessions guided by domain experts", active: true },
-  { id: "c3", name: "Webinar", description: "Interactive live masterclasses and industry panels", active: true },
-  { id: "c4", name: "Bootcamp", description: "Intensive multi-week skill acceleration cohorts", active: true },
-  { id: "c5", name: "Conference", description: "Keynotes, showcases, and networking summits", active: true },
-  { id: "c6", name: "Meetup", description: "Local and regional community gatherings", active: true },
+const defaultCategories: CategoryItem[] = [
+  {
+    id: "c1",
+    name: "Hackathon",
+    description: "Multi-day building competitions and prize challenges",
+    active: true,
+  },
+  {
+    id: "c2",
+    name: "Workshop",
+    description: "Hands-on practical sessions guided by domain experts",
+    active: true,
+  },
+  {
+    id: "c3",
+    name: "Webinar",
+    description: "Interactive live masterclasses and industry panels",
+    active: true,
+  },
+  {
+    id: "c4",
+    name: "Bootcamp",
+    description: "Intensive multi-week skill acceleration cohorts",
+    active: true,
+  },
+  {
+    id: "c5",
+    name: "Conference",
+    description: "Keynotes, showcases, and networking summits",
+    active: true,
+  },
+  {
+    id: "c6",
+    name: "Meetup",
+    description: "Local and regional community gatherings",
+    active: true,
+  },
 ];
 
-// Initial Announcements Seed
-const defaultAnnouncementsSeed: Announcement[] = [
+const defaultAnnouncements: Announcement[] = [
   {
     id: "ann_1",
     title: "Global AI Hackathon Registrations Open!",
-    message: "Over ₹25,00,000 in bounties announced for open-source AI models. Register before seats fill.",
+    message: "Registrations are now open for the global AI hackathon.",
     type: "info",
     active: true,
     createdAt: "2026-09-10",
   },
 ];
 
-// Initial Users Seed
-const defaultUsersSeed: UserProfile[] = [
+const defaultUsers: UserProfile[] = [
   {
     id: "usr_student_1",
     name: "Aarav Sharma",
     email: "aarav.sharma@campus.edu",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     role: "student",
-    headline: "CS & AI Undergraduate · Hackathon Enthusiast",
+    headline: "CS and AI Undergraduate",
     college: "Indian Institute of Technology (IIT)",
-    bio: "Passionate about machine learning, distributed systems, and competitive coding. Built 3 hackathon-winning projects.",
-    skills: ["Python", "PyTorch", "React", "TypeScript", "FastAPI"],
-    github: "github.com/aaravsharma",
-    linkedin: "linkedin.com/in/aaravsharma",
+    skills: ["Python", "PyTorch", "React", "TypeScript"],
   },
   {
     id: "usr_org_1",
     name: "DevSphere Foundation",
     email: "events@devsphere.org",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
     role: "organizer",
-    headline: "Global Technical Community & Hackathon Organizers",
+    headline: "Global Technical Community and Hackathon Organizers",
     orgName: "DevSphere Foundation",
     orgWebsite: "https://devsphere.org",
-    orgBio: "Empowering 50,000+ engineers worldwide through open hackathons, bootcamps, and developer workshops.",
     verificationStatus: "verified",
   },
   {
     id: "usr_admin_1",
     name: "Sarah Chen (Admin)",
     email: "sarah.chen@enginow.io",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
     role: "admin",
-    headline: "Platform Operations & Governance Lead",
+    headline: "Platform Operations and Governance Lead",
   },
 ];
 
-async function ensureFile<T>(filename: string, defaultData: T): Promise<string> {
-  const filePath = join(DATA_DIR, filename);
-  try {
-    await readFile(filePath, "utf8");
-  } catch {
-    await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, JSON.stringify(defaultData, null, 2), "utf8");
-  }
-  return filePath;
+async function ensureSchema() {
+  if (!process.env.DATABASE_URL)
+    throw new Error("DATABASE_URL is required for the Postgres backend");
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS platform_collections (name text PRIMARY KEY, data jsonb NOT NULL);
+    CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, email text UNIQUE NOT NULL, password_hash text NOT NULL, profile jsonb NOT NULL);
+    CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
+    CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions (expires_at);
+  `);
 }
 
-async function readJson<T>(filename: string, defaultData: T): Promise<T> {
-  const filePath = await ensureFile(filename, defaultData);
-  const content = await readFile(filePath, "utf8");
-  return JSON.parse(content) as T;
+async function ready() {
+  schemaPromise ??= ensureSchema();
+  return schemaPromise;
 }
 
-async function writeJson<T>(filename: string, data: T): Promise<T> {
-  const filePath = join(DATA_DIR, filename);
-  await mkdir(dirname(filePath), { recursive: true });
-  await writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+async function getCollection<T>(name: string, seed: T) {
+  await ready();
+  const result = await pool.query<{ data: T }>(
+    "SELECT data FROM platform_collections WHERE name = $1",
+    [name],
+  );
+  if (result.rows[0]) return result.rows[0].data;
+  await pool.query(
+    "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO NOTHING",
+    [name, JSON.stringify(seed)],
+  );
+  return seed;
+}
+
+async function setCollection<T>(name: string, data: T) {
+  await ready();
+  await pool.query(
+    "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO UPDATE SET data = EXCLUDED.data",
+    [name, JSON.stringify(data)],
+  );
   return data;
 }
 
-// Database helper functions
+async function getUsers() {
+  await ready();
+  const result = await pool.query<{ profile: UserProfile }>(
+    "SELECT profile FROM users ORDER BY id",
+  );
+  if (result.rows.length) return result.rows.map((row) => row.profile);
+  const seedPasswordHash = process.env.SEED_PASSWORD_HASH;
+  if (!seedPasswordHash) return defaultUsers;
+  for (const profile of defaultUsers) {
+    await pool.query(
+      "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb) ON CONFLICT (id) DO NOTHING",
+      [profile.id, profile.email.toLowerCase(), seedPasswordHash, JSON.stringify(profile)],
+    );
+  }
+  return defaultUsers;
+}
+
 export const db = {
-  // Registrations
-  async getRegistrations(): Promise<Registration[]> {
-    return readJson<Registration[]>("registrations.json", defaultRegistrationsSeed);
+  getRegistrations: () => getCollection("registrations", defaultRegistrations),
+  setRegistrations: (value: Registration[]) => setCollection("registrations", value),
+  getOrganizers: () => getCollection("organizers", defaultOrganizers),
+  setOrganizers: (value: OrganizerRecord[]) => setCollection("organizers", value),
+  getCategories: () => getCollection("categories", defaultCategories),
+  setCategories: (value: CategoryItem[]) => setCollection("categories", value),
+  getAnnouncements: () => getCollection("announcements", defaultAnnouncements),
+  setAnnouncements: (value: Announcement[]) => setCollection("announcements", value),
+  getEvents: (seed: BackendEvent[]) => getCollection("events", seed),
+  setEvents: (value: BackendEvent[]) => setCollection("events", value),
+  getUsers,
+  async getUserByEmail(email: string) {
+    await getUsers();
+    const result = await pool.query<{ profile: UserProfile; password_hash: string }>(
+      "SELECT profile, password_hash FROM users WHERE lower(email) = lower($1)",
+      [email],
+    );
+    return result.rows[0]
+      ? { profile: result.rows[0].profile, passwordHash: result.rows[0].password_hash }
+      : null;
   },
-  async setRegistrations(registrations: Registration[]): Promise<Registration[]> {
-    return writeJson<Registration[]>("registrations.json", registrations);
+  async createUser(profile: UserProfile, passwordHash: string) {
+    await ready();
+    await pool.query(
+      "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb)",
+      [profile.id, profile.email.toLowerCase(), passwordHash, JSON.stringify(profile)],
+    );
+    return profile;
   },
-
-  // Organizers
-  async getOrganizers(): Promise<OrganizerRecord[]> {
-    return readJson<OrganizerRecord[]>("organizers.json", defaultOrganizersSeed);
+  async updateUser(profile: UserProfile) {
+    await ready();
+    await pool.query("UPDATE users SET email = $2, profile = $3::jsonb WHERE id = $1", [
+      profile.id,
+      profile.email.toLowerCase(),
+      JSON.stringify(profile),
+    ]);
+    return profile;
   },
-  async setOrganizers(organizers: OrganizerRecord[]): Promise<OrganizerRecord[]> {
-    return writeJson<OrganizerRecord[]>("organizers.json", organizers);
+  async createSession(tokenHash: string, userId: string, expiresAt: Date) {
+    await ready();
+    await pool.query("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)", [
+      tokenHash,
+      userId,
+      expiresAt,
+    ]);
   },
-
-  // Categories
-  async getCategories(): Promise<CategoryItem[]> {
-    return readJson<CategoryItem[]>("categories.json", defaultCategoriesSeed);
+  async getUserBySession(tokenHash: string) {
+    await ready();
+    const result = await pool.query<{ profile: UserProfile }>(
+      "SELECT u.profile FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > NOW()",
+      [tokenHash],
+    );
+    return result.rows[0]?.profile ?? null;
   },
-  async setCategories(categories: CategoryItem[]): Promise<CategoryItem[]> {
-    return writeJson<CategoryItem[]>("categories.json", categories);
-  },
-
-  // Announcements
-  async getAnnouncements(): Promise<Announcement[]> {
-    return readJson<Announcement[]>("announcements.json", defaultAnnouncementsSeed);
-  },
-  async setAnnouncements(announcements: Announcement[]): Promise<Announcement[]> {
-    return writeJson<Announcement[]>("announcements.json", announcements);
-  },
-
-  // Users
-  async getUsers(): Promise<UserProfile[]> {
-    return readJson<UserProfile[]>("users.json", defaultUsersSeed);
-  },
-  async setUsers(users: UserProfile[]): Promise<UserProfile[]> {
-    return writeJson<UserProfile[]>("users.json", users);
+  async deleteSession(tokenHash: string) {
+    await ready();
+    await pool.query("DELETE FROM sessions WHERE token_hash = $1", [tokenHash]);
   },
 };

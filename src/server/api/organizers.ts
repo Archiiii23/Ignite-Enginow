@@ -1,7 +1,11 @@
 import { db } from "../db";
 import type { OrganizerRecord } from "@/lib/platform-store";
+import { requireRole } from "../auth";
 
-export async function handleOrganizersApi(request: Request, pathParts: string[]): Promise<Response> {
+export async function handleOrganizersApi(
+  request: Request,
+  pathParts: string[],
+): Promise<Response> {
   const method = request.method;
   const id = pathParts[2]; // e.g. /api/organizers/org_rec_1
 
@@ -16,9 +20,11 @@ export async function handleOrganizersApi(request: Request, pathParts: string[])
   }
 
   if (method === "POST") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     const body = (await request.json()) as Partial<OrganizerRecord>;
     const organizers = await db.getOrganizers();
-    const userId = body.userId || "usr_org_1";
+    const userId = auth.user.role === "organizer" ? auth.user.id : body.userId || auth.user.id;
 
     const existingIndex = organizers.findIndex((o) => o.userId === userId || o.id === body.id);
     if (existingIndex !== -1) {
@@ -50,6 +56,8 @@ export async function handleOrganizersApi(request: Request, pathParts: string[])
   }
 
   if (method === "PATCH") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     if (!id) {
       return Response.json({ error: "Missing organizer ID" }, { status: 400 });
     }
@@ -60,16 +68,39 @@ export async function handleOrganizersApi(request: Request, pathParts: string[])
     if (index === -1) {
       return Response.json({ error: "Organizer not found" }, { status: 404 });
     }
+    if (auth.user.role !== "admin" && organizers[index].userId !== auth.user.id)
+      return Response.json({ error: "Forbidden" }, { status: 403 });
 
-    organizers[index] = { ...organizers[index], ...body };
+    organizers[index] =
+      auth.user.role === "admin"
+        ? { ...organizers[index], ...body }
+        : {
+            ...organizers[index],
+            documentsSubmitted: body.documentsSubmitted,
+            verificationStatus: "pending",
+          };
     await db.setOrganizers(organizers);
     return Response.json(organizers[index]);
   }
 
   if (method === "PUT") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     const body = await request.json();
     if (Array.isArray(body)) {
-      const saved = await db.setOrganizers(body as OrganizerRecord[]);
+      const incoming = body as OrganizerRecord[];
+      const current = await db.getOrganizers();
+      const saved =
+        auth.user.role === "admin"
+          ? await db.setOrganizers(incoming)
+          : await db.setOrganizers(
+              current.map(
+                (organizer) =>
+                  incoming.find(
+                    (item) => item.id === organizer.id && item.userId === auth.user.id,
+                  ) ?? organizer,
+              ),
+            );
       return Response.json(saved);
     }
     return Response.json({ error: "Expected array of organizers" }, { status: 400 });

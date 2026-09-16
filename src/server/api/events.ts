@@ -1,4 +1,5 @@
 import { readBackendEvents, writeBackendEvents, type BackendEvent } from "@/lib/backend-events";
+import { requireRole } from "../auth";
 
 export async function handleEventsApi(request: Request, pathParts: string[]): Promise<Response> {
   const method = request.method;
@@ -33,6 +34,8 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
   }
 
   if (method === "POST") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     const body = (await request.json()) as Partial<BackendEvent>;
     const events = await readBackendEvents();
     const id = body.id || `ev_${Date.now()}`;
@@ -69,12 +72,15 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
       faqs: body.faqs || [],
       contactEmail: body.contactEmail || "events@enginow.io",
       about: body.about || "Detailed description coming soon.",
-      agenda: body.agenda || [{ time: "Day 1 · 10:00", title: "Opening Kickoff", description: "Welcome note" }],
+      agenda: body.agenda || [
+        { time: "Day 1 · 10:00", title: "Opening Kickoff", description: "Welcome note" },
+      ],
       perks: body.perks || ["Verified Certificate", "Community Access"],
       approvalStatus: body.approvalStatus || "draft",
       rejectionReason: body.rejectionReason,
-      organizerId: body.organizerId || "usr_org_1",
-      organizerName: body.organizerName || "DevSphere Foundation",
+      organizerId: auth.user.role === "organizer" ? auth.user.id : body.organizerId || auth.user.id,
+      organizerName:
+        auth.user.role === "organizer" ? auth.user.name : body.organizerName || auth.user.name,
       isFeatured: body.isFeatured || false,
       registrationsOpen: body.registrationsOpen ?? true,
     };
@@ -85,10 +91,23 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
   }
 
   if (method === "PUT") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     // Bulk replace OR single item update
     const body = await request.json();
     if (Array.isArray(body)) {
-      const saved = await writeBackendEvents(body as BackendEvent[]);
+      const existing = await readBackendEvents();
+      const saved =
+        auth.user.role === "admin"
+          ? await writeBackendEvents(body as BackendEvent[])
+          : await writeBackendEvents(
+              existing.map(
+                (event) =>
+                  (body as BackendEvent[]).find(
+                    (item) => item.id === event.id && item.organizerId === auth.user.id,
+                  ) ?? event,
+              ),
+            );
       return Response.json(saved);
     }
 
@@ -101,6 +120,8 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
     if (index === -1) {
       return Response.json({ error: "Event not found" }, { status: 404 });
     }
+    if (auth.user.role !== "admin" && events[index].organizerId !== auth.user.id)
+      return Response.json({ error: "Forbidden" }, { status: 403 });
 
     events[index] = { ...events[index], ...(body as Partial<BackendEvent>) };
     await writeBackendEvents(events);
@@ -108,6 +129,8 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
   }
 
   if (method === "PATCH") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     if (!idOrSlug) {
       return Response.json({ error: "Missing event ID or slug" }, { status: 400 });
     }
@@ -118,6 +141,8 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
     if (index === -1) {
       return Response.json({ error: "Event not found" }, { status: 404 });
     }
+    if (auth.user.role !== "admin" && events[index].organizerId !== auth.user.id)
+      return Response.json({ error: "Forbidden" }, { status: 403 });
 
     events[index] = { ...events[index], ...body };
     await writeBackendEvents(events);
@@ -125,6 +150,8 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
   }
 
   if (method === "DELETE") {
+    const auth = await requireRole(request, ["organizer", "admin"]);
+    if (auth.response) return auth.response;
     if (!idOrSlug) {
       return Response.json({ error: "Missing event ID" }, { status: 400 });
     }
@@ -134,6 +161,9 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
     if (filtered.length === events.length) {
       return Response.json({ error: "Event not found" }, { status: 404 });
     }
+    const target = events.find((event) => event.id === idOrSlug || event.slug === idOrSlug);
+    if (auth.user.role !== "admin" && target?.organizerId !== auth.user.id)
+      return Response.json({ error: "Forbidden" }, { status: 403 });
 
     await writeBackendEvents(filtered);
     return Response.json({ success: true, removedId: idOrSlug });

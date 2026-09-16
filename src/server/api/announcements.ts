@@ -1,7 +1,11 @@
 import { db } from "../db";
 import type { Announcement } from "@/lib/platform-store";
+import { requireRole } from "../auth";
 
-export async function handleAnnouncementsApi(request: Request, pathParts: string[]): Promise<Response> {
+export async function handleAnnouncementsApi(
+  request: Request,
+  pathParts: string[],
+): Promise<Response> {
   const method = request.method;
   const id = pathParts[2]; // e.g. /api/announcements/ann_1
 
@@ -11,6 +15,8 @@ export async function handleAnnouncementsApi(request: Request, pathParts: string
   }
 
   if (method === "POST") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     const body = (await request.json()) as {
       title: string;
       message: string;
@@ -37,6 +43,8 @@ export async function handleAnnouncementsApi(request: Request, pathParts: string
   }
 
   if (method === "DELETE") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     if (!id) return Response.json({ error: "Missing announcement ID" }, { status: 400 });
 
     const announcements = await db.getAnnouncements();
@@ -50,6 +58,8 @@ export async function handleAnnouncementsApi(request: Request, pathParts: string
   }
 
   if (method === "PUT") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     const body = await request.json();
     if (Array.isArray(body)) {
       const saved = await db.setAnnouncements(body as Announcement[]);

@@ -1,6 +1,5 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
 import type { EventItem } from "@/data/events";
+import { db } from "@/server/db";
 
 export type BackendEvent = EventItem & {
   approvalStatus: "draft" | "pending_approval" | "approved" | "rejected" | "published";
@@ -10,8 +9,6 @@ export type BackendEvent = EventItem & {
   isFeatured?: boolean;
   registrationsOpen: boolean;
 };
-
-const dataPath = join(process.cwd(), "data", "events.json");
 
 const fallbackEvents: BackendEvent[] = [
   {
@@ -50,22 +47,10 @@ const fallbackEvents: BackendEvent[] = [
   },
 ];
 
-async function ensureDataFile() {
-  try {
-    await readFile(dataPath, "utf8");
-  } catch {
-    await mkdir(dirname(dataPath), { recursive: true });
-    await writeFile(dataPath, JSON.stringify(fallbackEvents, null, 2), "utf8");
-  }
-}
-
 export async function readBackendEvents(): Promise<BackendEvent[]> {
-  await ensureDataFile();
-  return JSON.parse(await readFile(dataPath, "utf8")) as BackendEvent[];
+  return db.getEvents(fallbackEvents);
 }
 
 export async function writeBackendEvents(events: BackendEvent[]) {
-  await mkdir(dirname(dataPath), { recursive: true });
-  await writeFile(dataPath, JSON.stringify(events, null, 2), "utf8");
-  return events;
+  return db.setEvents(events);
 }

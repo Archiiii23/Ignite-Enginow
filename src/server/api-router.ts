@@ -4,6 +4,7 @@ import { handleOrganizersApi } from "./api/organizers";
 import { handleCategoriesApi } from "./api/categories";
 import { handleAnnouncementsApi } from "./api/announcements";
 import { handleAuthApi } from "./api/auth";
+import { handleContactApi } from "./api/contact";
 
 export async function handleApiRequest(request: Request): Promise<Response | undefined> {
   const url = new URL(request.url);
@@ -15,7 +16,11 @@ export async function handleApiRequest(request: Request): Promise<Response | und
   try {
     switch (resource) {
       case "health":
-        return Response.json({ status: "ok", timestamp: new Date().toISOString(), service: "enginow-ignite-api" });
+        return Response.json({
+          status: "ok",
+          timestamp: new Date().toISOString(),
+          service: "enginow-ignite-api",
+        });
       case "events":
         return await handleEventsApi(request, pathParts);
       case "registrations":
@@ -28,6 +33,8 @@ export async function handleApiRequest(request: Request): Promise<Response | und
         return await handleAnnouncementsApi(request, pathParts);
       case "auth":
         return await handleAuthApi(request, pathParts);
+      case "contact":
+        return await handleContactApi(request);
       default:
         return Response.json({ error: `API route /api/${resource} not found` }, { status: 404 });
     }
@@ -38,7 +45,7 @@ export async function handleApiRequest(request: Request): Promise<Response | und
         error: "Internal Server Error",
         message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

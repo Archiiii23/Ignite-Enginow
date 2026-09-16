@@ -1,7 +1,11 @@
 import { db } from "../db";
 import type { CategoryItem } from "@/lib/platform-store";
+import { requireRole } from "../auth";
 
-export async function handleCategoriesApi(request: Request, pathParts: string[]): Promise<Response> {
+export async function handleCategoriesApi(
+  request: Request,
+  pathParts: string[],
+): Promise<Response> {
   const method = request.method;
   const id = pathParts[2]; // e.g. /api/categories/c1
 
@@ -16,6 +20,8 @@ export async function handleCategoriesApi(request: Request, pathParts: string[])
   }
 
   if (method === "POST") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     const body = (await request.json()) as { name: string; description: string };
     if (!body.name) return Response.json({ error: "Category name is required" }, { status: 400 });
 
@@ -33,6 +39,8 @@ export async function handleCategoriesApi(request: Request, pathParts: string[])
   }
 
   if (method === "PATCH") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     if (!id) return Response.json({ error: "Missing category ID" }, { status: 400 });
 
     const body = (await request.json()) as Partial<CategoryItem>;
@@ -46,6 +54,8 @@ export async function handleCategoriesApi(request: Request, pathParts: string[])
   }
 
   if (method === "DELETE") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     if (!id) return Response.json({ error: "Missing category ID" }, { status: 400 });
 
     const categories = await db.getCategories();
@@ -59,6 +69,8 @@ export async function handleCategoriesApi(request: Request, pathParts: string[])
   }
 
   if (method === "PUT") {
+    const auth = await requireRole(request, ["admin"]);
+    if (auth.response) return auth.response;
     const body = await request.json();
     if (Array.isArray(body)) {
       const saved = await db.setCategories(body as CategoryItem[]);

@@ -26,6 +26,7 @@ import { AuthProvider } from "../lib/auth-context";
 import { PlatformStoreProvider } from "../lib/platform-store";
 import { NotificationProvider } from "../lib/notifications";
 import { SmoothScroll } from "../components/motion/SmoothScroll";
+import { Toaster } from "../components/ui/sonner";
 
 const themeInitScript = `
   (function() {
@@ -164,6 +165,7 @@ function RootComponent() {
         <AuthProvider>
           <PlatformStoreProvider>
             <NotificationProvider>
+              <Toaster />
               <SmoothScroll>
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <ComingSoonGate>
