@@ -358,3 +358,118 @@ export const getAdminAnalytics = async (req, res) => {
   const analytics = await getAdminPlatformAnalytics();
   return successResponse(res, 200, "Platform analytics calculated", analytics);
 };
+
+/**
+ * Get all pending role change requests
+ */
+export const getAdminRoleRequests = async (req, res) => {
+  const users = await User.find({ "roleChangeRequest.status": "PENDING" })
+    .select("name email role isRoleSelected roleChangeRequest createdAt")
+    .sort({ "roleChangeRequest.requestedAt": -1 });
+
+  return successResponse(res, 200, "Pending role change requests retrieved", users);
+};
+
+/**
+ * Approve role change request
+ */
+export const approveRoleRequest = async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  if (!user) {
+    return errorResponse(res, 404, "User not found", "USER_NOT_FOUND");
+  }
+
+  if (user.roleChangeRequest?.status !== "PENDING") {
+    return errorResponse(res, 400, "No pending role change request for this user", "NO_PENDING_REQUEST");
+  }
+
+  const previousRole = user.role;
+  const newRole = user.roleChangeRequest.requestedRole;
+
+  user.role = newRole;
+  user.roleChangeRequest.status = "APPROVED";
+  user.roleChangeRequest.reviewedAt = new Date();
+  user.roleChangeRequest.reviewedBy = req.user._id;
+  await user.save();
+
+  if (newRole === "organizer") {
+    let orgProfile = await OrganizerProfile.findOne({ user: user._id });
+    if (!orgProfile) {
+      await OrganizerProfile.create({
+        user: user._id,
+        organizationName: user.name + " Organization",
+        organizationType: "Independent Organizer",
+        contactEmail: user.email,
+        verificationStatus: "APPROVED",
+        reviewedAt: new Date(),
+        reviewedBy: req.user._id,
+      });
+    } else {
+      orgProfile.verificationStatus = "APPROVED";
+      await orgProfile.save();
+    }
+  }
+
+  await createNotification({
+    recipient: user._id,
+    type: "ROLE_CHANGE_APPROVED",
+    title: "Role Change Request Approved! 🎉",
+    message: `Your request to change your role to ${newRole === "student" ? "Participant" : "Organizer"} has been approved by an administrator.`,
+    relatedEntity: user._id,
+    relatedEntityType: "User",
+  });
+
+  await AuditLog.create({
+    actor: req.user._id,
+    actorName: req.user.name,
+    actorEmail: req.user.email,
+    action: "ADMIN_ROLE_CHANGE_APPROVED",
+    entityType: "User",
+    entityId: user._id,
+    metadata: { previousRole, newRole, approvedBy: req.user.email },
+  });
+
+  return successResponse(res, 200, `Role change approved. User is now ${newRole}.`, user.toSafeObject());
+};
+
+/**
+ * Reject role change request
+ */
+export const rejectRoleRequest = async (req, res) => {
+  const { reason = "Request denied by administrator" } = req.body;
+  const user = await User.findById(req.params.userId);
+  if (!user) {
+    return errorResponse(res, 404, "User not found", "USER_NOT_FOUND");
+  }
+
+  if (user.roleChangeRequest?.status !== "PENDING") {
+    return errorResponse(res, 400, "No pending role change request for this user", "NO_PENDING_REQUEST");
+  }
+
+  user.roleChangeRequest.status = "REJECTED";
+  user.roleChangeRequest.rejectionReason = reason;
+  user.roleChangeRequest.reviewedAt = new Date();
+  user.roleChangeRequest.reviewedBy = req.user._id;
+  await user.save();
+
+  await createNotification({
+    recipient: user._id,
+    type: "ROLE_CHANGE_REJECTED",
+    title: "Role Change Request Update",
+    message: `Your role change request was not approved: ${reason}`,
+    relatedEntity: user._id,
+    relatedEntityType: "User",
+  });
+
+  await AuditLog.create({
+    actor: req.user._id,
+    actorName: req.user.name,
+    actorEmail: req.user.email,
+    action: "ADMIN_ROLE_CHANGE_REJECTED",
+    entityType: "User",
+    entityId: user._id,
+    metadata: { requestedRole: user.roleChangeRequest.requestedRole, reason },
+  });
+
+  return successResponse(res, 200, "Role change request rejected.", user.toSafeObject());
+};

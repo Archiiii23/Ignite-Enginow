@@ -57,22 +57,18 @@ export const configurePassport = () => {
               if (!user.profileImage && profileImage) user.profileImage = profileImage;
               user.lastLoginAt = new Date();
               await user.save();
-            } else {
-              // Retrieve role if passed in OAuth state or session, defaulting to student
-              const preferredRole = (req.session?.preferredRole === "organizer" || req.query?.state === "organizer")
-                ? "organizer"
-                : "student"; // Admin cannot be self-selected per Section 10
-
+              // New user registration via Google OAuth: must select Participant or Organizer
               user = await User.create({
                 name,
                 email,
                 googleId,
                 profileImage: profileImage || undefined,
-                role: preferredRole,
+                role: "student",
+                isRoleSelected: false,
                 accountStatus: "active",
                 lastLoginAt: new Date(),
               });
-              logger.info(`New user registered via Google OAuth: ${email} (${user.role})`);
+              logger.info(`New user registered via Google OAuth: ${email} (role selection pending)`);
             }
 
             return done(null, user);

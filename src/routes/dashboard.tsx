@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { StudentPortal } from "@/components/dashboard/StudentPortal";
 import { OrganizerPortal } from "@/components/dashboard/OrganizerPortal";
 import { AdminPortal } from "@/components/dashboard/AdminPortal";
+import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -36,6 +37,23 @@ function Dashboard() {
             >
               Sign in to access dashboard
             </a>
+          </div>
+        </section>
+      </PageShell>
+    );
+  }
+
+  // If user signed in with Google for the first time and has not selected a role
+  if (user.isRoleSelected === false) {
+    return (
+      <PageShell>
+        <RoleSelectionModal isOpen={true} />
+        <section className="min-h-[70svh] grid place-items-center px-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-xl font-bold mb-2">Role Onboarding Required</h2>
+            <p className="text-sm text-muted-foreground">
+              Please choose whether you will participate as a Participant or host as an Organizer to access your dashboard.
+            </p>
           </div>
         </section>
       </PageShell>

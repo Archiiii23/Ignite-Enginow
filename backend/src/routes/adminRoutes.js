@@ -14,6 +14,9 @@ import {
   toggleFeaturedEvent,
   getAdminRegistrations,
   getAdminAnalytics,
+  getAdminRoleRequests,
+  approveRoleRequest,
+  rejectRoleRequest,
 } from "../controllers/adminController.js";
 import {
   createCategory,
@@ -49,6 +52,11 @@ router.use(requireAuth, requireRole("admin"));
 // Users Management
 router.get("/users", asyncHandler(getAdminUsers));
 router.patch("/users/:id/suspend", asyncHandler(toggleUserSuspension));
+
+// Role Change Requests per admin governance
+router.get("/role-requests", asyncHandler(getAdminRoleRequests));
+router.patch("/role-requests/:userId/approve", asyncHandler(approveRoleRequest));
+router.patch("/role-requests/:userId/reject", asyncHandler(rejectRoleRequest));
 
 // Organizers Queue & Approval
 router.get("/organizers", asyncHandler(getAdminOrganizers));

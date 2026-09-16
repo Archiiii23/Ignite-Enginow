@@ -1,6 +1,13 @@
 import { Router } from "express";
 import passport from "passport";
-import { getMe, logout, demoLogin, googleAuthSuccess } from "../controllers/authController.js";
+import {
+  getMe,
+  logout,
+  demoLogin,
+  googleAuthSuccess,
+  selectRole,
+  requestRoleChange,
+} from "../controllers/authController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -32,6 +39,12 @@ router.get("/me", requireAuth, asyncHandler(getMe));
 
 // Logout
 router.post("/logout", requireAuth, logout);
+
+// First-login role selection: Participant (student) vs Organizer
+router.post("/select-role", requireAuth, asyncHandler(selectRole));
+
+// Request role change (requires administrator approval)
+router.post("/request-role-change", requireAuth, asyncHandler(requestRoleChange));
 
 // Instant developer demo login (student, organizer, admin)
 router.post("/demo-login", asyncHandler(demoLogin));

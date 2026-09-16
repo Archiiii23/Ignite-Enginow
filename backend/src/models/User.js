@@ -60,6 +60,39 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    isRoleSelected: {
+      type: Boolean,
+      default: false,
+    },
+    roleChangeRequest: {
+      requestedRole: {
+        type: String,
+        enum: ["student", "organizer", "participant"],
+      },
+      reason: {
+        type: String,
+        trim: true,
+      },
+      status: {
+        type: String,
+        enum: ["NONE", "PENDING", "APPROVED", "REJECTED"],
+        default: "NONE",
+      },
+      requestedAt: {
+        type: Date,
+      },
+      reviewedAt: {
+        type: Date,
+      },
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      rejectionReason: {
+        type: String,
+        trim: true,
+      },
+    },
     lastLoginAt: {
       type: Date,
       default: Date.now,
@@ -85,6 +118,8 @@ userSchema.methods.toSafeObject = function () {
     email: this.email,
     profileImage: this.profileImage,
     role: this.role,
+    isRoleSelected: this.isRoleSelected ?? false,
+    roleChangeRequest: this.roleChangeRequest,
     accountStatus: this.accountStatus,
     headline: this.headline,
     college: this.college,

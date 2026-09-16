@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
@@ -21,11 +21,14 @@ import {
   X,
   Search,
   TrendingUp,
+  UserCheck,
+  RefreshCw,
 } from "lucide-react";
 import { usePlatformStore } from "@/lib/platform-store";
 import type { PlatformEvent } from "@/lib/platform-store";
+import { toast } from "sonner";
 
-type Tab = "organizers" | "events" | "users" | "categories" | "announcements" | "analytics";
+type Tab = "organizers" | "events" | "role-requests" | "users" | "categories" | "announcements" | "analytics";
 
 export function AdminPortal() {
   const {
@@ -60,6 +63,61 @@ export function AdminPortal() {
   const [newAnnMsg, setNewAnnMsg] = useState("");
   const [newAnnType, setNewAnnType] = useState<"info" | "success" | "warning">("info");
   const [searchUser, setSearchUser] = useState("");
+  const [roleRequests, setRoleRequests] = useState<any[]>([]);
+  const [loadingRoleRequests, setLoadingRoleRequests] = useState(false);
+  const [rejectingRoleUserId, setRejectingRoleUserId] = useState<string | null>(null);
+  const [roleRejectReason, setRoleRejectReason] = useState("");
+
+  const fetchRoleRequests = async () => {
+    setLoadingRoleRequests(true);
+    try {
+      const res = await fetch("/api/admin/role-requests", { credentials: "include" });
+      if (res.ok) {
+        const json = await res.json();
+        setRoleRequests(json.data || []);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingRoleRequests(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoleRequests();
+  }, []);
+
+  const handleApproveRole = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/admin/role-requests/${userId}/approve`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Approval failed");
+      toast.success("Role change approved!");
+      fetchRoleRequests();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to approve role request");
+    }
+  };
+
+  const handleRejectRole = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/admin/role-requests/${userId}/reject`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reason: roleRejectReason || "Denied by administrator" }),
+      });
+      if (!res.ok) throw new Error("Rejection failed");
+      toast.info("Role change request rejected.");
+      setRejectingRoleUserId(null);
+      setRoleRejectReason("");
+      fetchRoleRequests();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reject role request");
+    }
+  };
 
   const pendingOrgs = organizers.filter((o) => o.verificationStatus === "pending");
   const pendingEvents = events.filter((e) => e.approvalStatus === "pending_approval");
@@ -160,6 +218,11 @@ export function AdminPortal() {
 
       {/* Pending badges */}
       <div className="flex flex-wrap gap-2 mb-6">
+        {roleRequests.length > 0 && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+            <RefreshCw className="size-3" /> {roleRequests.length} role change request{roleRequests.length !== 1 ? "s" : ""} pending
+          </span>
+        )}
         {pendingOrgs.length > 0 && (
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
             <Clock className="size-3" /> {pendingOrgs.length} organizer verification{pendingOrgs.length !== 1 ? "s" : ""} pending
@@ -177,6 +240,7 @@ export function AdminPortal() {
         {([
           ["organizers", "Organizers", ShieldCheck],
           ["events", "Events Queue", Eye],
+          ["role-requests", `Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
           ["users", "Users", Users],
           ["categories", "Categories", Tag],
           ["announcements", "Announcements", Megaphone],
@@ -412,6 +476,139 @@ export function AdminPortal() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Role Requests Tab */}
+      {tab === "role-requests" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-foreground">Pending Role Change Requests</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Review and approve user requests to switch roles between Participant and Organizer.
+              </p>
+            </div>
+            <button
+              onClick={fetchRoleRequests}
+              className="h-8 px-3 rounded-lg border border-border text-xs font-semibold hover:bg-secondary flex items-center gap-1.5 transition-colors"
+            >
+              <RefreshCw className={`size-3.5 ${loadingRoleRequests ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          {loadingRoleRequests && (
+            <div className="py-12 text-center text-muted-foreground text-sm">
+              Loading role requests...
+            </div>
+          )}
+
+          {!loadingRoleRequests && roleRequests.length === 0 && (
+            <div className="bg-card border border-border rounded-2xl p-12 text-center">
+              <div className="size-12 rounded-2xl bg-primary/10 text-primary grid place-items-center mx-auto mb-3">
+                <CheckCircle2 className="size-6" />
+              </div>
+              <h3 className="font-semibold text-sm text-foreground">No Pending Role Requests</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                All participant and organizer role change requests have been processed.
+              </p>
+            </div>
+          )}
+
+          {!loadingRoleRequests && roleRequests.length > 0 && (
+            <div className="space-y-3">
+              {roleRequests.map((reqUser: any) => {
+                const currentRoleLabel = reqUser.role === "student" ? "Participant" : reqUser.role;
+                const requestedRoleLabel =
+                  reqUser.roleChangeRequest?.requestedRole === "student"
+                    ? "Participant"
+                    : reqUser.roleChangeRequest?.requestedRole || "Organizer";
+
+                const isRejecting = rejectingRoleUserId === (reqUser.id || reqUser._id);
+
+                return (
+                  <div
+                    key={reqUser.id || reqUser._id}
+                    className="bg-card border border-border rounded-2xl p-5 transition-all shadow-sm"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2.5">
+                          <h4 className="font-bold text-sm text-foreground">{reqUser.name}</h4>
+                          <span className="text-xs text-muted-foreground">{reqUser.email}</span>
+                        </div>
+
+                        {/* Role transition badge */}
+                        <div className="flex items-center gap-2 pt-1 text-xs">
+                          <span className="px-2.5 py-0.5 rounded-full bg-secondary text-foreground font-semibold">
+                            {currentRoleLabel}
+                          </span>
+                          <span className="text-muted-foreground font-bold">→</span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/20">
+                            {requestedRoleLabel}
+                          </span>
+                        </div>
+
+                        {reqUser.roleChangeRequest?.reason && (
+                          <div className="text-xs text-muted-foreground mt-2 italic bg-secondary/50 p-2.5 rounded-xl border border-border">
+                            "{reqUser.roleChangeRequest.reason}"
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      {!isRejecting ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => handleApproveRole(reqUser.id || reqUser._id)}
+                            className="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                          >
+                            <CheckCircle2 className="size-4" />
+                            <span>Approve</span>
+                          </button>
+                          <button
+                            onClick={() => setRejectingRoleUserId(reqUser.id || reqUser._id)}
+                            className="h-9 px-3 rounded-xl border border-border hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 text-xs font-semibold text-muted-foreground transition-colors"
+                          >
+                            <XCircle className="size-4" />
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-full sm:w-80 space-y-2 pt-2 sm:pt-0">
+                          <input
+                            type="text"
+                            placeholder="Reason for rejection..."
+                            value={roleRejectReason}
+                            onChange={(e) => setRoleRejectReason(e.target.value)}
+                            className="w-full h-9 bg-background border border-border rounded-xl px-3 text-xs focus:outline-none focus:border-primary"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleRejectRole(reqUser.id || reqUser._id)}
+                              className="flex-1 h-8 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg"
+                            >
+                              Confirm Reject
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRejectingRoleUserId(null);
+                                setRoleRejectReason("");
+                              }}
+                              className="px-3 h-8 border border-border text-xs rounded-lg hover:bg-secondary"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

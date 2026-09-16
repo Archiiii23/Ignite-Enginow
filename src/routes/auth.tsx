@@ -3,14 +3,14 @@ import { useState } from "react";
 import { PageShell } from "@/components/site/PageShell";
 import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth, type UserRole } from "@/lib/auth-context";
-import { GraduationCap, Briefcase, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { GraduationCap, Briefcase, ShieldCheck, CheckCircle2, Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: pageMeta({
-      title: "Sign in & Roles",
-      description: "Sign in to Enginow Ignite as a Student, Organizer, or Admin.",
+      title: "Sign in with Google",
+      description: "Sign in to Enginow Ignite with Google OAuth. Choose your role as Participant or Organizer.",
       path: "/auth",
       noindex: true,
     }),
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { loginWithEmail, signupWithEmail } = useAuth();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, user } = useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [selectedRole, setSelectedRole] = useState<UserRole>("student");
@@ -29,6 +29,31 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // If already authenticated and role selected, redirect to dashboard
+  if (user && user.isRoleSelected !== false) {
+    navigate({ to: "/dashboard" });
+  }
+
+  const handleGoogleSignIn = () => {
+    setGoogleLoading(true);
+    // Direct browser redirect to Google OAuth endpoint
+    window.location.href = "/api/auth/google";
+  };
+
+  const handleSimulatedGoogleSignIn = async (asRole?: UserRole) => {
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle(asRole || "student");
+      toast.success("Signed in successfully via Google session!");
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error(err.message || "Google authentication failed.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,80 +90,52 @@ function AuthPage() {
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
             <span className="text-eyebrow text-primary font-semibold mb-3 inline-block">
-              Enginow Ignite Auth & RBAC
+              Enginow Ignite Single Sign-On
             </span>
             <h1 className="text-section-title">
-              {mode === "signin" ? "Welcome back." : "Create your account."}
+              Sign In to Ignite
             </h1>
             <p className="text-lead mt-3">
-              Choose your role to access role-specific workflows and dashboards.
+              One account for hackathons, summits, and technical community hosting.
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-xl">
-            {/* Role Selection Tabs */}
-            <div className="mb-6">
-              <label className="text-caption text-muted-foreground block mb-2 font-medium">
-                Select your primary role
-              </label>
-              <div className="grid grid-cols-3 gap-2 p-1 bg-secondary rounded-2xl">
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("student")}
-                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl text-xs font-semibold transition-all ${
-                    selectedRole === "student"
-                      ? "bg-card text-foreground shadow-sm ring-1 ring-primary/30"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <GraduationCap className="size-4 mb-1 text-primary" />
-                  <span>Student</span>
-                </button>
+          <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+            {/* Primary Google Login Button */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className="w-full h-12 rounded-2xl bg-white hover:bg-neutral-50 text-neutral-900 border border-neutral-200 font-semibold text-sm flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md active:scale-[0.99] dark:bg-card dark:text-foreground dark:border-border dark:hover:bg-secondary"
+              >
+                {/* Google SVG Icon */}
+                <svg className="size-5 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>Continue with Google</span>
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("organizer")}
-                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl text-xs font-semibold transition-all ${
-                    selectedRole === "organizer"
-                      ? "bg-card text-foreground shadow-sm ring-1 ring-primary/30"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Briefcase className="size-4 mb-1 text-primary" />
-                  <span>Organizer</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("admin")}
-                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl text-xs font-semibold transition-all ${
-                    selectedRole === "admin"
-                      ? "bg-card text-foreground shadow-sm ring-1 ring-primary/30"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <ShieldCheck className="size-4 mb-1 text-primary" />
-                  <span>Admin</span>
-                </button>
-              </div>
-
-              {/* Role explanation */}
-              <div className="mt-2 text-xs text-muted-foreground px-1">
-                {selectedRole === "student" && (
-                  <span>
-                    Participate in hackathons, download QR event passes & favorite events.
-                  </span>
-                )}
-                {selectedRole === "organizer" && (
-                  <span>
-                    Create listings, submit for verification, manage attendees & track analytics.
-                  </span>
-                )}
-                {selectedRole === "admin" && (
-                  <span>
-                    Approve/reject organizers & events, view platform analytics & moderation.
-                  </span>
-                )}
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-muted-foreground">
+                <Lock className="size-3.5 text-primary shrink-0 mt-0.5" />
+                <span>
+                  <strong>First-time sign-in:</strong> You will select your role (<strong>Participant</strong> or <strong>Organizer</strong>) upon verification. Once established, role changes require admin approval.
+                </span>
               </div>
             </div>
 
@@ -148,7 +145,7 @@ function AuthPage() {
               </div>
               <div className="relative flex justify-center">
                 <span className="text-micro text-muted-foreground bg-card px-3">
-                  or continue with email
+                  or continue with email credentials
                 </span>
               </div>
             </div>
@@ -225,15 +222,50 @@ function AuthPage() {
                 disabled={loading}
                 className="w-full bg-primary text-primary-foreground h-11 rounded-xl text-sm font-semibold hover:opacity-95 transition-opacity shadow-[0_0_24px_-4px_var(--primary-glow)]"
               >
-                {mode === "signin"
-                  ? `Sign In as ${selectedRole}`
-                  : `Create ${selectedRole} Account`}
+                {loading
+                  ? "Authenticating..."
+                  : mode === "signin"
+                  ? "Sign In with Email"
+                  : "Create Account with Email"}
               </button>
             </form>
+
+            {/* Quick Persona Instant Login for Local Testing */}
+            <div className="mt-6 pt-5 border-t border-border">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 text-center">
+                Developer Fast-Access Personas
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSignIn("student")}
+                  className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold flex flex-col items-center gap-1 transition-colors"
+                >
+                  <GraduationCap className="size-4 text-violet-500" />
+                  <span>Participant</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSignIn("organizer")}
+                  className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold flex flex-col items-center gap-1 transition-colors"
+                >
+                  <Briefcase className="size-4 text-amber-500" />
+                  <span>Organizer</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSignIn("admin")}
+                  className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold flex flex-col items-center gap-1 transition-colors"
+                >
+                  <ShieldCheck className="size-4 text-rose-500" />
+                  <span>Admin</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <p className="text-caption text-center mt-6 text-muted-foreground">
-            Protected by Enginow Ignite security & OAuth governance.{" "}
+            Protected by Enginow Ignite security & Google OAuth session governance.{" "}
             <Link to="/" className="underline hover:text-foreground">
               Terms & Privacy
             </Link>

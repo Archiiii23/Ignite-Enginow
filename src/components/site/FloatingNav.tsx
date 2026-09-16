@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import {
   Menu, X, GraduationCap, Briefcase, ShieldCheck, LogOut,
   ChevronDown, LayoutDashboard, Bell, CheckCircle2, Info, AlertTriangle, XCircle,
+  Lock, RefreshCw,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications, type NotificationType } from "@/lib/notifications";
+import { RequestRoleChangeModal } from "@/components/auth/RequestRoleChangeModal";
+import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
 
 const links = [
   { label: "Events", to: "/events" as const },
@@ -52,6 +55,7 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
@@ -228,22 +232,37 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                       >
                         <LayoutDashboard className="size-4 text-muted-foreground" />Dashboard
                       </Link>
-                      <div className="px-3 pt-1 pb-1">
-                        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Switch Role</div>
-                        {(["student", "organizer", "admin"] as const).map((role) => {
-                          const rc2 = roleConfig[role];
-                          return (
+                      <div className="px-3 py-2.5 border-t border-border/80 bg-secondary/30">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Active Role</span>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                            <Lock className="size-2.5 text-primary" /> Locked
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between bg-card p-2 rounded-xl border border-border">
+                          <div className="flex items-center gap-2">
+                            {rc && <rc.icon className={`size-3.5 ${rc.cls}`} />}
+                            <span className="text-xs font-semibold capitalize text-foreground">
+                              {user.role === "student" ? "Participant" : user.role}
+                            </span>
+                          </div>
+                          {user.role !== "admin" && (
                             <button
-                              key={role}
-                              onClick={() => { switchRole(role); setProfileOpen(false); }}
-                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${user.role === role ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
+                              onClick={() => {
+                                setRoleChangeModalOpen(true);
+                                setProfileOpen(false);
+                              }}
+                              className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
                             >
-                              <rc2.icon className="size-3.5" />
-                              <span className="capitalize">{role}</span>
-                              {user.role === role && <span className="ml-auto text-[10px] text-primary font-bold">Current</span>}
+                              <RefreshCw className="size-3" /> Change
                             </button>
-                          );
-                        })}
+                          )}
+                        </div>
+                        {user.roleChangeRequest?.status === "PENDING" && (
+                          <div className="mt-2 text-[10px] bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-1.5 rounded-lg flex items-center gap-1">
+                            <span>Change to <strong>{user.roleChangeRequest.requestedRole === "student" ? "Participant" : user.roleChangeRequest.requestedRole}</strong> pending review</span>
+                          </div>
+                        )}
                       </div>
                       <div className="border-t border-border">
                         <button
@@ -336,6 +355,17 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
           )}
         </motion.div>
       )}
+
+      {/* First-Login Role Selection Modal */}
+      {user && user.isRoleSelected === false && (
+        <RoleSelectionModal isOpen={true} />
+      )}
+
+      {/* Admin-Governed Role Change Request Modal */}
+      <RequestRoleChangeModal
+        isOpen={roleChangeModalOpen}
+        onClose={() => setRoleChangeModalOpen(false)}
+      />
     </motion.nav>
   );
 }

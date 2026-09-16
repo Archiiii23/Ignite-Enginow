@@ -2,12 +2,23 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 
 export type UserRole = "student" | "organizer" | "admin";
 
+export interface RoleChangeRequest {
+  requestedRole: "student" | "organizer" | "participant";
+  reason?: string;
+  status: "NONE" | "PENDING" | "APPROVED" | "REJECTED";
+  requestedAt?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   avatar: string;
   role: UserRole;
+  isRoleSelected?: boolean;
+  roleChangeRequest?: RoleChangeRequest;
   headline?: string;
   college?: string;
   bio?: string;
@@ -26,6 +37,9 @@ interface AuthContextType {
   loginWithGoogle: (preferredRole?: UserRole) => Promise<UserProfile>;
   loginWithEmail: (email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   signupWithEmail: (name: string, email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
+  selectRole: (role: "participant" | "organizer") => Promise<UserProfile>;
+  requestRoleChange: (requestedRole: "participant" | "organizer", reason?: string) => Promise<UserProfile>;
+  refreshUser: () => Promise<UserProfile | null>;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
   switchRole?: (newRole: UserRole) => void;
   logout: () => void;
@@ -51,41 +65,60 @@ async function authRequest<T>(path: string, body?: unknown) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) {
+        setUser(null);
+        return null;
+      }
+      const payload = await res.json();
+      if (payload?.data) {
+        const u = payload.data;
+        const profile: UserProfile = {
+          id: u.id || u._id,
+          name: u.name,
+          email: u.email,
+          avatar: u.profileImage || u.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          role: u.role || "student",
+          isRoleSelected: u.isRoleSelected ?? true,
+          roleChangeRequest: u.roleChangeRequest,
+          headline: u.headline,
+          college: u.college,
+          bio: u.bio,
+          skills: u.skills,
+          github: u.github,
+          linkedin: u.linkedin,
+          orgName: u.orgName,
+          orgWebsite: u.orgWebsite,
+          orgBio: u.orgBio,
+          verificationStatus: u.verificationStatus,
+        };
+        setUser(profile);
+        return profile;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   // On initial mount, fetch current authenticated session
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    fetch("/api/auth/me", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((payload) => {
-        if (payload?.data) {
-          const u = payload.data;
-          setUser({
-            id: u.id || u._id,
-            name: u.name,
-            email: u.email,
-            avatar: u.profileImage || u.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-            role: u.role || "student",
-            headline: u.headline,
-            college: u.college,
-            bio: u.bio,
-            skills: u.skills,
-            github: u.github,
-            linkedin: u.linkedin,
-            orgName: u.orgName,
-            orgWebsite: u.orgWebsite,
-            orgBio: u.orgBio,
-            verificationStatus: u.verificationStatus,
-          });
-        }
-      })
-      .catch(() => undefined);
-  }, []);
+    refreshUser();
+  }, [refreshUser]);
 
   const loginWithGoogle = useCallback(async (preferredRole: UserRole = "student") => {
-    const res = await authRequest<UserProfile>("demo-login", { role: preferredRole });
-    setUser(res);
-    return res;
+    // If running in browser and user initiates Google login, we can navigate directly or use instant fallback
+    try {
+      const res = await authRequest<UserProfile>("demo-login", { role: preferredRole });
+      setUser(res);
+      return res;
+    } catch {
+      window.location.href = `/api/auth/google?role=${preferredRole}`;
+      return new Promise<UserProfile>(() => {});
+    }
   }, []);
 
   const loginWithEmail = useCallback(async (email: string, passwordOrRole?: string | UserRole) => {
@@ -116,6 +149,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [loginWithGoogle]);
 
+  const selectRole = useCallback(async (role: "participant" | "organizer") => {
+    const res = await authRequest<UserProfile>("select-role", { role });
+    setUser(res);
+    return res;
+  }, []);
+
+  const requestRoleChange = useCallback(async (requestedRole: "participant" | "organizer", reason?: string) => {
+    const res = await authRequest<UserProfile>("request-role-change", { requestedRole, reason });
+    setUser(res);
+    return res;
+  }, []);
+
   const switchRole = useCallback((newRole: UserRole) => {
     loginWithGoogle(newRole);
   }, [loginWithGoogle]);
@@ -143,6 +188,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithGoogle,
         loginWithEmail,
         signupWithEmail,
+        selectRole,
+        requestRoleChange,
+        refreshUser,
         updateUserProfile,
         switchRole,
         logout,

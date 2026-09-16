@@ -19,6 +19,8 @@ const notificationSchema = new mongoose.Schema(
         "EVENT_REMINDER",
         "ORGANIZER_APPROVED",
         "ORGANIZER_REJECTED",
+        "ROLE_CHANGE_APPROVED",
+        "ROLE_CHANGE_REJECTED",
         "SYSTEM",
       ],
       default: "SYSTEM",
