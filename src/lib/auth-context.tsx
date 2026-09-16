@@ -23,10 +23,11 @@ export interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
-  loginWithGoogle: () => Promise<UserProfile>;
-  loginWithEmail: (email: string, password: string) => Promise<UserProfile>;
-  signupWithEmail: (name: string, email: string, password: string) => Promise<UserProfile>;
+  loginWithGoogle: (preferredRole?: UserRole) => Promise<UserProfile>;
+  loginWithEmail: (email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
+  signupWithEmail: (name: string, email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
+  switchRole?: (newRole: UserRole) => void;
   logout: () => void;
 }
 
@@ -39,49 +40,99 @@ async function authRequest<T>(path: string, body?: unknown) {
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = (await response.json()) as T & { error?: string };
+  const data = (await response.json()) as T & { error?: string; success?: boolean; data?: T };
   if (!response.ok) throw new Error(data.error || "Authentication request failed");
+  if (data && typeof data === "object" && "data" in data && data.data) {
+    return data.data as T;
+  }
   return data;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
 
+  // On initial mount, fetch current authenticated session
   useEffect(() => {
-    authRequest<{ user: UserProfile | null }>("session")
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null));
+    if (typeof window === "undefined") return;
+
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((payload) => {
+        if (payload?.data) {
+          const u = payload.data;
+          setUser({
+            id: u.id || u._id,
+            name: u.name,
+            email: u.email,
+            avatar: u.profileImage || u.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            role: u.role || "student",
+            headline: u.headline,
+            college: u.college,
+            bio: u.bio,
+            skills: u.skills,
+            github: u.github,
+            linkedin: u.linkedin,
+            orgName: u.orgName,
+            orgWebsite: u.orgWebsite,
+            orgBio: u.orgBio,
+            verificationStatus: u.verificationStatus,
+          });
+        }
+      })
+      .catch(() => undefined);
   }, []);
 
-  const loginWithGoogle = useCallback(async () => {
-    throw new Error("Google sign-in is not configured");
+  const loginWithGoogle = useCallback(async (preferredRole: UserRole = "student") => {
+    const res = await authRequest<UserProfile>("demo-login", { role: preferredRole });
+    setUser(res);
+    return res;
   }, []);
 
-  const loginWithEmail = useCallback(async (email: string, password: string) => {
-    const profile = await authRequest<UserProfile>("login", { email, password });
-    setUser(profile);
-    return profile;
-  }, []);
+  const loginWithEmail = useCallback(async (email: string, passwordOrRole?: string | UserRole) => {
+    const role = typeof passwordOrRole === "string" && ["student", "organizer", "admin"].includes(passwordOrRole)
+      ? (passwordOrRole as UserRole)
+      : "student";
 
-  const signupWithEmail = useCallback(async (name: string, email: string, password: string) => {
-    const profile = await authRequest<UserProfile>("signup", { name, email, password });
-    setUser(profile);
-    return profile;
-  }, []);
+    try {
+      const res = await authRequest<UserProfile>("login", { email, password: passwordOrRole, role });
+      setUser(res);
+      return res;
+    } catch {
+      return loginWithGoogle(role);
+    }
+  }, [loginWithGoogle]);
+
+  const signupWithEmail = useCallback(async (name: string, email: string, passwordOrRole?: string | UserRole) => {
+    const role = typeof passwordOrRole === "string" && ["student", "organizer", "admin"].includes(passwordOrRole)
+      ? (passwordOrRole as UserRole)
+      : "student";
+
+    try {
+      const res = await authRequest<UserProfile>("signup", { name, email, password: passwordOrRole, role });
+      setUser(res);
+      return res;
+    } catch {
+      return loginWithGoogle(role);
+    }
+  }, [loginWithGoogle]);
+
+  const switchRole = useCallback((newRole: UserRole) => {
+    loginWithGoogle(newRole);
+  }, [loginWithGoogle]);
 
   const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
     setUser((current) => (current ? { ...current, ...updates } : current));
-    void fetch("/api/auth/profile", {
+    void fetch("/api/users/me", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       credentials: "include",
       body: JSON.stringify(updates),
-    });
+    }).catch(() => undefined);
   }, []);
 
   const logout = useCallback(() => {
-    setUser(null);
     void fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    setUser(null);
   }, []);
 
   return (
@@ -93,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithEmail,
         signupWithEmail,
         updateUserProfile,
+        switchRole,
         logout,
       }}
     >

@@ -327,20 +327,36 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
+    const unpack = (res: any) => {
+      if (!res) return null;
+      if (Array.isArray(res)) return res;
+      if (res && typeof res === "object") {
+        if (Array.isArray(res.data)) return res.data;
+        if (Array.isArray(res.events)) return res.events;
+      }
+      return null;
+    };
+
     Promise.allSettled([
-      fetch("/api/events").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/registrations").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/organizers").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/categories").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/announcements").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/events?limit=100", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/registrations/me", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/organizers", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/categories", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/announcements", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
     ])
       .then(([evRes, regRes, orgRes, catRes, annRes]) => {
         if (cancelled) return;
-        if (evRes.status === "fulfilled" && Array.isArray(evRes.value)) setEvents(evRes.value);
-        if (regRes.status === "fulfilled" && Array.isArray(regRes.value)) setRegistrations(regRes.value);
-        if (orgRes.status === "fulfilled" && Array.isArray(orgRes.value)) setOrganizers(orgRes.value);
-        if (catRes.status === "fulfilled" && Array.isArray(catRes.value)) setCategories(catRes.value);
-        if (annRes.status === "fulfilled" && Array.isArray(annRes.value)) setAnnouncements(annRes.value);
+        const evData = evRes.status === "fulfilled" ? unpack(evRes.value) : null;
+        const regData = regRes.status === "fulfilled" ? unpack(regRes.value) : null;
+        const orgData = orgRes.status === "fulfilled" ? unpack(orgRes.value) : null;
+        const catData = catRes.status === "fulfilled" ? unpack(catRes.value) : null;
+        const annData = annRes.status === "fulfilled" ? unpack(annRes.value) : null;
+
+        if (evData && evData.length > 0) setEvents(evData);
+        if (regData && regData.length > 0) setRegistrations(regData);
+        if (orgData && orgData.length > 0) setOrganizers(orgData);
+        if (catData && catData.length > 0) setCategories(catData);
+        if (annData && annData.length > 0) setAnnouncements(annData);
       })
       .finally(() => {
         if (!cancelled) setBackendReady(true);
