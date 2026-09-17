@@ -114,11 +114,11 @@ export function OrganizerPortal() {
 
   const exportCSV = (eventId: string) => {
     const regs = getEventRegistrations(eventId);
-    const header = "Name,Email,College,Seat,Status,Registered At\n";
+    const header = "Name,Email,Phone,College,Degree,Year,Roll Number,GitHub,LinkedIn,Skills,Participation,Team Name,Team Role,T-Shirt,Seat,Status,Registered At\n";
     const rows = regs
       .map(
         (r) =>
-          `"${r.userName}","${r.userEmail}","${r.college ?? ""}","${r.seatNumber}","${r.status}","${r.registeredAt}"`
+          `"${r.userName}","${r.userEmail}","${r.phone ?? ""}","${r.college ?? ""}","${r.degree ?? ""}","${r.yearOfStudy ?? ""}","${r.rollNumber ?? ""}","${r.githubUrl ?? ""}","${r.linkedinUrl ?? ""}","${(r.skills || []).join("; ")}","${r.participationType ?? "solo"}","${r.teamName ?? ""}","${r.teamRole ?? ""}","${r.tshirtSize ?? ""}","${r.seatNumber}","${r.status}","${r.registeredAt}"`
       )
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
@@ -350,16 +350,49 @@ export function OrganizerPortal() {
                         {regs.map((reg) => (
                           <div
                             key={reg.id}
-                            className="px-4 py-3 flex items-center justify-between text-sm"
+                            className="px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm"
                           >
-                            <div>
-                              <div className="font-medium">{reg.userName}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {reg.userEmail} · {reg.college ?? "—"}
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-foreground">{reg.userName}</span>
+                                {reg.teamName && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                                    Team: {reg.teamName}
+                                  </span>
+                                )}
+                                {reg.experienceLevel && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+                                    {reg.experienceLevel}
+                                  </span>
+                                )}
                               </div>
+                              <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                                <span>{reg.userEmail}</span>
+                                {reg.phone && <span>· 📞 {reg.phone}</span>}
+                                <span>· {reg.college ?? "—"}</span>
+                                {reg.degree && <span>({reg.degree})</span>}
+                                {reg.rollNumber && <span className="font-mono">· ID: {reg.rollNumber}</span>}
+                              </div>
+                              {(reg.githubUrl || (reg.skills && reg.skills.length > 0)) && (
+                                <div className="text-[11px] text-muted-foreground flex flex-wrap items-center gap-1.5 pt-0.5">
+                                  {reg.githubUrl && (
+                                    <a
+                                      href={reg.githubUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-primary hover:underline"
+                                    >
+                                      GitHub Profile ↗
+                                    </a>
+                                  )}
+                                  {reg.skills && reg.skills.length > 0 && (
+                                    <span>· Skills: {reg.skills.join(", ")}</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-muted-foreground">
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded-md">
                                 {reg.seatNumber}
                               </span>
                               <button

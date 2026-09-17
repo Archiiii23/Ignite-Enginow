@@ -14,28 +14,71 @@
     "durationLabel": "4 hours",
     "price": "₹499",
     "seats": 300,
-    "registered": 214,
+    "registered": 215,
     "cover": "/src/assets/event-2.jpg",
     "status": "live",
-    "tags": ["Workshops", "Distributed Systems", "Backend", "Architecture"],
-    "host": { "name": "OpenKernel Community", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Aarav Mehta", "role": "Staff Architect, Fintech Scale" },
-      { "name": "Maya Sen", "role": "Principal Cloud Engineer, AWS" }
+    "tags": [
+      "Workshops",
+      "Distributed Systems",
+      "Backend",
+      "Architecture"
     ],
-    "sponsors": [{ "name": "Razorpay" }, { "name": "Cred" }],
+    "host": {
+      "name": "OpenKernel Community",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Aarav Mehta",
+        "role": "Staff Architect, Fintech Scale"
+      },
+      {
+        "name": "Maya Sen",
+        "role": "Principal Cloud Engineer, AWS"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Razorpay"
+      },
+      {
+        "name": "Cred"
+      }
+    ],
     "faqs": [
-      { "q": "Is this workshop interactive?", "a": "Yes, you will design architectures live with 1-on-1 feedback." },
-      { "q": "Will recordings be provided?", "a": "Full HD recordings and architecture diagrams are provided for lifetime access." }
+      {
+        "q": "Is this workshop interactive?",
+        "a": "Yes, you will design architectures live with 1-on-1 feedback."
+      },
+      {
+        "q": "Will recordings be provided?",
+        "a": "Full HD recordings and architecture diagrams are provided for lifetime access."
+      }
     ],
     "contactEmail": "workshops@enginow.io",
     "about": "Learn how modern high-scale platforms handle millions of concurrent operations with minimal latency. We cover message queues, distributed consensus, data sharding, caching strategies, and chaos engineering.",
     "agenda": [
-      { "time": "14:00", "title": "Fundamentals of Distributed Scale", "description": "Latency vs throughput and SLO definitions." },
-      { "time": "15:00", "title": "Data Plane Patterns", "description": "Queues, caches, and consistency trade-offs." },
-      { "time": "16:30", "title": "Interactive System Design Lab", "description": "Design a real-world resilient ride-sharing dispatch system." }
+      {
+        "time": "14:00",
+        "title": "Fundamentals of Distributed Scale",
+        "description": "Latency vs throughput and SLO definitions."
+      },
+      {
+        "time": "15:00",
+        "title": "Data Plane Patterns",
+        "description": "Queues, caches, and consistency trade-offs."
+      },
+      {
+        "time": "16:30",
+        "title": "Interactive System Design Lab",
+        "description": "Design a real-world resilient ride-sharing dispatch system."
+      }
     ],
-    "perks": ["Verified Workshop Certificate", "Interactive Architecture Blueprint", "Lifetime Recording Access"],
+    "perks": [
+      "Verified Workshop Certificate",
+      "Interactive Architecture Blueprint",
+      "Lifetime Recording Access"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",
@@ -61,25 +104,72 @@
     "registered": 612,
     "cover": "/src/assets/event-1.jpg",
     "status": "live",
-    "tags": ["Hackathons", "Quantum", "Edge AI", "Prize"],
-    "host": { "name": "DevSphere Foundation", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Dr. Priya Nair", "role": "Quantum Research Lead, IBM" },
-      { "name": "Arun Krishnan", "role": "Principal Engineer, Google DeepMind" }
+    "tags": [
+      "Hackathons",
+      "Quantum",
+      "Edge AI",
+      "Prize"
     ],
-    "sponsors": [{ "name": "Google Cloud" }, { "name": "IBM Quantum" }, { "name": "NVIDIA" }],
+    "host": {
+      "name": "DevSphere Foundation",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Dr. Priya Nair",
+        "role": "Quantum Research Lead, IBM"
+      },
+      {
+        "name": "Arun Krishnan",
+        "role": "Principal Engineer, Google DeepMind"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Google Cloud"
+      },
+      {
+        "name": "IBM Quantum"
+      },
+      {
+        "name": "NVIDIA"
+      }
+    ],
     "faqs": [
-      { "q": "Can I participate solo or in teams?", "a": "You can participate solo or in teams of up to 4 members." },
-      { "q": "Are prizes cash or credits?", "a": "Cash bounties will be wired directly to winners, along with cloud compute credits." }
+      {
+        "q": "Can I participate solo or in teams?",
+        "a": "You can participate solo or in teams of up to 4 members."
+      },
+      {
+        "q": "Are prizes cash or credits?",
+        "a": "Cash bounties will be wired directly to winners, along with cloud compute credits."
+      }
     ],
     "contactEmail": "hack@enginow.io",
     "about": "A flagship hybrid hackathon bringing together builders across quantum computing, applied ML, and edge systems. Ship a working prototype in 48 hours, get mentored by senior staff engineers, and pitch to leading investors.",
     "agenda": [
-      { "time": "Day 1 · 09:00", "title": "Opening Keynote & Problem Tracks", "description": "Kickoff ceremony with track release." },
-      { "time": "Day 2 · 11:00", "title": "Staff Engineer Office Hours", "description": "1-on-1 code reviews and mentorship." },
-      { "time": "Day 3 · 15:00", "title": "Top 10 Demo Day & Jury Pitch", "description": "Live pitch session before industry judges." }
+      {
+        "time": "Day 1 · 09:00",
+        "title": "Opening Keynote & Problem Tracks",
+        "description": "Kickoff ceremony with track release."
+      },
+      {
+        "time": "Day 2 · 11:00",
+        "title": "Staff Engineer Office Hours",
+        "description": "1-on-1 code reviews and mentorship."
+      },
+      {
+        "time": "Day 3 · 15:00",
+        "title": "Top 10 Demo Day & Jury Pitch",
+        "description": "Live pitch session before industry judges."
+      }
     ],
-    "perks": ["₹10,00,000 Cash Pool", "Exclusive Builder Swag Kit", "Direct Recruiter Fast-Track", "Mentorship Access"],
+    "perks": [
+      "₹10,00,000 Cash Pool",
+      "Exclusive Builder Swag Kit",
+      "Direct Recruiter Fast-Track",
+      "Mentorship Access"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_1",
     "organizerName": "DevSphere Foundation",
@@ -104,25 +194,69 @@
     "registered": 285,
     "cover": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&auto=format&fit=crop&q=80",
     "status": "upcoming",
-    "tags": ["Seminars", "AI / ML", "Research", "Academic"],
-    "host": { "name": "IISc Research Collective", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Prof. K. Venkatesh", "role": "Director, Computational Intelligence Lab" },
-      { "name": "Dr. Ananya Ray", "role": "Senior Research Scientist, DeepMind" }
+    "tags": [
+      "Seminars",
+      "AI / ML",
+      "Research",
+      "Academic"
     ],
-    "sponsors": [{ "name": "IISc Bengaluru" }, { "name": "Microsoft Research" }],
+    "host": {
+      "name": "IISc Research Collective",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Prof. K. Venkatesh",
+        "role": "Director, Computational Intelligence Lab"
+      },
+      {
+        "name": "Dr. Ananya Ray",
+        "role": "Senior Research Scientist, DeepMind"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "IISc Bengaluru"
+      },
+      {
+        "name": "Microsoft Research"
+      }
+    ],
     "faqs": [
-      { "q": "Is prior ML knowledge required?", "a": "Familiarity with neural networks and linear algebra is recommended." },
-      { "q": "Will paper preprints be shared?", "a": "Yes, attendees receive digital access to all featured research papers." }
+      {
+        "q": "Is prior ML knowledge required?",
+        "a": "Familiarity with neural networks and linear algebra is recommended."
+      },
+      {
+        "q": "Will paper preprints be shared?",
+        "a": "Yes, attendees receive digital access to all featured research papers."
+      }
     ],
     "contactEmail": "seminars@enginow.io",
     "about": "An academic research seminar diving deep into test-time compute, multimodal foundation models, formal verification of LLM outputs, and novel alignment techniques.",
     "agenda": [
-      { "time": "09:30", "title": "Paper Presentation: Test-Time Reasoning", "description": "Scaling search vs parameters." },
-      { "time": "11:30", "title": "Diffusion & Generative Frontiers", "description": "Advances in 3D generation and physics engines." },
-      { "time": "14:30", "title": "Panel: AI Alignment & Robustness", "description": "Safety guardrails for autonomous agents." }
+      {
+        "time": "09:30",
+        "title": "Paper Presentation: Test-Time Reasoning",
+        "description": "Scaling search vs parameters."
+      },
+      {
+        "time": "11:30",
+        "title": "Diffusion & Generative Frontiers",
+        "description": "Advances in 3D generation and physics engines."
+      },
+      {
+        "time": "14:30",
+        "title": "Panel: AI Alignment & Robustness",
+        "description": "Safety guardrails for autonomous agents."
+      }
     ],
-    "perks": ["Research Paper Pack", "Auditorium Access", "Networking Lunch", "Certificate of Attendance"],
+    "perks": [
+      "Research Paper Pack",
+      "Auditorium Access",
+      "Networking Lunch",
+      "Certificate of Attendance"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",
@@ -147,25 +281,65 @@
     "registered": 1587,
     "cover": "/src/assets/event-3.jpg",
     "status": "live",
-    "tags": ["Webinars", "AI", "Product Management", "Free"],
-    "host": { "name": "Enginow Product Network", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Isha Rao", "role": "Head of Product, AI Platform" },
-      { "name": "Vikram Sethi", "role": "VP Engineering, Scale AI" }
+    "tags": [
+      "Webinars",
+      "AI",
+      "Product Management",
+      "Free"
     ],
-    "sponsors": [{ "name": "Enginow" }],
+    "host": {
+      "name": "Enginow Product Network",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Isha Rao",
+        "role": "Head of Product, AI Platform"
+      },
+      {
+        "name": "Vikram Sethi",
+        "role": "VP Engineering, Scale AI"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Enginow"
+      }
+    ],
     "faqs": [
-      { "q": "Can I ask questions live?", "a": "Yes, 30 minutes are reserved for live audience Q&A." },
-      { "q": "Will I get slides?", "a": "Presentation slides and curated PM frameworks will be emailed." }
+      {
+        "q": "Can I ask questions live?",
+        "a": "Yes, 30 minutes are reserved for live audience Q&A."
+      },
+      {
+        "q": "Will I get slides?",
+        "a": "Presentation slides and curated PM frameworks will be emailed."
+      }
     ],
     "contactEmail": "webinars@enginow.io",
     "about": "What separates AI features that delight from gimmicks that get abandoned? Practical insights on eval frameworks, latency budgets, user feedback loops, and unit economics.",
     "agenda": [
-      { "time": "18:00", "title": "Framing: Where AI Earns Its Keep", "description": "The product landscape in 2026." },
-      { "time": "18:30", "title": "Hardest Product Calls in Production", "description": "Real-world case studies and teardowns." },
-      { "time": "19:00", "title": "Live Audience Q&A", "description": "Direct AMA with product leaders." }
+      {
+        "time": "18:00",
+        "title": "Framing: Where AI Earns Its Keep",
+        "description": "The product landscape in 2026."
+      },
+      {
+        "time": "18:30",
+        "title": "Hardest Product Calls in Production",
+        "description": "Real-world case studies and teardowns."
+      },
+      {
+        "time": "19:00",
+        "title": "Live Audience Q&A",
+        "description": "Direct AMA with product leaders."
+      }
     ],
-    "perks": ["Live Q&A Access", "Product Framework Deck", "Full Recording Access"],
+    "perks": [
+      "Live Q&A Access",
+      "Product Framework Deck",
+      "Full Recording Access"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_1",
     "organizerName": "DevSphere Foundation",
@@ -191,22 +365,64 @@
     "registered": 940,
     "cover": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80",
     "status": "upcoming",
-    "tags": ["Competitions", "Competitive Programming", "Algorithms", "Prize"],
-    "host": { "name": "AlgoStrike League", "role": "Verified Organizer" },
-    "speakers": [{ "name": "Rohan Varma", "role": "Grandmaster & IOI Gold Medalist" }],
-    "sponsors": [{ "name": "Tower Research" }, { "name": "DE Shaw" }],
+    "tags": [
+      "Competitions",
+      "Competitive Programming",
+      "Algorithms",
+      "Prize"
+    ],
+    "host": {
+      "name": "AlgoStrike League",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Rohan Varma",
+        "role": "Grandmaster & IOI Gold Medalist"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Tower Research"
+      },
+      {
+        "name": "DE Shaw"
+      }
+    ],
     "faqs": [
-      { "q": "What programming languages are supported?", "a": "C++, Java, Python, Rust, and Go." },
-      { "q": "Is anti-cheat active?", "a": "Yes, automated code plagiarism detection and webcam proctoring apply." }
+      {
+        "q": "What programming languages are supported?",
+        "a": "C++, Java, Python, Rust, and Go."
+      },
+      {
+        "q": "Is anti-cheat active?",
+        "a": "Yes, automated code plagiarism detection and webcam proctoring apply."
+      }
     ],
     "contactEmail": "competitions@enginow.io",
     "about": "A three-round algorithmic competition featuring advanced data structures, segment trees, flow algorithms, dynamic programming, and byte-minimization code golf challenges.",
     "agenda": [
-      { "time": "14:00", "title": "Qualifier Round", "description": "5 algorithmic speed problems." },
-      { "time": "16:30", "title": "The Decider: Hard Optimizations", "description": "3 NP-hard approximation challenges." },
-      { "time": "19:00", "title": "Live Leaderboard & Awards", "description": "Prize distribution and solution analysis." }
+      {
+        "time": "14:00",
+        "title": "Qualifier Round",
+        "description": "5 algorithmic speed problems."
+      },
+      {
+        "time": "16:30",
+        "title": "The Decider: Hard Optimizations",
+        "description": "3 NP-hard approximation challenges."
+      },
+      {
+        "time": "19:00",
+        "title": "Live Leaderboard & Awards",
+        "description": "Prize distribution and solution analysis."
+      }
     ],
-    "perks": ["₹3,50,00,000 Prize Pool", "HFT Interview Fast-Tracks", "Ranked Competitive Badge"],
+    "perks": [
+      "₹3,50,00,000 Prize Pool",
+      "HFT Interview Fast-Tracks",
+      "Ranked Competitive Badge"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",
@@ -231,26 +447,75 @@
     "registered": 46,
     "cover": "/src/assets/event-4.jpg",
     "status": "upcoming",
-    "tags": ["Bootcamps", "React", "TypeScript", "Frontend", "Paid"],
-    "host": { "name": "Enginow Academy", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Sania Mirza", "role": "Staff Engineer, Stripe" },
-      { "name": "Rohan Gupta", "role": "Tech Lead, Notion" }
+    "tags": [
+      "Bootcamps",
+      "React",
+      "TypeScript",
+      "Frontend",
+      "Paid"
     ],
-    "sponsors": [{ "name": "JetBrains" }, { "name": "Vercel" }],
+    "host": {
+      "name": "Enginow Academy",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Sania Mirza",
+        "role": "Staff Engineer, Stripe"
+      },
+      {
+        "name": "Rohan Gupta",
+        "role": "Tech Lead, Notion"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "JetBrains"
+      },
+      {
+        "name": "Vercel"
+      }
+    ],
     "faqs": [
-      { "q": "What is the weekly time commitment?", "a": "Approximately 6–8 hours including weekend live sessions." },
-      { "q": "Is there a capstone project?", "a": "Yes, a production deployment reviewed directly by staff engineers." }
+      {
+        "q": "What is the weekly time commitment?",
+        "a": "Approximately 6–8 hours including weekend live sessions."
+      },
+      {
+        "q": "Is there a capstone project?",
+        "a": "Yes, a production deployment reviewed directly by staff engineers."
+      }
     ],
     "contactEmail": "academy@enginow.io",
     "about": "An intensive four-weekend engineering cohort focused on modern state management, high-performance rendering, accessibility, WebSockets, and production deployments.",
     "agenda": [
-      { "time": "Week 1", "title": "Architecture & Data Plane", "description": "TanStack, Server State & Cache invalidation." },
-      { "time": "Week 2", "title": "UI Craft & Micro-Interactions", "description": "Motion, design tokens, and fluid animation." },
-      { "time": "Week 3", "title": "Auth & Real-Time Sync", "description": "WebSockets, CRDTs, and secure cookie sessions." },
-      { "time": "Week 4", "title": "Deploy, Benchmark & Demo", "description": "Lighthouse 100 audits and demo day." }
+      {
+        "time": "Week 1",
+        "title": "Architecture & Data Plane",
+        "description": "TanStack, Server State & Cache invalidation."
+      },
+      {
+        "time": "Week 2",
+        "title": "UI Craft & Micro-Interactions",
+        "description": "Motion, design tokens, and fluid animation."
+      },
+      {
+        "time": "Week 3",
+        "title": "Auth & Real-Time Sync",
+        "description": "WebSockets, CRDTs, and secure cookie sessions."
+      },
+      {
+        "time": "Week 4",
+        "title": "Deploy, Benchmark & Demo",
+        "description": "Lighthouse 100 audits and demo day."
+      }
     ],
-    "perks": ["Live Cohort Access", "Personal Code Reviews", "Graduation Certificate", "Alumni Network"],
+    "perks": [
+      "Live Cohort Access",
+      "Personal Code Reviews",
+      "Graduation Certificate",
+      "Alumni Network"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_1",
     "organizerName": "DevSphere Foundation",
@@ -275,27 +540,81 @@
     "registered": 803,
     "cover": "/src/assets/event-5.jpg",
     "status": "upcoming",
-    "tags": ["Conferences", "DevFest", "Networking", "In-person"],
-    "host": { "name": "DevSphere Communities", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Ananya Das", "role": "Engineering Director, Flipkart" },
-      { "name": "Karan Mehta", "role": "Founder, HealthAI" },
-      { "name": "Prerna Sinha", "role": "Staff ML Engineer, Microsoft" }
+    "tags": [
+      "Conferences",
+      "DevFest",
+      "Networking",
+      "In-person"
     ],
-    "sponsors": [{ "name": "Google" }, { "name": "Microsoft" }, { "name": "GitHub" }],
+    "host": {
+      "name": "DevSphere Communities",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Ananya Das",
+        "role": "Engineering Director, Flipkart"
+      },
+      {
+        "name": "Karan Mehta",
+        "role": "Founder, HealthAI"
+      },
+      {
+        "name": "Prerna Sinha",
+        "role": "Staff ML Engineer, Microsoft"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Google"
+      },
+      {
+        "name": "Microsoft"
+      },
+      {
+        "name": "GitHub"
+      }
+    ],
     "faqs": [
-      { "q": "Are meals included?", "a": "Buffet lunch, coffee breaks, and conference reception are included." },
-      { "q": "Can college students get discounts?", "a": "Yes, 30% student discounts apply with valid college ID." }
+      {
+        "q": "Are meals included?",
+        "a": "Buffet lunch, coffee breaks, and conference reception are included."
+      },
+      {
+        "q": "Can college students get discounts?",
+        "a": "Yes, 30% student discounts apply with valid college ID."
+      }
     ],
     "contactEmail": "devfest@enginow.io",
     "about": "A high-energy full-day technical conference featuring three parallel tracks: Cloud & Scalability, AI & LLMs in Production, and Modern Webcraft. Meet founders, engineering executives, and fellow innovators.",
     "agenda": [
-      { "time": "09:30", "title": "Registration & Breakfast Mixer", "description": "Badge pickup & welcome lounge." },
-      { "time": "10:30", "title": "Opening Keynote: Future of Software", "description": "State of engineering in 2026." },
-      { "time": "12:00", "title": "Parallel Deep-Dive Tracks", "description": "3 tracks across AI, Systems, and Frontend." },
-      { "time": "18:00", "title": "Networking Reception & After-Party", "description": "Drinks, food, and open conversations." }
+      {
+        "time": "09:30",
+        "title": "Registration & Breakfast Mixer",
+        "description": "Badge pickup & welcome lounge."
+      },
+      {
+        "time": "10:30",
+        "title": "Opening Keynote: Future of Software",
+        "description": "State of engineering in 2026."
+      },
+      {
+        "time": "12:00",
+        "title": "Parallel Deep-Dive Tracks",
+        "description": "3 tracks across AI, Systems, and Frontend."
+      },
+      {
+        "time": "18:00",
+        "title": "Networking Reception & After-Party",
+        "description": "Drinks, food, and open conversations."
+      }
     ],
-    "perks": ["Full-Day Conference Badge", "Official Swag Pack", "Catered Lunch & Dinner", "Recorded Talks Access"],
+    "perks": [
+      "Full-Day Conference Badge",
+      "Official Swag Pack",
+      "Catered Lunch & Dinner",
+      "Recorded Talks Access"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",
@@ -320,21 +639,60 @@
     "registered": 184,
     "cover": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=1200&auto=format&fit=crop&q=80",
     "status": "upcoming",
-    "tags": ["Tech Talks", "Rust", "Systems", "Low Latency"],
-    "host": { "name": "Rust India Community", "role": "Verified Organizer" },
-    "speakers": [{ "name": "Vikramaditya Rao", "role": "Staff Systems Engineer, Trading Tech" }],
-    "sponsors": [{ "name": "Rust Foundation" }, { "name": "Tower Research" }],
+    "tags": [
+      "Tech Talks",
+      "Rust",
+      "Systems",
+      "Low Latency"
+    ],
+    "host": {
+      "name": "Rust India Community",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Vikramaditya Rao",
+        "role": "Staff Systems Engineer, Trading Tech"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Rust Foundation"
+      },
+      {
+        "name": "Tower Research"
+      }
+    ],
     "faqs": [
-      { "q": "Is Rust experience required?", "a": "Intermediate programming experience in Rust, C++, or Go is recommended." }
+      {
+        "q": "Is Rust experience required?",
+        "a": "Intermediate programming experience in Rust, C++, or Go is recommended."
+      }
     ],
     "contactEmail": "techtalks@enginow.io",
     "about": "An in-depth technical lecture exploring how staff engineers achieve sub-microsecond latency in Rust using Linux io_uring, custom allocators, and cache-line aligned memory layouts.",
     "agenda": [
-      { "time": "18:30", "title": "Hardware-Mechanical Sympathy", "description": "CPU caches, TLB, and branch prediction." },
-      { "time": "19:15", "title": "Zero-Copy Architectures in Rust", "description": "io_uring and ring buffer design." },
-      { "time": "20:30", "title": "Audience Code Walkthrough", "description": "Benchmarking microsecond gains." }
+      {
+        "time": "18:30",
+        "title": "Hardware-Mechanical Sympathy",
+        "description": "CPU caches, TLB, and branch prediction."
+      },
+      {
+        "time": "19:15",
+        "title": "Zero-Copy Architectures in Rust",
+        "description": "io_uring and ring buffer design."
+      },
+      {
+        "time": "20:30",
+        "title": "Audience Code Walkthrough",
+        "description": "Benchmarking microsecond gains."
+      }
     ],
-    "perks": ["Source Code Samples", "Speaker AMA", "Event Pass"],
+    "perks": [
+      "Source Code Samples",
+      "Speaker AMA",
+      "Event Pass"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_1",
     "organizerName": "DevSphere Foundation",
@@ -359,21 +717,55 @@
     "registered": 138,
     "cover": "/src/assets/event-6.jpg",
     "status": "live",
-    "tags": ["Community Events", "Open Source", "Meetup", "Bengaluru"],
-    "host": { "name": "Enginow Open Source Guild", "role": "Verified Organizer" },
+    "tags": [
+      "Community Events",
+      "Open Source",
+      "Meetup",
+      "Bengaluru"
+    ],
+    "host": {
+      "name": "Enginow Open Source Guild",
+      "role": "Verified Organizer"
+    },
     "speakers": [],
-    "sponsors": [{ "name": "GitHub" }, { "name": "WeWork" }],
+    "sponsors": [
+      {
+        "name": "GitHub"
+      },
+      {
+        "name": "WeWork"
+      }
+    ],
     "faqs": [
-      { "q": "Is this event free?", "a": "Yes, free for all community members. RSVP is required for security check-in." }
+      {
+        "q": "Is this event free?",
+        "a": "Yes, free for all community members. RSVP is required for security check-in."
+      }
     ],
     "contactEmail": "community@enginow.io",
     "about": "An informal, high-signal gathering for open-source project maintainers and contributors. Share lightning demos, discuss funding models, and find project collaborators.",
     "agenda": [
-      { "time": "18:30", "title": "Doors & Introductions", "description": "Coffee & open conversations." },
-      { "time": "19:00", "title": "5-Minute Lightning Talks", "description": "Showcase what you shipped." },
-      { "time": "20:00", "title": "Open Unconference Circles", "description": "Tooling, documentation, and sponsorship." }
+      {
+        "time": "18:30",
+        "title": "Doors & Introductions",
+        "description": "Coffee & open conversations."
+      },
+      {
+        "time": "19:00",
+        "title": "5-Minute Lightning Talks",
+        "description": "Showcase what you shipped."
+      },
+      {
+        "time": "20:00",
+        "title": "Open Unconference Circles",
+        "description": "Tooling, documentation, and sponsorship."
+      }
     ],
-    "perks": ["Open Source Stickers", "Community Directory Access", "Snacks & Coffee"],
+    "perks": [
+      "Open Source Stickers",
+      "Community Directory Access",
+      "Snacks & Coffee"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",
@@ -399,21 +791,65 @@
     "registered": 1420,
     "cover": "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&auto=format&fit=crop&q=80",
     "status": "upcoming",
-    "tags": ["College Festivals", "Robotics", "Hackathons", "Campus", "Prize"],
-    "host": { "name": "IIT Madras Tech Council", "role": "Verified Organizer" },
-    "speakers": [{ "name": "Dr. K. Sivan", "role": "Former ISRO Chairman (Guest of Honor)" }],
-    "sponsors": [{ "name": "ISRO" }, { "name": "Tata Technologies" }, { "name": "Infosys" }],
+    "tags": [
+      "College Festivals",
+      "Robotics",
+      "Hackathons",
+      "Campus",
+      "Prize"
+    ],
+    "host": {
+      "name": "IIT Madras Tech Council",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Dr. K. Sivan",
+        "role": "Former ISRO Chairman (Guest of Honor)"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "ISRO"
+      },
+      {
+        "name": "Tata Technologies"
+      },
+      {
+        "name": "Infosys"
+      }
+    ],
     "faqs": [
-      { "q": "Is accommodation provided for outstation students?", "a": "Yes, hostel accommodations are provided on prior booking." }
+      {
+        "q": "Is accommodation provided for outstation students?",
+        "a": "Yes, hostel accommodations are provided on prior booking."
+      }
     ],
     "contactEmail": "fest@enginow.io",
     "about": "Over 5,000 engineering students from 75+ universities converge for three exhilarating days of technical competitions, drone races, robotic combat arenas, coding marathons, and a grand concert finale.",
     "agenda": [
-      { "time": "Day 1", "title": "RoboWars & Hackathon Kickoff", "description": "Arena combat and 36-hour build marathon." },
-      { "time": "Day 2", "title": "Paper Presentations & Esports", "description": "Research tracks and gaming qualifiers." },
-      { "time": "Day 3", "title": "Grand Finale & EDM Concert", "description": "Awards ceremony and live celebrity performance." }
+      {
+        "time": "Day 1",
+        "title": "RoboWars & Hackathon Kickoff",
+        "description": "Arena combat and 36-hour build marathon."
+      },
+      {
+        "time": "Day 2",
+        "title": "Paper Presentations & Esports",
+        "description": "Research tracks and gaming qualifiers."
+      },
+      {
+        "time": "Day 3",
+        "title": "Grand Finale & EDM Concert",
+        "description": "Awards ceremony and live celebrity performance."
+      }
     ],
-    "perks": ["3-Day Festival Pass", "College Championship Points", "Concert Night Access", "Certificate of Merit"],
+    "perks": [
+      "3-Day Festival Pass",
+      "College Championship Points",
+      "Concert Night Access",
+      "Certificate of Merit"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_1",
     "organizerName": "DevSphere Foundation",
@@ -438,24 +874,64 @@
     "registered": 96,
     "cover": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1200&auto=format&fit=crop&q=80",
     "status": "live",
-    "tags": ["Networking Events", "Founders", "Startups", "Investors"],
-    "host": { "name": "Ignite Venture Network", "role": "Verified Organizer" },
-    "speakers": [
-      { "name": "Tanmay Bhatia", "role": "Managing Partner, SeedCapital" },
-      { "name": "Shreya Gupta", "role": "Co-Founder & CTO, HyperScale" }
+    "tags": [
+      "Networking Events",
+      "Founders",
+      "Startups",
+      "Investors"
     ],
-    "sponsors": [{ "name": "Silicon Valley Bank" }, { "name": "AWS Startups" }],
+    "host": {
+      "name": "Ignite Venture Network",
+      "role": "Verified Organizer"
+    },
+    "speakers": [
+      {
+        "name": "Tanmay Bhatia",
+        "role": "Managing Partner, SeedCapital"
+      },
+      {
+        "name": "Shreya Gupta",
+        "role": "Co-Founder & CTO, HyperScale"
+      }
+    ],
+    "sponsors": [
+      {
+        "name": "Silicon Valley Bank"
+      },
+      {
+        "name": "AWS Startups"
+      }
+    ],
     "faqs": [
-      { "q": "Is registration curated?", "a": "Yes, registrations are reviewed to maintain a high-signal founder/engineer attendee mix." }
+      {
+        "q": "Is registration curated?",
+        "a": "Yes, registrations are reviewed to maintain a high-signal founder/engineer attendee mix."
+      }
     ],
     "contactEmail": "networking@enginow.io",
     "about": "An exclusive mixer connecting early-stage technology founders, prospective co-founders, seed angel investors, and senior staff engineers. No vanity pitches, just direct conversations.",
     "agenda": [
-      { "time": "18:00", "title": "Welcome Drinks & Registration", "description": "Private lounge check-in." },
-      { "time": "19:00", "title": "Founder Spotlight", "description": "3 three-minute stories of scaling from 0 to 1." },
-      { "time": "19:30", "title": "Open Mixer & Dinner", "description": "Facilitated table networking." }
+      {
+        "time": "18:00",
+        "title": "Welcome Drinks & Registration",
+        "description": "Private lounge check-in."
+      },
+      {
+        "time": "19:00",
+        "title": "Founder Spotlight",
+        "description": "3 three-minute stories of scaling from 0 to 1."
+      },
+      {
+        "time": "19:30",
+        "title": "Open Mixer & Dinner",
+        "description": "Facilitated table networking."
+      }
     ],
-    "perks": ["Curated Attendee List", "Investor Lounge Access", "Gourmet Dinner & Cocktails"],
+    "perks": [
+      "Curated Attendee List",
+      "Investor Lounge Access",
+      "Gourmet Dinner & Cocktails"
+    ],
     "approvalStatus": "published",
     "organizerId": "usr_org_2",
     "organizerName": "OpenKernel Community",

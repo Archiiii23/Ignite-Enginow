@@ -86,20 +86,59 @@ export function TicketModal({ registration, isOpen, onClose }: TicketModalProps)
                 </div>
               </div>
 
-              {/* Attendee Details */}
-              <div className="grid grid-cols-2 gap-3 py-1 text-sm">
+              {/* Attendee Full Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2 text-sm border-b border-border/80">
                 <div>
-                  <div className="text-xs text-muted-foreground font-mono">Attendee Name</div>
+                  <div className="text-[11px] text-muted-foreground font-mono">Attendee Name</div>
                   <div className="font-semibold text-foreground text-base">{registration.userName}</div>
                   <div className="text-xs text-muted-foreground truncate">{registration.userEmail}</div>
+                  {registration.phone && (
+                    <div className="text-xs text-primary font-mono mt-0.5">{registration.phone}</div>
+                  )}
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground font-mono">Affiliation / College</div>
+                  <div className="text-[11px] text-muted-foreground font-mono">Institution / College</div>
                   <div className="font-medium text-foreground">{registration.college || "Independent Builder"}</div>
-                  <div className="text-xs text-primary font-mono font-medium mt-0.5">
-                    Seat: {registration.seatNumber}
-                  </div>
+                  {(registration.degree || registration.yearOfStudy) && (
+                    <div className="text-xs text-muted-foreground">
+                      {[registration.degree, registration.yearOfStudy].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
+                  {registration.rollNumber && (
+                    <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                      Roll/ID: {registration.rollNumber}
+                    </div>
+                  )}
                 </div>
+
+                {/* Additional student metadata badges */}
+                {(registration.teamName || registration.githubUrl || registration.seatNumber) && (
+                  <div className="sm:col-span-2 flex flex-wrap items-center gap-2 pt-1">
+                    <span className="text-[11px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-mono font-medium border border-primary/20">
+                      Seat: {registration.seatNumber}
+                    </span>
+                    {registration.teamName && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-foreground font-medium border border-border">
+                        Team: {registration.teamName} {registration.teamRole ? `(${registration.teamRole})` : ""}
+                      </span>
+                    )}
+                    {registration.tshirtSize && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground font-mono border border-border">
+                        Size: {registration.tshirtSize}
+                      </span>
+                    )}
+                    {registration.githubUrl && (
+                      <a
+                        href={registration.githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-primary hover:underline font-mono border border-border"
+                      >
+                        GitHub ↗
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* QR Code & Barcode Pass section */}

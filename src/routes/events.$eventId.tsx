@@ -11,9 +11,10 @@ import {
   Building, AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { usePlatformStore } from "@/lib/platform-store";
+import { usePlatformStore, type Registration } from "@/lib/platform-store";
 import { useNotifications } from "@/lib/notifications";
 import { TicketModal } from "@/components/events/TicketModal";
+import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 
 export const Route = createFileRoute("/events/$eventId")({
   loader: async ({ params }): Promise<{ event: EventItem }> => {
@@ -135,14 +136,15 @@ function EventDetail() {
   } = usePlatformStore();
 
   const [ticketOpen, setTicketOpen] = useState(false);
-  const [registering, setRegistering] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+  const [activeRegistration, setActiveRegistration] = useState<Registration | null>(null);
   const [justRegistered, setJustRegistered] = useState(false);
 
   const liveEvent = platformEvents.find((e) => e.id === event.id || e.slug === event.slug) ?? event;
   const capacityPct = Math.min(100, Math.round((liveEvent.registered / liveEvent.seats) * 100));
 
-  const registered = isAuthenticated && user ? isRegistered(event.id, user.id) : false;
-  const registration = isAuthenticated && user ? getRegistration(event.id, user.id) : undefined;
+  const registered = (isAuthenticated && user ? isRegistered(event.id, user.id) : false) || !!activeRegistration;
+  const registration = (isAuthenticated && user ? getRegistration(event.id, user.id) : undefined) || activeRegistration;
   const favorite = isAuthenticated ? isFavorite(event.id) : false;
 
   const isClosed = "registrationsOpen" in liveEvent && !liveEvent.registrationsOpen;
@@ -151,26 +153,31 @@ function EventDetail() {
   const deadline = useDeadlineCountdown(event.registrationDeadline);
   const deadlinePassed = deadline ? (deadline.d === 0 && deadline.h === 0 && deadline.m === 0 && deadline.s === 0) : false;
 
-  const handleRegister = () => {
-    if (!isAuthenticated || !user) return;
-    setRegistering(true);
+  const handleOpenRegisterModal = () => {
+    setRegistrationModalOpen(true);
+  };
+
+  const handleCompleteRegistration = (formData: Partial<Registration>) => {
     try {
-      registerForEvent(event.id, { name: user.name, email: user.email, college: user.college });
+      const newReg = registerForEvent(event.id, formData);
+      setActiveRegistration(newReg);
       setJustRegistered(true);
+      setRegistrationModalOpen(false);
       setTicketOpen(true);
       addNotification(
         "Registration Confirmed! 🎉",
-        `You're registered for "${event.title}". Check your dashboard for your ticket.`,
+        `You're registered for "${event.title}". Your official pass has been generated.`,
         "success"
       );
-    } finally {
-      setRegistering(false);
+    } catch {
+      addNotification("Registration Failed", "Could not complete registration. Please try again.", "warning");
     }
   };
 
   const handleCancel = () => {
     if (registration) {
       cancelRegistration(registration.id);
+      setActiveRegistration(null);
       setJustRegistered(false);
       addNotification("Registration Cancelled", `Your registration for "${event.title}" has been cancelled.`, "warning");
     }
@@ -345,25 +352,21 @@ function EventDetail() {
 
               {/* Registration CTA */}
               <div className="mt-5 space-y-3">
-                {!isAuthenticated ? (
-                  <Link
-                    to="/auth"
-                    className="block w-full bg-primary text-primary-foreground text-sm font-semibold h-11 rounded-lg hover:opacity-90 transition-all text-center leading-[2.75rem] shadow-[0_0_20px_-4px_var(--primary-glow)]"
-                  >
-                    Sign in to Register
-                  </Link>
-                ) : registered ? (
+                {registered ? (
                   <>
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-sm font-semibold p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                       <CheckCircle2 className="size-4" />
                       {justRegistered ? "You're registered! 🎉" : "Already Registered"}
                     </div>
-                    {registration?.status === "confirmed" && (
+                    {registration && (
                       <button
-                        onClick={() => setTicketOpen(true)}
-                        className="w-full flex items-center justify-center gap-2 h-11 bg-foreground text-background text-sm font-medium rounded-lg hover:bg-foreground/90 transition-colors"
+                        onClick={() => {
+                          setActiveRegistration(registration);
+                          setTicketOpen(true);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 h-11 bg-foreground text-background text-sm font-medium rounded-lg hover:bg-foreground/90 transition-colors shadow-sm"
                       >
-                        <Ticket className="size-4" /> View My Ticket
+                        <Ticket className="size-4" /> View My Ticket Pass
                       </button>
                     )}
                     <button
@@ -382,13 +385,25 @@ function EventDetail() {
                     Sold Out
                   </div>
                 ) : (
-                  <button
-                    onClick={handleRegister}
-                    disabled={registering}
-                    className="w-full bg-primary text-primary-foreground text-sm font-semibold h-11 rounded-lg hover:opacity-90 transition-all disabled:opacity-60 shadow-[0_0_20px_-4px_var(--primary-glow)]"
-                  >
-                    {registering ? "Registering..." : "Register Now — It's Free"}
-                  </button>
+                  <>
+                    <button
+                      onClick={handleOpenRegisterModal}
+                      className="w-full bg-primary text-primary-foreground text-sm font-semibold h-11 rounded-lg hover:opacity-90 transition-all shadow-[0_0_20px_-4px_var(--primary-glow)] flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Ticket className="size-4" />
+                      Register Now — {event.price === "Free" ? "It's Free" : event.price}
+                    </button>
+                    {!isAuthenticated && (
+                      <div className="text-center">
+                        <Link
+                          to="/auth"
+                          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+                        >
+                          Already have an account? Sign in
+                        </Link>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {isAuthenticated && user?.role === "student" && (
@@ -447,8 +462,19 @@ function EventDetail() {
         </div>
       </section>
 
-      {registration && (
-        <TicketModal registration={registration} isOpen={ticketOpen} onClose={() => setTicketOpen(false)} />
+      <EventRegistrationModal
+        event={event}
+        isOpen={registrationModalOpen}
+        onClose={() => setRegistrationModalOpen(false)}
+        onSubmitRegistration={handleCompleteRegistration}
+      />
+
+      {(activeRegistration || registration) && (
+        <TicketModal
+          registration={activeRegistration || registration || null}
+          isOpen={ticketOpen}
+          onClose={() => setTicketOpen(false)}
+        />
       )}
     </PageShell>
   );

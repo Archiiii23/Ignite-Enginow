@@ -35,13 +35,7 @@ export async function handleRegistrationsApi(
   if (method === "POST") {
     const auth = await requireRole(request, ["student"]);
     if (auth.response) return auth.response;
-    const body = (await request.json()) as {
-      eventId: string;
-      userId?: string;
-      userName?: string;
-      userEmail?: string;
-      college?: string;
-    };
+    const body = (await request.json()) as Partial<Registration> & { eventId: string };
 
     if (!body.eventId) {
       return Response.json({ error: "Missing eventId" }, { status: 400 });
@@ -81,6 +75,21 @@ export async function handleRegistrationsApi(
       userName: body.userName || "Participant",
       userEmail: body.userEmail || "participant@example.com",
       college: body.college || "Global Tech University",
+      phone: body.phone,
+      degree: body.degree,
+      yearOfStudy: body.yearOfStudy,
+      rollNumber: body.rollNumber,
+      githubUrl: body.githubUrl,
+      linkedinUrl: body.linkedinUrl,
+      experienceLevel: body.experienceLevel || "Intermediate",
+      skills: body.skills || [],
+      participationType: body.participationType || "solo",
+      teamName: body.teamName,
+      teamSize: body.teamSize,
+      teamRole: body.teamRole,
+      reasonForAttending: body.reasonForAttending,
+      tshirtSize: body.tshirtSize,
+      dietaryPreference: body.dietaryPreference,
       registeredAt: new Date().toISOString(),
       status: "confirmed",
       ticketCode: `IGN-${catCode}-${randDigits}`,
