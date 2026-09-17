@@ -5,6 +5,8 @@ import { handleCategoriesApi } from "./api/categories";
 import { handleAnnouncementsApi } from "./api/announcements";
 import { handleAuthApi } from "./api/auth";
 import { handleContactApi } from "./api/contact";
+import { handleAdminApi } from "./api/admin";
+import { handleUsersApi } from "./api/users";
 
 export async function handleApiRequest(request: Request): Promise<Response | undefined> {
   const url = new URL(request.url);
@@ -35,6 +37,10 @@ export async function handleApiRequest(request: Request): Promise<Response | und
         return await handleAuthApi(request, pathParts);
       case "contact":
         return await handleContactApi(request);
+      case "admin":
+        return await handleAdminApi(request, pathParts);
+      case "users":
+        return await handleUsersApi(request, pathParts);
       default:
         return Response.json({ error: `API route /api/${resource} not found` }, { status: 404 });
     }

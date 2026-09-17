@@ -138,7 +138,7 @@ function EventDetail() {
   const [registering, setRegistering] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
 
-  const liveEvent = platformEvents.find((e) => e.id === event.id) ?? event;
+  const liveEvent = platformEvents.find((e) => e.id === event.id || e.slug === event.slug) ?? event;
   const capacityPct = Math.min(100, Math.round((liveEvent.registered / liveEvent.seats) * 100));
 
   const registered = isAuthenticated && user ? isRegistered(event.id, user.id) : false;
@@ -157,6 +157,7 @@ function EventDetail() {
     try {
       registerForEvent(event.id, { name: user.name, email: user.email, college: user.college });
       setJustRegistered(true);
+      setTicketOpen(true);
       addNotification(
         "Registration Confirmed! 🎉",
         `You're registered for "${event.title}". Check your dashboard for your ticket.`,

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "reg_1",
+    "eventId": "e1",
+    "eventTitle": "Quantum Hack 2026",
+    "eventDate": "Aug 14 - 16, 2026",
+    "eventLocation": "Bengaluru + Online",
+    "userId": "usr_student_1",
+    "userName": "Aarav Sharma",
+    "userEmail": "aarav.sharma@campus.edu",
+    "college": "Indian Institute of Technology (IIT)",
+    "registeredAt": "2026-08-10T14:30:00Z",
+    "status": "confirmed",
+    "ticketCode": "IGN-HAC-8812",
+    "seatNumber": "HAC-04"
+  },
+  {
+    "id": "reg_2",
+    "eventId": "e2",
+    "eventTitle": "Autonomous Agents Conf",
+    "eventDate": "Aug 22, 2026",
+    "eventLocation": "Virtual",
+    "userId": "usr_student_1",
+    "userName": "Aarav Sharma",
+    "userEmail": "aarav.sharma@campus.edu",
+    "college": "Indian Institute of Technology (IIT)",
+    "registeredAt": "2026-08-12T09:15:00Z",
+    "status": "attended",
+    "ticketCode": "IGN-CON-1904",
+    "seatNumber": "CON-14"
+  },
+  {
+    "id": "reg_3",
+    "eventId": "e1",
+    "eventTitle": "Quantum Hack 2026",
+    "eventDate": "Aug 14 - 16, 2026",
+    "eventLocation": "Bengaluru + Online",
+    "userId": "usr_student_2",
+    "userName": "Priya Sundaram",
+    "userEmail": "priya.s@tech.ac.in",
+    "college": "BITS Pilani",
+    "registeredAt": "2026-08-11T10:00:00Z",
+    "status": "confirmed",
+    "ticketCode": "IGN-HAC-9021",
+    "seatNumber": "HAC-05"
+  }
+]

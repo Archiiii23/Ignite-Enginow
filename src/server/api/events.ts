@@ -169,5 +169,15 @@ export async function handleEventsApi(request: Request, pathParts: string[]): Pr
     return Response.json({ success: true, removedId: idOrSlug });
   }
 
+  if (method === "PUT") {
+    const body = await request.json();
+    if (Array.isArray(body)) {
+      const incoming = body as BackendEvent[];
+      await writeBackendEvents(incoming);
+      return Response.json(incoming);
+    }
+    return Response.json({ error: "Expected array of events" }, { status: 400 });
+  }
+
   return Response.json({ error: "Method not allowed" }, { status: 405 });
 }

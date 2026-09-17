@@ -500,8 +500,10 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
     (eventId: string, userId?: string) => {
       const targetUserId = userId || user?.id;
       if (!targetUserId) return false;
+      const ev = events.find((e) => e.id === eventId || e.slug === eventId);
+      const targetEventId = ev ? ev.id : eventId;
       return registrations.some(
-        (r) => (r.eventId === eventId || r.eventId === events.find((e) => e.slug === eventId)?.id) && r.userId === targetUserId && r.status !== "cancelled"
+        (r) => (r.eventId === targetEventId || (ev && r.eventId === ev.slug)) && r.userId === targetUserId && r.status !== "cancelled"
       );
     },
     [registrations, user, events]
@@ -511,8 +513,10 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
     (eventId: string, userId?: string) => {
       const targetUserId = userId || user?.id;
       if (!targetUserId) return undefined;
+      const ev = events.find((e) => e.id === eventId || e.slug === eventId);
+      const targetEventId = ev ? ev.id : eventId;
       return registrations.find(
-        (r) => (r.eventId === eventId || r.eventId === events.find((e) => e.slug === eventId)?.id) && r.userId === targetUserId && r.status !== "cancelled"
+        (r) => (r.eventId === targetEventId || (ev && r.eventId === ev.slug)) && r.userId === targetUserId && r.status !== "cancelled"
       );
     },
     [registrations, user, events]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "org_rec_1",
+    "userId": "usr_org_1",
+    "name": "DevSphere Foundation",
+    "email": "events@devsphere.org",
+    "orgName": "DevSphere Foundation",
+    "website": "https://devsphere.org",
+    "verificationStatus": "verified",
+    "documentsSubmitted": "Certificate of Incorporation & Gov ID (Verified by Admin on Aug 2026)",
+    "eventsCount": 4,
+    "joinedAt": "2026-07-10"
+  },
+  {
+    "id": "org_rec_2",
+    "userId": "usr_org_2",
+    "name": "OpenKernel Community",
+    "email": "team@openkernel.org",
+    "orgName": "OpenKernel Community",
+    "website": "https://openkernel.org",
+    "verificationStatus": "pending",
+    "documentsSubmitted": "Open Source Non-Profit Registration PDF & Domain TXT verification",
+    "eventsCount": 2,
+    "joinedAt": "2026-08-28"
+  },
+  {
+    "id": "org_rec_3",
+    "userId": "usr_org_3",
+    "name": "Apex AI Labs",
+    "email": "contact@apexlabs.ai",
+    "orgName": "Apex AI Labs",
+    "website": "https://apexlabs.ai",
+    "verificationStatus": "pending",
+    "documentsSubmitted": "Corporate registration submitted",
+    "eventsCount": 1,
+    "joinedAt": "2026-09-01"
+  }
+]

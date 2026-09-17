@@ -1,0 +1,67 @@
+[
+  {
+    "id": "usr_student_1",
+    "email": "aarav.sharma@campus.edu",
+    "passwordHash": "mock_password_hash",
+    "profile": {
+      "id": "usr_student_1",
+      "name": "Aarav Sharma",
+      "email": "aarav.sharma@campus.edu",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "role": "student",
+      "isRoleSelected": true,
+      "headline": "CS and AI Undergraduate",
+      "college": "Indian Institute of Technology (IIT)",
+      "skills": [
+        "Python",
+        "PyTorch",
+        "React",
+        "TypeScript"
+      ]
+    }
+  },
+  {
+    "id": "usr_org_1",
+    "email": "events@devsphere.org",
+    "passwordHash": "mock_password_hash",
+    "profile": {
+      "id": "usr_org_1",
+      "name": "DevSphere Foundation",
+      "email": "events@devsphere.org",
+      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+      "role": "organizer",
+      "isRoleSelected": true,
+      "headline": "Global Technical Community and Hackathon Organizers",
+      "orgName": "DevSphere Foundation",
+      "orgWebsite": "https://devsphere.org",
+      "verificationStatus": "verified"
+    }
+  },
+  {
+    "id": "usr_admin_1",
+    "email": "sarah.chen@enginow.io",
+    "passwordHash": "mock_password_hash",
+    "profile": {
+      "id": "usr_admin_1",
+      "name": "Sarah Chen (Admin)",
+      "email": "sarah.chen@enginow.io",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      "role": "admin",
+      "isRoleSelected": true,
+      "headline": "Platform Operations and Governance Lead"
+    }
+  },
+  {
+    "id": "usr_5fa173d4-8b7c-4b51-b35d-b52c92a390a4",
+    "email": "jainarchi555@gmail.com",
+    "passwordHash": "1de1b558d105e564d66edbc41a6fc540:59a9e63c2705715ae19e321d483136c3259ec480937e341a610944e1ac8a62acb021eaea7868b8ee076d1eab89b027e120a961f3e3d9d743a54446c6595230ab",
+    "profile": {
+      "id": "usr_5fa173d4-8b7c-4b51-b35d-b52c92a390a4",
+      "name": "Jainarchi555",
+      "email": "jainarchi555@gmail.com",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "role": "student",
+      "isRoleSelected": true
+    }
+  }
+]

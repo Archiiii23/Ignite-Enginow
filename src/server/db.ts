@@ -1,3 +1,5 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { Pool } from "pg";
 import type { BackendEvent } from "@/lib/backend-events";
 import type {
@@ -8,12 +10,36 @@ import type {
 } from "@/lib/platform-store";
 import type { UserProfile } from "@/lib/auth-context";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
-});
+const hasPostgres = !!process.env.DATABASE_URL;
+const pool = hasPostgres
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+    })
+  : null;
 
 let schemaPromise: Promise<void> | undefined;
+
+const DATA_DIR = join(process.cwd(), "data", "db");
+
+async function readJsonFile<T>(filename: string, fallback: T): Promise<T> {
+  const filePath = join(DATA_DIR, filename);
+  try {
+    const text = await readFile(filePath, "utf8");
+    return JSON.parse(text) as T;
+  } catch {
+    await mkdir(dirname(filePath), { recursive: true });
+    await writeFile(filePath, JSON.stringify(fallback, null, 2), "utf8");
+    return fallback;
+  }
+}
+
+async function writeJsonFile<T>(filename: string, data: T): Promise<T> {
+  const filePath = join(DATA_DIR, filename);
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+  return data;
+}
 
 const defaultOrganizers: OrganizerRecord[] = [
   {
@@ -24,7 +50,7 @@ const defaultOrganizers: OrganizerRecord[] = [
     orgName: "DevSphere Foundation",
     website: "https://devsphere.org",
     verificationStatus: "verified",
-    documentsSubmitted: "Verification documents approved",
+    documentsSubmitted: "Certificate of Incorporation & Gov ID (Verified by Admin on Aug 2026)",
     eventsCount: 4,
     joinedAt: "2026-07-10",
   },
@@ -36,7 +62,7 @@ const defaultOrganizers: OrganizerRecord[] = [
     orgName: "OpenKernel Community",
     website: "https://openkernel.org",
     verificationStatus: "pending",
-    documentsSubmitted: "Registration documents submitted",
+    documentsSubmitted: "Open Source Non-Profit Registration PDF & Domain TXT verification",
     eventsCount: 2,
     joinedAt: "2026-08-28",
   },
@@ -145,7 +171,7 @@ const defaultAnnouncements: Announcement[] = [
   {
     id: "ann_1",
     title: "Global AI Hackathon Registrations Open!",
-    message: "Registrations are now open for the global AI hackathon.",
+    message: "Over ₹25,00,000 in bounties announced for open-source AI models. Register before seats fill.",
     type: "info",
     active: true,
     createdAt: "2026-09-10",
@@ -160,6 +186,7 @@ const defaultUsers: UserProfile[] = [
     avatar:
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     role: "student",
+    isRoleSelected: true,
     headline: "CS and AI Undergraduate",
     college: "Indian Institute of Technology (IIT)",
     skills: ["Python", "PyTorch", "React", "TypeScript"],
@@ -171,6 +198,7 @@ const defaultUsers: UserProfile[] = [
     avatar:
       "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
     role: "organizer",
+    isRoleSelected: true,
     headline: "Global Technical Community and Hackathon Organizers",
     orgName: "DevSphere Foundation",
     orgWebsite: "https://devsphere.org",
@@ -183,123 +211,296 @@ const defaultUsers: UserProfile[] = [
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
     role: "admin",
+    isRoleSelected: true,
     headline: "Platform Operations and Governance Lead",
   },
 ];
 
+interface StoredUserAccount {
+  id: string;
+  email: string;
+  passwordHash: string;
+  profile: UserProfile;
+}
+
+interface StoredSession {
+  tokenHash: string;
+  userId: string;
+  expiresAt: string;
+}
+
 async function ensureSchema() {
-  if (!process.env.DATABASE_URL)
-    throw new Error("DATABASE_URL is required for the Postgres backend");
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS platform_collections (name text PRIMARY KEY, data jsonb NOT NULL);
-    CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, email text UNIQUE NOT NULL, password_hash text NOT NULL, profile jsonb NOT NULL);
-    CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
-    CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions (expires_at);
-  `);
+  if (!pool) return;
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS platform_collections (name text PRIMARY KEY, data jsonb NOT NULL);
+      CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, email text UNIQUE NOT NULL, password_hash text NOT NULL, profile jsonb NOT NULL);
+      CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
+      CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions (expires_at);
+    `);
+  } catch (err) {
+    console.warn("[Postgres] Failed to initialize Postgres pool schema, falling back to local file DB:", err);
+  }
 }
 
 async function ready() {
-  schemaPromise ??= ensureSchema();
-  return schemaPromise;
-}
-
-async function getCollection<T>(name: string, seed: T) {
-  await ready();
-  const result = await pool.query<{ data: T }>(
-    "SELECT data FROM platform_collections WHERE name = $1",
-    [name],
-  );
-  if (result.rows[0]) return result.rows[0].data;
-  await pool.query(
-    "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO NOTHING",
-    [name, JSON.stringify(seed)],
-  );
-  return seed;
-}
-
-async function setCollection<T>(name: string, data: T) {
-  await ready();
-  await pool.query(
-    "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO UPDATE SET data = EXCLUDED.data",
-    [name, JSON.stringify(data)],
-  );
-  return data;
-}
-
-async function getUsers() {
-  await ready();
-  const result = await pool.query<{ profile: UserProfile }>(
-    "SELECT profile FROM users ORDER BY id",
-  );
-  if (result.rows.length) return result.rows.map((row) => row.profile);
-  const seedPasswordHash = process.env.SEED_PASSWORD_HASH;
-  if (!seedPasswordHash) return defaultUsers;
-  for (const profile of defaultUsers) {
-    await pool.query(
-      "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb) ON CONFLICT (id) DO NOTHING",
-      [profile.id, profile.email.toLowerCase(), seedPasswordHash, JSON.stringify(profile)],
-    );
+  if (pool) {
+    schemaPromise ??= ensureSchema();
+    await schemaPromise;
   }
-  return defaultUsers;
+}
+
+async function getCollection<T>(name: string, seed: T): Promise<T> {
+  if (pool) {
+    try {
+      await ready();
+      const result = await pool.query<{ data: T }>(
+        "SELECT data FROM platform_collections WHERE name = $1",
+        [name],
+      );
+      if (result.rows[0]) return result.rows[0].data;
+      await pool.query(
+        "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO NOTHING",
+        [name, JSON.stringify(seed)],
+      );
+      return seed;
+    } catch {
+      // fallback to file
+    }
+  }
+  return readJsonFile<T>(`${name}.json`, seed);
+}
+
+async function setCollection<T>(name: string, data: T): Promise<T> {
+  if (pool) {
+    try {
+      await ready();
+      await pool.query(
+        "INSERT INTO platform_collections (name, data) VALUES ($1, $2::jsonb) ON CONFLICT (name) DO UPDATE SET data = EXCLUDED.data",
+        [name, JSON.stringify(data)],
+      );
+    } catch {
+      // fallback to file
+    }
+  }
+  return writeJsonFile<T>(`${name}.json`, data);
+}
+
+async function getUsers(): Promise<UserProfile[]> {
+  if (pool) {
+    try {
+      await ready();
+      const result = await pool.query<{ profile: UserProfile }>(
+        "SELECT profile FROM users ORDER BY id",
+      );
+      if (result.rows.length) return result.rows.map((row) => row.profile);
+      const seedPasswordHash = process.env.SEED_PASSWORD_HASH;
+      if (seedPasswordHash) {
+        for (const profile of defaultUsers) {
+          await pool.query(
+            "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb) ON CONFLICT (id) DO NOTHING",
+            [profile.id, profile.email.toLowerCase(), seedPasswordHash, JSON.stringify(profile)],
+          );
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+  const accounts = await readJsonFile<StoredUserAccount[]>(
+    "users.json",
+    defaultUsers.map((profile) => ({
+      id: profile.id,
+      email: profile.email.toLowerCase(),
+      passwordHash: "mock_password_hash",
+      profile,
+    })),
+  );
+  return accounts.map((acc) => acc.profile);
 }
 
 export const db = {
-  getRegistrations: () => getCollection("registrations", defaultRegistrations),
-  setRegistrations: (value: Registration[]) => setCollection("registrations", value),
-  getOrganizers: () => getCollection("organizers", defaultOrganizers),
-  setOrganizers: (value: OrganizerRecord[]) => setCollection("organizers", value),
-  getCategories: () => getCollection("categories", defaultCategories),
-  setCategories: (value: CategoryItem[]) => setCollection("categories", value),
-  getAnnouncements: () => getCollection("announcements", defaultAnnouncements),
-  setAnnouncements: (value: Announcement[]) => setCollection("announcements", value),
-  getEvents: (seed: BackendEvent[]) => getCollection("events", seed),
-  setEvents: (value: BackendEvent[]) => setCollection("events", value),
+  getRegistrations: () => getCollection<Registration[]>("registrations", defaultRegistrations),
+  setRegistrations: (value: Registration[]) => setCollection<Registration[]>("registrations", value),
+  getOrganizers: () => getCollection<OrganizerRecord[]>("organizers", defaultOrganizers),
+  setOrganizers: (value: OrganizerRecord[]) => setCollection<OrganizerRecord[]>("organizers", value),
+  getCategories: () => getCollection<CategoryItem[]>("categories", defaultCategories),
+  setCategories: (value: CategoryItem[]) => setCollection<CategoryItem[]>("categories", value),
+  getAnnouncements: () => getCollection<Announcement[]>("announcements", defaultAnnouncements),
+  setAnnouncements: (value: Announcement[]) => setCollection<Announcement[]>("announcements", value),
+  getEvents: (seed: BackendEvent[]) => getCollection<BackendEvent[]>("events", seed),
+  setEvents: (value: BackendEvent[]) => setCollection<BackendEvent[]>("events", value),
   getUsers,
-  async getUserByEmail(email: string) {
-    await getUsers();
-    const result = await pool.query<{ profile: UserProfile; password_hash: string }>(
-      "SELECT profile, password_hash FROM users WHERE lower(email) = lower($1)",
-      [email],
-    );
-    return result.rows[0]
-      ? { profile: result.rows[0].profile, passwordHash: result.rows[0].password_hash }
-      : null;
+
+  async getUserByEmail(email: string): Promise<{ profile: UserProfile; passwordHash: string } | null> {
+    if (pool) {
+      try {
+        await ready();
+        const result = await pool.query<{ profile: UserProfile; password_hash: string }>(
+          "SELECT profile, password_hash FROM users WHERE lower(email) = lower($1)",
+          [email],
+        );
+        if (result.rows[0]) {
+          return { profile: result.rows[0].profile, passwordHash: result.rows[0].password_hash };
+        }
+      } catch {
+        // fallback
+      }
+    }
+    const accounts = await readJsonFile<StoredUserAccount[]>("users.json", []);
+    const found = accounts.find((a) => a.email.toLowerCase() === email.toLowerCase());
+    return found ? { profile: found.profile, passwordHash: found.passwordHash } : null;
   },
-  async createUser(profile: UserProfile, passwordHash: string) {
-    await ready();
-    await pool.query(
-      "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb)",
-      [profile.id, profile.email.toLowerCase(), passwordHash, JSON.stringify(profile)],
-    );
+
+  async createUser(profile: UserProfile, passwordHash: string): Promise<UserProfile> {
+    if (pool) {
+      try {
+        await ready();
+        await pool.query(
+          "INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4::jsonb)",
+          [profile.id, profile.email.toLowerCase(), passwordHash, JSON.stringify(profile)],
+        );
+      } catch {
+        // fallback
+      }
+    }
+    const accounts = await readJsonFile<StoredUserAccount[]>("users.json", []);
+    const existingIndex = accounts.findIndex((a) => a.id === profile.id || a.email.toLowerCase() === profile.email.toLowerCase());
+    const newEntry: StoredUserAccount = {
+      id: profile.id,
+      email: profile.email.toLowerCase(),
+      passwordHash,
+      profile,
+    };
+    if (existingIndex >= 0) {
+      accounts[existingIndex] = newEntry;
+    } else {
+      accounts.push(newEntry);
+    }
+    await writeJsonFile("users.json", accounts);
     return profile;
   },
-  async updateUser(profile: UserProfile) {
-    await ready();
-    await pool.query("UPDATE users SET email = $2, profile = $3::jsonb WHERE id = $1", [
-      profile.id,
-      profile.email.toLowerCase(),
-      JSON.stringify(profile),
-    ]);
+
+  async updateUser(profile: UserProfile): Promise<UserProfile> {
+    if (pool) {
+      try {
+        await ready();
+        await pool.query("UPDATE users SET email = $2, profile = $3::jsonb WHERE id = $1", [
+          profile.id,
+          profile.email.toLowerCase(),
+          JSON.stringify(profile),
+        ]);
+      } catch {
+        // fallback
+      }
+    }
+    const accounts = await readJsonFile<StoredUserAccount[]>("users.json", []);
+    const index = accounts.findIndex((a) => a.id === profile.id);
+    if (index >= 0) {
+      accounts[index].email = profile.email.toLowerCase();
+      accounts[index].profile = profile;
+    } else {
+      accounts.push({
+        id: profile.id,
+        email: profile.email.toLowerCase(),
+        passwordHash: "mock_password_hash",
+        profile,
+      });
+    }
+    await writeJsonFile("users.json", accounts);
     return profile;
   },
-  async createSession(tokenHash: string, userId: string, expiresAt: Date) {
-    await ready();
-    await pool.query("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)", [
+
+  async createSession(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
+    if (pool) {
+      try {
+        await ready();
+        await pool.query("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)", [
+          tokenHash,
+          userId,
+          expiresAt,
+        ]);
+      } catch {
+        // fallback
+      }
+    }
+    const sessions = await readJsonFile<StoredSession[]>("sessions.json", []);
+    sessions.push({
       tokenHash,
       userId,
-      expiresAt,
-    ]);
+      expiresAt: expiresAt.toISOString(),
+    });
+    await writeJsonFile("sessions.json", sessions);
   },
-  async getUserBySession(tokenHash: string) {
-    await ready();
-    const result = await pool.query<{ profile: UserProfile }>(
-      "SELECT u.profile FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > NOW()",
-      [tokenHash],
+
+  async getUserBySession(tokenHash: string): Promise<UserProfile | null> {
+    if (pool) {
+      try {
+        await ready();
+        const result = await pool.query<{ profile: UserProfile }>(
+          "SELECT u.profile FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > NOW()",
+          [tokenHash],
+        );
+        if (result.rows[0]) return result.rows[0].profile;
+      } catch {
+        // fallback
+      }
+    }
+    const sessions = await readJsonFile<StoredSession[]>("sessions.json", []);
+    const validSession = sessions.find(
+      (s) => s.tokenHash === tokenHash && new Date(s.expiresAt) > new Date(),
     );
-    return result.rows[0]?.profile ?? null;
+    if (!validSession) return null;
+    const users = await getUsers();
+    return users.find((u) => u.id === validSession.userId) ?? null;
   },
-  async deleteSession(tokenHash: string) {
-    await ready();
-    await pool.query("DELETE FROM sessions WHERE token_hash = $1", [tokenHash]);
+
+  async deleteSession(tokenHash: string): Promise<void> {
+    if (pool) {
+      try {
+        await ready();
+        await pool.query("DELETE FROM sessions WHERE token_hash = $1", [tokenHash]);
+      } catch {
+        // fallback
+      }
+    }
+    const sessions = await readJsonFile<StoredSession[]>("sessions.json", []);
+    const filtered = sessions.filter((s) => s.tokenHash !== tokenHash);
+    await writeJsonFile("sessions.json", filtered);
+  },
+
+  async getRoleRequests(): Promise<UserProfile[]> {
+    const users = await getUsers();
+    return users.filter(
+      (u) => u.roleChangeRequest && u.roleChangeRequest.status === "PENDING",
+    );
+  },
+
+  async updateRoleRequest(
+    userId: string,
+    status: "APPROVED" | "REJECTED",
+    rejectionReason?: string,
+  ): Promise<UserProfile | null> {
+    const users = await getUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user || !user.roleChangeRequest) return null;
+
+    const requestedRole = user.roleChangeRequest.requestedRole;
+    const finalRole = status === "APPROVED"
+      ? (requestedRole === "organizer" ? "organizer" : "student")
+      : user.role;
+
+    const updatedProfile: UserProfile = {
+      ...user,
+      role: finalRole,
+      roleChangeRequest: {
+        ...user.roleChangeRequest,
+        status,
+        reviewedAt: new Date().toISOString(),
+        rejectionReason: status === "REJECTED" ? rejectionReason : undefined,
+      },
+    };
+    await this.updateUser(updatedProfile);
+    return updatedProfile;
   },
 };
