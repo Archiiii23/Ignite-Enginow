@@ -1,15 +1,24 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, MapPin, Users, Star } from "lucide-react";
+import { ArrowUpRight, MapPin, Users, Star, Calendar, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { usePlatformStore } from "@/lib/platform-store";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 
 export function FeaturedEvents() {
   const { events } = usePlatformStore();
+  const [view, setView] = useState<"featured" | "upcoming">("featured");
 
-  // Use featured events from store (admin can toggle), fallback to first 6
-  const featured = events.filter((e) => e.isFeatured && e.approvalStatus === "published").slice(0, 6);
-  const displayEvents = featured.length >= 3 ? featured : events.filter((e) => e.approvalStatus === "published").slice(0, 6);
+  const published = events.filter((e) => e.approvalStatus === "published");
+  const featured = published.filter((e) => e.isFeatured);
+  const featuredList = featured.length >= 3 ? featured.slice(0, 6) : published.slice(0, 6);
+
+  const upcomingList = [...published]
+    .filter((e) => e.status !== "ended")
+    .sort((a, b) => (a.dateISO || "").localeCompare(b.dateISO || ""))
+    .slice(0, 6);
+
+  const displayEvents = view === "featured" ? featuredList : upcomingList;
 
   const statusClass = {
     live: "bg-background/85 backdrop-blur text-[color:var(--live)] ring-1 ring-[color:var(--live)]/40",
@@ -29,24 +38,55 @@ export function FeaturedEvents() {
     <section id="events" className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <ScrollReveal>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <span className="text-eyebrow text-primary font-semibold">
                 — Scene 2: Explore
               </span>
               <h2 className="mt-3 text-section-title">
-                Events happening now
+                {view === "featured" ? "Featured Events" : "Upcoming Events"}
               </h2>
-              <p className="mt-5 text-lead max-w-[52ch]">
-                The most anticipated gatherings across the global ecosystem — hand-picked by the Ignite team.
+              <p className="mt-4 text-lead max-w-[52ch]">
+                {view === "featured"
+                  ? "The most anticipated gatherings across the global ecosystem — hand-picked by the Ignite team."
+                  : "Upcoming hackathons, workshops, and meetups scheduled across campuses and online."}
               </p>
             </div>
-            <Link
-              to="/events"
-              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-glow transition-colors"
-            >
-              View all events <ArrowUpRight className="size-4" />
-            </Link>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Switcher */}
+              <div className="inline-flex p-1 bg-secondary rounded-xl border border-border">
+                <button
+                  onClick={() => setView("featured")}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    view === "featured"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Sparkles className="size-3.5 text-amber-500" />
+                  Featured ({featuredList.length})
+                </button>
+                <button
+                  onClick={() => setView("upcoming")}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    view === "upcoming"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Calendar className="size-3.5 text-primary" />
+                  Upcoming ({upcomingList.length})
+                </button>
+              </div>
+
+              <Link
+                to="/events"
+                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-glow transition-colors ml-2"
+              >
+                View all <ArrowUpRight className="size-4" />
+              </Link>
+            </div>
           </div>
         </ScrollReveal>
 

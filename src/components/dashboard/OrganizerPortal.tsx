@@ -21,6 +21,7 @@ import {
   ChevronUp,
   Eye,
   FileCheck,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { usePlatformStore } from "@/lib/platform-store";
@@ -71,8 +72,28 @@ export function OrganizerPortal() {
   const [verifyNote, setVerifyNote] = useState("");
   const [verifySubmitted, setVerifySubmitted] = useState(false);
 
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "draft">("all");
+
   const myEvents = events.filter((e) => e.organizerId === user?.id);
   const myOrg = organizers.find((o) => o.userId === user?.id);
+
+  const totalEventsCount = myEvents.length;
+  const pendingEventsCount = myEvents.filter((e) => e.approvalStatus === "pending_approval").length;
+  const approvedEventsCount = myEvents.filter(
+    (e) => e.approvalStatus === "published" || e.approvalStatus === "approved"
+  ).length;
+  const totalRegistrationsCount = myEvents.reduce(
+    (sum, ev) => sum + getEventRegistrations(ev.id).length,
+    0
+  );
+
+  const filteredEvents = myEvents.filter((e) => {
+    if (statusFilter === "pending") return e.approvalStatus === "pending_approval";
+    if (statusFilter === "approved")
+      return e.approvalStatus === "published" || e.approvalStatus === "approved";
+    if (statusFilter === "draft") return e.approvalStatus === "draft";
+    return true;
+  });
 
   const approvalColors = {
     draft: "text-muted-foreground bg-secondary border-border",
@@ -238,6 +259,53 @@ export function OrganizerPortal() {
         </div>
       )}
 
+      {/* Dashboard Overview Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-muted-foreground mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Total Events</span>
+            <Calendar className="size-4 text-primary" />
+          </div>
+          <div className="text-3xl font-bold font-display text-foreground">{totalEventsCount}</div>
+          <p className="text-[11px] text-muted-foreground mt-1">Managed event listings</p>
+        </div>
+
+        <div className="bg-card border border-amber-500/20 bg-amber-500/[0.02] rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-muted-foreground mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Pending Events
+            </span>
+            <Clock className="size-4 text-amber-500" />
+          </div>
+          <div className="text-3xl font-bold font-display text-amber-600 dark:text-amber-400">
+            {pendingEventsCount}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1">Awaiting admin review</p>
+        </div>
+
+        <div className="bg-card border border-emerald-500/20 bg-emerald-500/[0.02] rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-muted-foreground mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Approved Events
+            </span>
+            <CheckCircle2 className="size-4 text-emerald-500" />
+          </div>
+          <div className="text-3xl font-bold font-display text-emerald-600 dark:text-emerald-400">
+            {approvedEventsCount}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1">Live & public for registration</p>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-muted-foreground mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Registrations</span>
+            <Users className="size-4 text-primary" />
+          </div>
+          <div className="text-3xl font-bold font-display text-primary">{totalRegistrationsCount}</div>
+          <p className="text-[11px] text-muted-foreground mt-1">Total enrolled students</p>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-secondary rounded-xl mb-8 w-fit">
         {([
@@ -263,13 +331,40 @@ export function OrganizerPortal() {
       {/* Events Tab */}
       {tab === "events" && (
         <div className="space-y-4">
-          {myEvents.length === 0 && (
+          {/* Quick Filter Chips */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+            <div className="inline-flex p-1 bg-secondary/80 rounded-xl border border-border">
+              {[
+                ["all", `All (${totalEventsCount})`],
+                ["pending", `Pending Review (${pendingEventsCount})`],
+                ["approved", `Approved (${approvedEventsCount})`],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setStatusFilter(key as any)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    statusFilter === key
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredEvents.length === 0 && (
             <div className="text-center py-20 bg-card border border-border rounded-2xl">
               <Plus className="size-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No events yet. Create your first event listing!</p>
+              <p className="text-muted-foreground">
+                {statusFilter === "all"
+                  ? "No events yet. Create your first event listing!"
+                  : `No ${statusFilter} events found.`}
+              </p>
             </div>
           )}
-          {myEvents.map((ev) => {
+          {filteredEvents.map((ev) => {
             const regs = getEventRegistrations(ev.id);
             const rosterOpen = expandedRosters.has(ev.id);
             const fillPct = Math.round((ev.registered / ev.seats) * 100);

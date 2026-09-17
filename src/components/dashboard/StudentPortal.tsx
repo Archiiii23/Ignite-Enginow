@@ -14,10 +14,12 @@ import {
   Linkedin,
   BookOpen,
   Star,
-  ArrowUpRight,
   Edit3,
   Save,
   X,
+  Award,
+  Sparkles,
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { usePlatformStore } from "@/lib/platform-store";
@@ -26,7 +28,7 @@ import type { Registration } from "@/lib/platform-store";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { cardHoverVariants, tableRowVariants } from "@/animations/motionVariants";
 
-type Tab = "events" | "favorites" | "profile";
+type Tab = "events" | "saved" | "upcoming" | "certificates" | "profile";
 
 export function StudentPortal() {
   const { user, updateUserProfile } = useAuth();
@@ -48,6 +50,8 @@ export function StudentPortal() {
   });
 
   const myRegistrations = registrations.filter((r) => r.userId === user?.id);
+  const upcomingRegistrations = myRegistrations.filter((r) => r.status !== "cancelled");
+  const attendedRegistrations = myRegistrations.filter((r) => r.status === "attended");
   const favoriteEvents = events.filter((e) => favorites.includes(e.id));
 
   const statusConfig = {
@@ -125,16 +129,18 @@ export function StudentPortal() {
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-secondary rounded-xl mb-8 w-fit">
+      <div className="flex flex-wrap gap-1 p-1 bg-secondary rounded-xl mb-8 w-fit">
         {([
-          ["events", "My Events", Ticket],
-          ["favorites", "Saved", Heart],
+          ["events", `Registered Events (${myRegistrations.length})`, Ticket],
+          ["saved", `Saved Events (${favoriteEvents.length})`, Heart],
+          ["upcoming", `Upcoming Events (${upcomingRegistrations.length})`, Calendar],
+          ["certificates", "Certificates (Future)", Award],
           ["profile", "Profile", User],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
             onClick={() => setTab(id as Tab)}
-            className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               tab === id
                 ? "bg-card text-foreground shadow-sm font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -147,7 +153,7 @@ export function StudentPortal() {
       </div>
 
       <AnimatePresence mode="wait">
-        {/* My Events Tab */}
+        {/* Registered Events Tab */}
         {tab === "events" && (
           <motion.div
             key="events-tab"
@@ -159,12 +165,12 @@ export function StudentPortal() {
             {myRegistrations.length === 0 ? (
               <div className="text-center py-20 bg-card border border-border rounded-2xl">
                 <Ticket className="size-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No registrations yet.</p>
+                <p className="text-muted-foreground">No event registrations found.</p>
                 <Link
                   to="/events"
                   className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline underline-offset-4"
                 >
-                  Explore events <ArrowUpRight className="size-3.5" />
+                  Explore events directory →
                 </Link>
               </div>
             ) : (
@@ -198,41 +204,39 @@ export function StudentPortal() {
                             <Calendar className="size-3" /> {reg.eventDate}
                           </span>
                           <span className="flex items-center gap-1">
-                            <QrCode className="size-3" /> {reg.ticketCode}
+                            <Clock className="size-3" /> Registered:{" "}
+                            {new Date(reg.registeredAt).toLocaleDateString()}
                           </span>
+                          {reg.ticketCode && (
+                            <span className="font-mono text-primary font-semibold">
+                              #{reg.ticketCode}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+
+                      <div className="flex items-center gap-3 shrink-0">
                         <span
                           className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${s.cls}`}
                         >
                           {s.label}
                         </span>
-                        {reg.status === "confirmed" && (
-                          <>
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.96 }}
-                              onClick={() => openTicket(reg)}
-                              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
-                            >
-                              <Ticket className="size-3.5" /> View Ticket
-                            </motion.button>
-                            <button
-                              onClick={() => cancelRegistration(reg.id)}
-                              className="h-9 px-3 rounded-lg border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
-                              title="Cancel registration"
-                            >
-                              <XCircle className="size-4" />
-                            </button>
-                          </>
-                        )}
-                        {reg.status === "attended" && (
+
+                        {reg.status !== "cancelled" && (
                           <button
                             onClick={() => openTicket(reg)}
-                            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border text-xs hover:bg-secondary transition-colors"
+                            className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-95 transition-opacity shadow-sm"
                           >
-                            <BookOpen className="size-3.5" /> View Pass
+                            <Ticket className="size-3.5" /> View Ticket
+                          </button>
+                        )}
+                        {reg.status === "confirmed" && (
+                          <button
+                            onClick={() => cancelRegistration(reg.id)}
+                            className="h-9 px-3 rounded-lg border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                            title="Cancel registration"
+                          >
+                            <XCircle className="size-4" />
                           </button>
                         )}
                       </div>
@@ -244,10 +248,10 @@ export function StudentPortal() {
           </motion.div>
         )}
 
-        {/* Favorites Tab */}
-        {tab === "favorites" && (
+        {/* Saved Events Tab */}
+        {tab === "saved" && (
           <motion.div
-            key="favorites-tab"
+            key="saved-tab"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -261,7 +265,7 @@ export function StudentPortal() {
                   to="/events"
                   className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline underline-offset-4"
                 >
-                  Browse events <ArrowUpRight className="size-3.5" />
+                  Browse events to save favorites →
                 </Link>
               </div>
             ) : (
@@ -309,6 +313,131 @@ export function StudentPortal() {
                 ))}
               </div>
             )}
+          </motion.div>
+        )}
+
+        {/* Upcoming Events Tab */}
+        {tab === "upcoming" && (
+          <motion.div
+            key="upcoming-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-4"
+          >
+            {upcomingRegistrations.length === 0 ? (
+              <div className="text-center py-20 bg-card border border-border rounded-2xl">
+                <Calendar className="size-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">You have no upcoming registered events.</p>
+                <Link
+                  to="/events"
+                  className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline underline-offset-4"
+                >
+                  Discover upcoming hackathons & workshops →
+                </Link>
+              </div>
+            ) : (
+              upcomingRegistrations.map((reg) => {
+                const ev = events.find((e) => e.id === reg.eventId);
+                return (
+                  <div
+                    key={reg.id}
+                    className="bg-card border border-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="size-12 rounded-xl bg-primary/10 text-primary grid place-items-center font-bold font-display shrink-0">
+                        <Calendar className="size-6" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-base">{reg.eventTitle}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Scheduled: {reg.eventDate} · {reg.eventLocation || "Online"}
+                        </div>
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="size-3" /> Seat Confirmed · Pass #{reg.ticketCode}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => openTicket(reg)}
+                      className="shrink-0 inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 transition-opacity"
+                    >
+                      <Ticket className="size-4" /> View Admission Pass
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </motion.div>
+        )}
+
+        {/* Certificates (Future) Tab */}
+        {tab === "certificates" && (
+          <motion.div
+            key="certificates-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-6"
+          >
+            {/* Future Module Announcement */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-amber-500/5 border border-amber-500/20 text-xs text-muted-foreground flex items-start gap-3">
+              <Sparkles className="size-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block text-foreground text-sm font-semibold mb-0.5">
+                  Certificates & Cryptographic Credentials (Future Module)
+                </strong>
+                Enginow Ignite is rolling out automated on-chain & PDF certificate generation. Attend eligible hackathons and conferences to automatically claim verified credential badges directly on your profile.
+              </div>
+            </div>
+
+            {/* Attended or Preview Certificates */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {attendedRegistrations.length > 0 ? (
+                attendedRegistrations.map((reg) => (
+                  <div
+                    key={reg.id}
+                    className="relative bg-gradient-to-br from-card to-secondary/30 border-2 border-primary/30 rounded-3xl p-6 shadow-xl"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Award className="size-6 text-amber-500" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                          Certificate of Completion
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+                        Verified
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">This acknowledges that</div>
+                    <div className="text-lg font-bold font-display text-foreground mt-0.5">
+                      {user?.name || reg.userName}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      has successfully attended and participated in
+                    </div>
+                    <div className="text-sm font-semibold text-primary mt-0.5">{reg.eventTitle}</div>
+
+                    <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                      <div>Date: {reg.eventDate}</div>
+                      <div className="font-mono text-[11px]">ID: IGN-CRT-{reg.id}</div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-16 bg-card border border-border rounded-2xl">
+                  <Award className="size-12 text-muted-foreground mx-auto mb-3 opacity-60" />
+                  <h3 className="font-semibold text-base mb-1">No Verified Certificates Yet</h3>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                    Once an organizer marks your attendance at an event, your official Certificate of Completion will be generated right here.
+                  </p>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 

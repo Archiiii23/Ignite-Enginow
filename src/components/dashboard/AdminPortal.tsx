@@ -23,12 +23,22 @@ import {
   TrendingUp,
   UserCheck,
   RefreshCw,
+  FileSpreadsheet,
+  Download,
 } from "lucide-react";
 import { usePlatformStore } from "@/lib/platform-store";
 import type { PlatformEvent } from "@/lib/platform-store";
 import { toast } from "sonner";
 
-type Tab = "organizers" | "events" | "role-requests" | "users" | "categories" | "announcements" | "analytics";
+type Tab =
+  | "organizers"
+  | "events"
+  | "role-requests"
+  | "users"
+  | "categories"
+  | "reports"
+  | "announcements"
+  | "analytics";
 
 export function AdminPortal() {
   const {
@@ -161,6 +171,76 @@ export function AdminPortal() {
     setNewAnnMsg("");
   };
 
+  const exportRegistrationsCsv = () => {
+    const headers = ["Ticket Code", "Student Name", "Email", "College", "Event Title", "Date", "Status"];
+    const rows = registrations.map((r) => [
+      r.ticketCode || "",
+      `"${(r.userName || "").replace(/"/g, '""')}"`,
+      r.userEmail || "",
+      `"${(r.college || "").replace(/"/g, '""')}"`,
+      `"${r.eventTitle.replace(/"/g, '""')}"`,
+      `"${r.eventDate || ""}"`,
+      r.status,
+    ]);
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `ignite-registrations-report-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Registrations CSV report downloaded!");
+  };
+
+  const exportOrganizersCsv = () => {
+    const headers = ["Org Name", "Email", "Website", "Status", "Events Count", "Joined Date"];
+    const rows = organizers.map((o) => [
+      `"${(o.orgName || o.name).replace(/"/g, '""')}"`,
+      o.email || "",
+      o.website || "",
+      o.verificationStatus,
+      o.eventsCount || 0,
+      o.joinedAt || "",
+    ]);
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `ignite-organizers-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Organizers audit CSV report downloaded!");
+  };
+
+  const exportEventsCsv = () => {
+    const headers = ["Title", "Organizer", "Category", "Mode", "Price", "Seats", "Registered", "Status", "Approval"];
+    const rows = events.map((e) => [
+      `"${e.title.replace(/"/g, '""')}"`,
+      `"${e.organizerName.replace(/"/g, '""')}"`,
+      e.category,
+      e.mode,
+      e.price,
+      e.seats,
+      e.registered,
+      e.status,
+      e.approvalStatus,
+    ]);
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `ignite-events-report-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Events report CSV downloaded!");
+  };
+
   // Aggregate students from registration data
   const allUsers = Array.from(
     new Map(
@@ -245,6 +325,7 @@ export function AdminPortal() {
           ["role-requests", `Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
           ["users", "Users", Users],
           ["categories", "Categories", Tag],
+          ["reports", "Reports", FileSpreadsheet],
           ["announcements", "Announcements", Megaphone],
           ["analytics", "Analytics", BarChart2],
         ] as const).map(([id, label, Icon]) => (
@@ -758,6 +839,79 @@ export function AdminPortal() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Reports Tab */}
+      {tab === "reports" && (
+        <div className="space-y-6">
+          <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <span>
+              <strong>Platform Reports & Compliance Exports:</strong> Generate auditable CSV data ledgers for participant admissions, organizer verifications, and event fill metrics.
+            </span>
+            <span className="text-foreground font-semibold shrink-0">
+              Live Database Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Registrations Report Card */}
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="size-12 rounded-xl bg-primary/10 text-primary grid place-items-center mb-4">
+                  <Users className="size-6" />
+                </div>
+                <h3 className="font-semibold text-base">Registrations Ledger</h3>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Complete roster of {registrations.length} student registrations across all events with ticket codes, colleges, and attendance status.
+                </p>
+              </div>
+              <button
+                onClick={exportRegistrationsCsv}
+                className="mt-6 w-full h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 flex items-center justify-center gap-2 transition-opacity shadow-sm"
+              >
+                <Download className="size-4" /> Download Registrations CSV
+              </button>
+            </div>
+
+            {/* Organizers Report Card */}
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="size-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 grid place-items-center mb-4">
+                  <ShieldCheck className="size-6" />
+                </div>
+                <h3 className="font-semibold text-base">Organizer Audit Ledger</h3>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Directory of all {organizers.length} organizer entities, verification records, document submissions, and approval states.
+                </p>
+              </div>
+              <button
+                onClick={exportOrganizersCsv}
+                className="mt-6 w-full h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold hover:bg-amber-500/25 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Download className="size-4" /> Download Organizers CSV
+              </button>
+            </div>
+
+            {/* Events Performance Report Card */}
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid place-items-center mb-4">
+                  <BarChart2 className="size-6" />
+                </div>
+                <h3 className="font-semibold text-base">Event Performance Report</h3>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Comprehensive metric report of all {events.length} listings, capacity fill rates, pricing tiers, and public visibility states.
+                </p>
+              </div>
+              <button
+                onClick={exportEventsCsv}
+                className="mt-6 w-full h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Download className="size-4" /> Download Events CSV
+              </button>
+            </div>
           </div>
         </div>
       )}

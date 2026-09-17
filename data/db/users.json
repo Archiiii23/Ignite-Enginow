@@ -61,7 +61,13 @@
       "email": "jainarchi555@gmail.com",
       "avatar": "",
       "role": "student",
-      "isRoleSelected": true
+      "isRoleSelected": true,
+      "roleChangeRequest": {
+        "requestedRole": "organizer",
+        "reason": "capable",
+        "status": "PENDING",
+        "requestedAt": "2026-09-17T17:26:40.522Z"
+      }
     }
   }
 ]

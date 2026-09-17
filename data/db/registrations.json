@@ -1,39 +1,5 @@
 [
   {
-    "id": "reg_1789664697448",
-    "eventId": "e-ws-1",
-    "eventTitle": "Designing Systems That Scale",
-    "eventDate": "Oct 24, 2026",
-    "eventLocation": "Live on Enginow Interactive Stage",
-    "userId": "usr_student_1",
-    "userName": "Ananya Sharma",
-    "userEmail": "ananya@iitm.ac.in",
-    "college": "IIT Madras",
-    "phone": "+91 9876543210",
-    "degree": "B.Tech Computer Science",
-    "yearOfStudy": "3rd Year",
-    "rollNumber": "CS23B042",
-    "githubUrl": "https://github.com/ananya-sharma",
-    "linkedinUrl": "https://linkedin.com/in/ananya-sharma",
-    "experienceLevel": "Advanced",
-    "skills": [
-      "React",
-      "TypeScript",
-      "Rust"
-    ],
-    "participationType": "team",
-    "teamName": "KernelHacks",
-    "teamSize": 3,
-    "teamRole": "Lead Systems Engineer",
-    "reasonForAttending": "Excited to learn high-throughput distributed system design!",
-    "tshirtSize": "M",
-    "dietaryPreference": "Vegetarian",
-    "registeredAt": "2026-09-17T17:04:57.448Z",
-    "status": "confirmed",
-    "ticketCode": "IGN-WOR-9798",
-    "seatNumber": "WOR-15"
-  },
-  {
     "id": "reg_1",
     "eventId": "e-hk-1",
     "eventTitle": "Quantum Hack 2026",
@@ -45,8 +11,8 @@
     "college": "Indian Institute of Technology (IIT)",
     "registeredAt": "2026-10-10T14:30:00Z",
     "status": "confirmed",
-    "ticketCode": "IGN-HAC-8812",
-    "seatNumber": "HAC-04"
+    "ticketCode": "IGN-QNT-8812",
+    "seatNumber": "HACK-B04"
   },
   {
     "id": "reg_2",
@@ -60,8 +26,8 @@
     "college": "Indian Institute of Technology (IIT)",
     "registeredAt": "2026-10-12T09:15:00Z",
     "status": "attended",
-    "ticketCode": "IGN-CON-1904",
-    "seatNumber": "CON-14"
+    "ticketCode": "IGN-AGT-1904",
+    "seatNumber": "GEN-114"
   },
   {
     "id": "reg_3",
@@ -75,7 +41,7 @@
     "college": "BITS Pilani",
     "registeredAt": "2026-10-11T10:00:00Z",
     "status": "confirmed",
-    "ticketCode": "IGN-HAC-9021",
-    "seatNumber": "HAC-05"
+    "ticketCode": "IGN-QNT-9021",
+    "seatNumber": "HACK-B05"
   }
 ]
