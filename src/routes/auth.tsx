@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageShell } from "@/components/site/PageShell";
 import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth, type UserRole } from "@/lib/auth-context";
