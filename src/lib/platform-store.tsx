@@ -131,8 +131,8 @@ interface PlatformContextType {
   cancelRegistrationAdmin: (registrationId: string) => void;
 }
 
-const STORAGE_KEY_EVENTS = "ignite-platform-events";
-const STORAGE_KEY_REGISTRATIONS = "ignite-platform-registrations";
+const STORAGE_KEY_EVENTS = "ignite-platform-events-v3";
+const STORAGE_KEY_REGISTRATIONS = "ignite-platform-registrations-v3";
 const STORAGE_KEY_ORGANIZERS = "ignite-platform-organizers";
 const STORAGE_KEY_FAVORITES = "ignite-platform-favorites";
 const STORAGE_KEY_CATEGORIES = "ignite-platform-categories";
@@ -145,7 +145,7 @@ const defaultEventsSeed: PlatformEvent[] = initialEventsSeed.map((e, idx) => ({
   organizerId: idx % 2 === 0 ? "usr_org_1" : "usr_org_2",
   organizerName: idx % 2 === 0 ? "DevSphere Foundation" : "OpenKernel Community",
   isFeatured: idx < 3,
-  registrationsOpen: e.status !== "closing",
+  registrationsOpen: e.status !== "ended",
 }));
 
 // Initial organizers seed
@@ -192,45 +192,45 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
 const defaultRegistrationsSeed: Registration[] = [
   {
     id: "reg_1",
-    eventId: "e1",
+    eventId: "e-hk-1",
     eventTitle: "Quantum Hack 2026",
-    eventDate: "Aug 14 – 16, 2026",
+    eventDate: "Nov 13 – 15, 2026",
     eventLocation: "Bengaluru + Online",
     userId: "usr_student_1",
     userName: "Aarav Sharma",
     userEmail: "aarav.sharma@campus.edu",
     college: "Indian Institute of Technology (IIT)",
-    registeredAt: "2026-08-10T14:30:00Z",
+    registeredAt: "2026-10-10T14:30:00Z",
     status: "confirmed",
     ticketCode: "IGN-QNT-8812",
     seatNumber: "HACK-B04",
   },
   {
     id: "reg_2",
-    eventId: "e2",
-    eventTitle: "Autonomous Agents Conf",
-    eventDate: "Aug 22, 2026",
-    eventLocation: "Virtual",
+    eventId: "e-cf-1",
+    eventTitle: "DevFest South 2026",
+    eventDate: "Nov 28, 2026",
+    eventLocation: "HICC Convention Centre, Hyderabad",
     userId: "usr_student_1",
     userName: "Aarav Sharma",
     userEmail: "aarav.sharma@campus.edu",
     college: "Indian Institute of Technology (IIT)",
-    registeredAt: "2026-08-12T09:15:00Z",
+    registeredAt: "2026-10-12T09:15:00Z",
     status: "attended",
     ticketCode: "IGN-AGT-1904",
     seatNumber: "GEN-114",
   },
   {
     id: "reg_3",
-    eventId: "e1",
+    eventId: "e-hk-1",
     eventTitle: "Quantum Hack 2026",
-    eventDate: "Aug 14 – 16, 2026",
+    eventDate: "Nov 13 – 15, 2026",
     eventLocation: "Bengaluru + Online",
     userId: "usr_student_2",
     userName: "Priya Sundaram",
     userEmail: "priya.s@tech.ac.in",
     college: "BITS Pilani",
-    registeredAt: "2026-08-11T10:00:00Z",
+    registeredAt: "2026-10-11T10:00:00Z",
     status: "confirmed",
     ticketCode: "IGN-QNT-9021",
     seatNumber: "HACK-B05",

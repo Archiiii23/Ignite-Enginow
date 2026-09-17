@@ -10,45 +10,19 @@ export type BackendEvent = EventItem & {
   registrationsOpen: boolean;
 };
 
-const fallbackEvents: BackendEvent[] = [
-  {
-    id: "e1",
-    slug: "quantum-hack-2026",
-    title: "Quantum Hack 2026",
-    tagline: "48-hour global hackathon exploring quantum algorithms and quantum-safe cryptography.",
-    category: "Hackathon",
-    mode: "Hybrid",
-    location: "Bengaluru, India + Virtual",
-    city: "Bengaluru",
-    dateISO: "2026-08-14",
-    dateLabel: "Aug 14 – 16, 2026",
-    registrationDeadline: "2026-08-10",
-    durationLabel: "48 hours",
-    price: "Free",
-    prize: "₹15,00,000",
-    seats: 500,
-    registered: 382,
-    cover: "/src/assets/event-1.jpg",
-    status: "live",
-    tags: ["Quantum", "Cryptography", "AI", "Global"],
-    host: { name: "Quantum Labs India", role: "Organizer", avatar: "" },
-    speakers: [],
-    sponsors: [],
-    faqs: [],
-    contactEmail: "hack@quantumlabs.in",
-    about: "Build the future of quantum computing.",
-    agenda: [{ time: "Day 1 · 10:00", title: "Kickoff", description: "Opening session" }],
-    perks: ["₹15L prize pool", "Mentorship", "Swag kits"],
-    approvalStatus: "published",
-    organizerId: "usr_org_1",
-    organizerName: "DevSphere Foundation",
-    isFeatured: true,
-    registrationsOpen: true,
-  },
-];
+import { events as staticEvents } from "@/data/events";
+
+export const defaultBackendEvents: BackendEvent[] = staticEvents.map((e, idx) => ({
+  ...e,
+  approvalStatus: "published" as const,
+  organizerId: idx % 2 === 0 ? "usr_org_1" : "usr_org_2",
+  organizerName: idx % 2 === 0 ? "DevSphere Foundation" : "OpenKernel Community",
+  isFeatured: idx < 3,
+  registrationsOpen: e.status !== "ended",
+}));
 
 export async function readBackendEvents(): Promise<BackendEvent[]> {
-  return db.getEvents(fallbackEvents);
+  return db.getEvents(defaultBackendEvents);
 }
 
 export async function writeBackendEvents(events: BackendEvent[]) {
