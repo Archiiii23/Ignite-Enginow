@@ -15,6 +15,7 @@ import { usePlatformStore, type Registration } from "@/lib/platform-store";
 import { useNotifications } from "@/lib/notifications";
 import { TicketModal } from "@/components/events/TicketModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/events/$eventId")({
   loader: async ({ params }): Promise<{ event: EventItem }> => {
@@ -127,6 +128,7 @@ function EventDetail() {
   const { addNotification } = useNotifications();
   const {
     events: platformEvents,
+    approveEvent,
     registerForEvent,
     cancelRegistration,
     isRegistered,
@@ -142,6 +144,9 @@ function EventDetail() {
 
   const liveEvent = platformEvents.find((e) => e.id === event.id || e.slug === event.slug) ?? event;
   const capacityPct = Math.min(100, Math.round((liveEvent.registered / liveEvent.seats) * 100));
+
+  const isPendingApproval = "approvalStatus" in liveEvent && liveEvent.approvalStatus === "pending_approval";
+  const isRejected = "approvalStatus" in liveEvent && liveEvent.approvalStatus === "rejected";
 
   const registered = (isAuthenticated && user ? isRegistered(event.id, user.id) : false) || !!activeRegistration;
   const registration = (isAuthenticated && user ? getRegistration(event.id, user.id) : undefined) || activeRegistration;
@@ -191,6 +196,45 @@ function EventDetail() {
           <Link to="/events" className="inline-flex items-center gap-2 text-caption hover:text-foreground">
             <ArrowLeft className="size-3.5" /> All events
           </Link>
+
+          {isPendingApproval && (
+            <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <Clock className="size-5 shrink-0" />
+                <div>
+                  <div className="font-semibold text-sm">Event in Pending Review (Step 2 of Event Approval Flow)</div>
+                  <div className="text-xs opacity-90 mt-0.5">
+                    This event has been submitted by the organizer and is currently awaiting administrator review before becoming public.
+                  </div>
+                </div>
+              </div>
+              {user?.role === "admin" && (
+                <button
+                  onClick={() => {
+                    approveEvent(liveEvent.id);
+                    toast.success(`Event approved! It is now Public for student registration.`);
+                  }}
+                  className="shrink-0 h-9 px-4 rounded-xl bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition-colors flex items-center gap-1.5 shadow-sm"
+                >
+                  <CheckCircle2 className="size-3.5" /> Approve & Make Public
+                </button>
+              )}
+            </div>
+          )}
+
+          {isRejected && (
+            <div className="mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/25 text-red-600 dark:text-red-400 flex items-center gap-2.5 shadow-sm">
+              <XCircle className="size-5 shrink-0" />
+              <div>
+                <div className="font-semibold text-sm">Event Submission Rejected</div>
+                <div className="text-xs opacity-90 mt-0.5">
+                  {"rejectionReason" in liveEvent && liveEvent.rejectionReason
+                    ? `Reason: ${liveEvent.rejectionReason}`
+                    : "This event was not approved for publication."}
+                </div>
+              </div>
+            </div>
+          )}
           <div className="mt-6 relative aspect-[16/7] overflow-hidden rounded-3xl border border-border">
             <img src={event.cover} alt={event.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
@@ -376,6 +420,30 @@ function EventDetail() {
                       <XCircle className="size-4" /> Cancel Registration
                     </button>
                   </>
+                ) : isPendingApproval ? (
+                  <div className="space-y-2.5">
+                    <div className="w-full p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-xl text-center flex items-center justify-center gap-2">
+                      <Clock className="size-4" /> Pending Admin Review
+                    </div>
+                    <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+                      Student registrations will open immediately once approved by an administrator.
+                    </p>
+                    {user?.role === "admin" && (
+                      <button
+                        onClick={() => {
+                          approveEvent(liveEvent.id);
+                          toast.success(`Event approved! It is now Public for student registration.`);
+                        }}
+                        className="w-full h-10 rounded-xl bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-600 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                      >
+                        <CheckCircle2 className="size-3.5" /> Approve & Make Public
+                      </button>
+                    )}
+                  </div>
+                ) : isRejected ? (
+                  <div className="w-full p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold rounded-xl text-center flex items-center justify-center gap-2">
+                    <XCircle className="size-4" /> Not Approved
+                  </div>
                 ) : isClosed || deadlinePassed ? (
                   <div className="w-full h-11 flex items-center justify-center bg-secondary text-muted-foreground text-sm rounded-lg border border-border">
                     Registrations Closed

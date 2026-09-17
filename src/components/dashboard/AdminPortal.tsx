@@ -136,6 +136,7 @@ export function AdminPortal() {
     rejectEvent(eventId, rejectReason);
     setRejectingEventId(null);
     setRejectReason("");
+    toast.info("Event has been rejected with feedback sent to organizer.");
   };
 
   const handleRejectOrg = (orgId: string) => {
@@ -143,6 +144,7 @@ export function AdminPortal() {
     rejectOrganizer(orgId, orgRejectReason);
     setRejectingOrgId(null);
     setOrgRejectReason("");
+    toast.info("Organizer verification has been rejected with feedback.");
   };
 
   const handleAddCategory = () => {
@@ -264,6 +266,15 @@ export function AdminPortal() {
       {/* Organizers Tab */}
       {tab === "organizers" && (
         <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex items-center justify-between">
+            <span>
+              <strong>Organizer Approval Flow (Step 5 & 6):</strong> Review applicant credentials. Approving grants verified organizer status and allows them to create and manage listings.
+            </span>
+            <span className="font-semibold text-foreground shrink-0 ml-3">
+              {pendingOrgs.length} pending
+            </span>
+          </div>
+
           {organizers.map((org) => {
             const s = orgStatusConfig[org.verificationStatus as keyof typeof orgStatusConfig];
             const isRejecting = rejectingOrgId === org.id;
@@ -291,10 +302,13 @@ export function AdminPortal() {
                     {org.verificationStatus === "pending" && (
                       <>
                         <button
-                          onClick={() => approveOrganizer(org.id)}
+                          onClick={() => {
+                            approveOrganizer(org.id);
+                            toast.success(`Organizer "${org.name}" approved! Listing privileges granted.`);
+                          }}
                           className="h-9 px-4 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center gap-1"
                         >
-                          <CheckCircle2 className="size-3.5" /> Approve
+                          <CheckCircle2 className="size-3.5" /> Approve Organizer
                         </button>
                         <button
                           onClick={() => setRejectingOrgId(org.id)}
@@ -358,6 +372,15 @@ export function AdminPortal() {
       {/* Events Approval Queue Tab */}
       {tab === "events" && (
         <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex items-center justify-between">
+            <span>
+              <strong>Event Approval Workflow:</strong> Review organizer-submitted events in <strong>Pending Review</strong>. Approving an event transitions it to <strong>Public</strong>, enabling student discovery and registrations.
+            </span>
+            <span className="font-semibold text-foreground shrink-0 ml-3">
+              {pendingEvents.length} pending review
+            </span>
+          </div>
+
           {pendingEvents.length === 0 && (
             <div className="text-center py-16 bg-card border border-border rounded-2xl">
               <CheckCircle2 className="size-10 text-emerald-500 mx-auto mb-3" />
@@ -386,10 +409,13 @@ export function AdminPortal() {
                   </div>
                   <div className="flex flex-wrap items-start gap-2 shrink-0">
                     <button
-                      onClick={() => approveEvent(ev.id)}
+                      onClick={() => {
+                        approveEvent(ev.id);
+                        toast.success(`Event "${ev.title}" approved! It is now Public for student registration.`);
+                      }}
                       className="h-9 px-4 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center gap-1"
                     >
-                      <CheckCircle2 className="size-3.5" /> Approve
+                      <CheckCircle2 className="size-3.5" /> Approve & Publish
                     </button>
                     <button
                       onClick={() => setRejectingEventId(ev.id)}

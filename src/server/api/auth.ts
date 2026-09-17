@@ -54,7 +54,14 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
 
   // First-login Role Selection
   if (request.method === "POST" && subRoute === "select-role") {
-    const body = (await request.json().catch(() => ({}))) as { role?: "participant" | "organizer" };
+    const body = (await request.json().catch(() => ({}))) as {
+      role?: "participant" | "organizer";
+      orgName?: string;
+      orgWebsite?: string;
+      orgBio?: string;
+      phone?: string;
+      documentsSubmitted?: string;
+    };
     const user = await getAuthenticatedUser(request);
     const finalRole: UserRole = body.role?.toLowerCase() === "organizer" ? "organizer" : "student";
 
@@ -63,12 +70,40 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
         ...user,
         role: finalRole,
         isRoleSelected: true,
+        orgName: body.orgName,
+        orgWebsite: body.orgWebsite,
+        orgBio: body.orgBio,
+        verificationStatus: finalRole === "organizer" ? "pending" : undefined,
       };
       await db.updateUser(updated);
+
+      if (finalRole === "organizer") {
+        const organizers = await db.getOrganizers();
+        const existingIdx = organizers.findIndex((o) => o.userId === user.id);
+        const orgRec = {
+          id: existingIdx !== -1 ? organizers[existingIdx].id : `org_rec_${Date.now()}`,
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          orgName: body.orgName || user.name,
+          website: body.orgWebsite || "https://example.org",
+          verificationStatus: "pending" as const,
+          documentsSubmitted: body.documentsSubmitted || "Organizer credentials submitted for review",
+          eventsCount: 0,
+          joinedAt: new Date().toISOString().split("T")[0],
+        };
+        if (existingIdx !== -1) {
+          organizers[existingIdx] = orgRec;
+          await db.setOrganizers(organizers);
+        } else {
+          await db.setOrganizers([orgRec, ...organizers]);
+        }
+      }
+
       return Response.json({ success: true, data: updated, user: updated });
     }
 
-    // If session not yet stored in cookies, return mock updated profile
+    // Fallback profile if session not yet committed
     const fallbackProfile: UserProfile = {
       id: "usr_student_dev",
       name: "Alex Rivera",
@@ -76,6 +111,9 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
       avatar: "",
       role: finalRole,
       isRoleSelected: true,
+      orgName: body.orgName,
+      orgWebsite: body.orgWebsite,
+      verificationStatus: finalRole === "organizer" ? "pending" : undefined,
     };
     return Response.json({ success: true, data: fallbackProfile, user: fallbackProfile });
   }

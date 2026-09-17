@@ -597,7 +597,7 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
         registered: 0,
         cover: eventData.cover || initialEventsSeed[0].cover,
         status: "upcoming",
-        approvalStatus: "draft",
+        approvalStatus: "pending_approval",
         organizerId: user?.id || "usr_org_1",
         organizerName: user?.orgName || user?.name || "Organizer",
         isFeatured: false,
@@ -688,21 +688,39 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
   );
 
   // ADMIN ACTIONS
-  const approveOrganizer = useCallback((orgId: string) => {
-    setOrganizers((prev) =>
-      prev.map((o) => (o.id === orgId || o.userId === orgId ? { ...o, verificationStatus: "verified" as const } : o))
-    );
-  }, []);
+  const approveOrganizer = useCallback(
+    (orgId: string) => {
+      setOrganizers((prev) =>
+        prev.map((o) =>
+          o.id === orgId || o.userId === orgId
+            ? { ...o, verificationStatus: "verified" as const, rejectionReason: undefined }
+            : o
+        )
+      );
+      const targetOrg = organizers.find((o) => o.id === orgId || o.userId === orgId);
+      if (user && targetOrg && (user.id === targetOrg.userId || user.id === orgId)) {
+        updateUserProfile({ verificationStatus: "verified" });
+      }
+    },
+    [organizers, user, updateUserProfile]
+  );
 
-  const rejectOrganizer = useCallback((orgId: string, reason = "Incomplete verification documents.") => {
-    setOrganizers((prev) =>
-      prev.map((o) =>
-        o.id === orgId || o.userId === orgId
-          ? { ...o, verificationStatus: "rejected" as const, rejectionReason: reason }
-          : o
-      )
-    );
-  }, []);
+  const rejectOrganizer = useCallback(
+    (orgId: string, reason = "Incomplete verification documents.") => {
+      setOrganizers((prev) =>
+        prev.map((o) =>
+          o.id === orgId || o.userId === orgId
+            ? { ...o, verificationStatus: "rejected" as const, rejectionReason: reason }
+            : o
+        )
+      );
+      const targetOrg = organizers.find((o) => o.id === orgId || o.userId === orgId);
+      if (user && targetOrg && (user.id === targetOrg.userId || user.id === orgId)) {
+        updateUserProfile({ verificationStatus: "rejected" });
+      }
+    },
+    [organizers, user, updateUserProfile]
+  );
 
   const suspendOrganizer = useCallback((orgId: string) => {
     setOrganizers((prev) =>
@@ -712,7 +730,11 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
 
   const approveEvent = useCallback((eventId: string) => {
     setEvents((prev) =>
-      prev.map((e) => (e.id === eventId ? { ...e, approvalStatus: "approved" as const } : e))
+      prev.map((e) =>
+        e.id === eventId
+          ? { ...e, approvalStatus: "published" as const, status: "live" as const }
+          : e
+      )
     );
   }, []);
 

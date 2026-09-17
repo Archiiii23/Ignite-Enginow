@@ -38,7 +38,16 @@ interface AuthContextType {
   loginWithGoogle: (preferredRole?: UserRole) => Promise<UserProfile>;
   loginWithEmail: (email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   signupWithEmail: (name: string, email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
-  selectRole: (role: "participant" | "organizer") => Promise<UserProfile>;
+  selectRole: (
+    role: "participant" | "organizer",
+    orgDetails?: {
+      orgName?: string;
+      orgWebsite?: string;
+      orgBio?: string;
+      phone?: string;
+      documentsSubmitted?: string;
+    }
+  ) => Promise<UserProfile>;
   requestRoleChange: (requestedRole: "participant" | "organizer", reason?: string) => Promise<UserProfile>;
   refreshUser: () => Promise<UserProfile | null>;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
@@ -244,36 +253,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const selectRole = useCallback(async (role: "participant" | "organizer") => {
-    const startTime = Date.now();
-    try {
-      const res = await authRequest<UserProfile>("select-role", { role }, 1200);
-      await ensureMinAuthDuration(startTime, 1200);
-      setUser(res);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
+  const selectRole = useCallback(
+    async (
+      role: "participant" | "organizer",
+      orgDetails?: {
+        orgName?: string;
+        orgWebsite?: string;
+        orgBio?: string;
+        phone?: string;
+        documentsSubmitted?: string;
       }
-      return res;
-    } catch {
-      await ensureMinAuthDuration(startTime, 1200);
-      const finalRole = role.toLowerCase() === "organizer" ? "organizer" : "student";
-      const updated: UserProfile = {
-        ...(user || {
-          id: "usr_google_dev",
-          name: "Alex Rivera",
-          email: "alex.rivera@campus.edu",
-          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-        }),
-        role: finalRole,
-        isRoleSelected: true,
-      };
-      setUser(updated);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("ignite_auth_user", JSON.stringify(updated));
+    ) => {
+      const startTime = Date.now();
+      try {
+        const res = await authRequest<UserProfile>("select-role", { role, ...orgDetails }, 1200);
+        await ensureMinAuthDuration(startTime, 1200);
+        setUser(res);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
+        }
+        return res;
+      } catch {
+        await ensureMinAuthDuration(startTime, 1200);
+        const finalRole = role.toLowerCase() === "organizer" ? "organizer" : "student";
+        const updated: UserProfile = {
+          ...(user || {
+            id: "usr_google_dev",
+            name: "Alex Rivera",
+            email: "alex.rivera@campus.edu",
+            avatar: "",
+          }),
+          role: finalRole,
+          isRoleSelected: true,
+          orgName: orgDetails?.orgName,
+          orgWebsite: orgDetails?.orgWebsite,
+          orgBio: orgDetails?.orgBio,
+          verificationStatus: finalRole === "organizer" ? "pending" : undefined,
+        };
+        setUser(updated);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("ignite_auth_user", JSON.stringify(updated));
+        }
+        return updated;
       }
-      return updated;
-    }
-  }, [user]);
+    },
+    [user]
+  );
 
   const requestRoleChange = useCallback(async (requestedRole: "participant" | "organizer", reason?: string) => {
     const res = await authRequest<UserProfile>("request-role-change", { requestedRole, reason }, 1500);

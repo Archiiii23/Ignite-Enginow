@@ -174,17 +174,69 @@ export function OrganizerPortal() {
             <p className="text-sm text-muted-foreground mt-0.5">{user?.headline}</p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            setEditingEvent(null);
-            setForm(BLANK_EVENT);
-            setShowCreateModal(true);
-          }}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_20px_-4px_var(--primary-glow)]"
-        >
-          <Plus className="size-4" /> Create Event
-        </button>
+        {verificationStatus === "verified" ? (
+          <button
+            onClick={() => {
+              setEditingEvent(null);
+              setForm(BLANK_EVENT);
+              setShowCreateModal(true);
+            }}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_20px_-4px_var(--primary-glow)]"
+          >
+            <Plus className="size-4" /> Create Event
+          </button>
+        ) : (
+          <button
+            onClick={() => setTab("verification")}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-semibold hover:bg-amber-500/15 transition-colors"
+            title="Account must be verified by admin before creating listings"
+          >
+            <Clock className="size-4" />
+            {verificationStatus === "pending" ? "Pending Approval (Step 5 of 7)" : "Complete Verification to Create Listings"}
+          </button>
+        )}
       </div>
+
+      {/* Organizer Flow Status Banner */}
+      {verificationStatus === "pending" && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-700 dark:text-amber-300 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Clock className="size-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <strong className="font-semibold block text-foreground text-sm">
+                Organizer Approval in Progress (Step 5 of 7: Admin Review)
+              </strong>
+              Your organization profile has been submitted and is currently under review by platform administrators. Once approved in Step 6, you will unlock Step 7 to create and publish event listings for students.
+            </div>
+          </div>
+          <button
+            onClick={() => setTab("verification")}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 font-medium transition-colors"
+          >
+            View Verification Status →
+          </button>
+        </div>
+      )}
+
+      {verificationStatus === "rejected" && (
+        <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/25 text-xs text-red-700 dark:text-red-300 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <XCircle className="size-5 text-red-500 shrink-0 mt-0.5" />
+            <div>
+              <strong className="font-semibold block text-foreground text-sm">
+                Organizer Verification Rejected (Step 6)
+              </strong>
+              {myOrg?.rejectionReason ? `Reason: ${myOrg.rejectionReason}` : "Your submitted details were not approved by administrators."} Please update your verification documents in the Verification tab to resubmit.
+            </div>
+          </div>
+          <button
+            onClick={() => setTab("verification")}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 font-medium transition-colors"
+          >
+            Update Documents →
+          </button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-secondary rounded-xl mb-8 w-fit">
@@ -239,13 +291,26 @@ export function OrganizerPortal() {
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{ev.title}</span>
                       <span
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                          approvalColors[ev.approvalStatus]
-                        }`}
-                      >
-                        {ev.approvalStatus.replace("_", " ")}
+                      className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                        approvalColors[ev.approvalStatus]
+                      }`}
+                    >
+                      {ev.approvalStatus === "pending_approval"
+                        ? "⏳ Pending Admin Review"
+                        : ev.approvalStatus === "published"
+                        ? "✓ Public & Live"
+                        : ev.approvalStatus.replace("_", " ")}
+                    </span>
+                  </div>
+
+                  {ev.approvalStatus === "pending_approval" && (
+                    <div className="mt-2 text-xs bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 rounded-xl px-3 py-2 flex items-center gap-2">
+                      <Clock className="size-3.5 shrink-0" />
+                      <span>
+                        <strong>Event Approval Workflow:</strong> This event is in Pending Review. It will become public and open for student registrations as soon as an administrator approves it.
                       </span>
                     </div>
+                  )}
                     <p className="text-xs text-muted-foreground line-clamp-1">{ev.tagline}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                       <span>{ev.dateLabel}</span>
@@ -420,12 +485,65 @@ export function OrganizerPortal() {
 
       {/* Verification Tab */}
       {tab === "verification" && (
-        <div className="max-w-2xl">
+        <div className="max-w-3xl space-y-6">
+          {/* Visual 7-Step Pipeline Card */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h3 className="text-sm font-mono uppercase tracking-wider font-semibold text-primary mb-3">
+              Organizer Approval Flow Progress
+            </h3>
+            <div className="space-y-2.5 text-xs">
+              {[
+                { step: "Step 1", title: "User Logs In", status: "completed", desc: "Authenticated session active" },
+                { step: "Step 2", title: "Selects Organizer", status: "completed", desc: "Role chosen as Organizer" },
+                { step: "Step 3", title: "Fills Organizer Details", status: "completed", desc: "Org name, website, and documents entered" },
+                { step: "Step 4", title: "Organizer Submits Profile", status: "completed", desc: "Profile submitted for verification" },
+                {
+                  step: "Step 5 & 6",
+                  title: "Admin Reviews & Approves/Rejects",
+                  status: verificationStatus === "verified" ? "completed" : verificationStatus === "rejected" ? "rejected" : "in_progress",
+                  desc: verificationStatus === "verified" ? "Approved by Platform Administrator" : verificationStatus === "rejected" ? (myOrg?.rejectionReason || "Application rejected") : "Currently being reviewed by administrator team",
+                },
+                {
+                  step: "Step 7",
+                  title: "Organizer Creates Listings",
+                  status: verificationStatus === "verified" ? "completed" : "locked",
+                  desc: verificationStatus === "verified" ? "Listing creation unlocked & active" : "Locked until administrator approval",
+                },
+              ].map((item, idx) => (
+                <div
+                  key={item.step}
+                  className={`flex items-center justify-between p-3 rounded-xl border ${
+                    item.status === "completed"
+                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                      : item.status === "in_progress"
+                      ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                      : item.status === "rejected"
+                      ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
+                      : "bg-secondary/40 border-border text-muted-foreground opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-background border border-border">
+                      {item.step}
+                    </span>
+                    <div>
+                      <div className="font-semibold text-foreground text-xs">{item.title}</div>
+                      <div className="text-[11px] text-muted-foreground">{item.desc}</div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold">
+                    {item.status === "completed" ? "✓ Done" : item.status === "in_progress" ? "⏳ In Review" : item.status === "rejected" ? "❌ Rejected" : "🔒 Locked"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-card border border-border rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
               <ShieldCheck className={`size-8 ${vc.cls}`} />
               <div>
-                <h2 className="text-lg font-semibold">Organizer Verification</h2>
+                <h2 className="text-lg font-semibold">Verification Credentials</h2>
                 <p className="text-sm text-muted-foreground">
                   Status:{" "}
                   <span className={`font-semibold ${vc.cls}`}>{vc.label}</span>
@@ -434,11 +552,11 @@ export function OrganizerPortal() {
             </div>
 
             {verificationStatus === "verified" && (
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <CheckCircle2 className="size-12 text-emerald-500 mx-auto mb-3" />
                 <p className="font-semibold text-foreground">Your organization is fully verified!</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  You can create and publish events without admin approval.
+                  You can now create listings. When you create an event, it will enter Pending Review for quick admin approval before going live to students.
                 </p>
                 {myOrg?.documentsSubmitted && (
                   <div className="mt-4 text-xs text-muted-foreground bg-secondary rounded-xl p-3">
@@ -449,12 +567,17 @@ export function OrganizerPortal() {
             )}
 
             {verificationStatus === "pending" && (
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <Clock className="size-12 text-amber-500 mx-auto mb-3" />
-                <p className="font-semibold text-foreground">Verification Under Review</p>
+                <p className="font-semibold text-foreground">Verification Under Review (Step 5 of 7)</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Our team is reviewing your submitted documents. You'll be notified once verified.
+                  Our administrator team is reviewing your organization profile and credentials.
                 </p>
+                {myOrg?.documentsSubmitted && (
+                  <div className="mt-4 text-xs text-muted-foreground bg-secondary rounded-xl p-3">
+                    Submitted proof: {myOrg.documentsSubmitted}
+                  </div>
+                )}
               </div>
             )}
 
@@ -573,7 +696,7 @@ export function OrganizerPortal() {
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md overflow-y-auto">
           <div className="relative w-full max-w-2xl bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-bold font-display">
                 {editingEvent ? "Edit Event" : "Create New Event"}
               </h2>
@@ -588,6 +711,15 @@ export function OrganizerPortal() {
                 <X className="size-5 text-muted-foreground" />
               </button>
             </div>
+
+            {!editingEvent && (
+              <div className="mb-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2.5">
+                <Clock className="size-4 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Event Approval Workflow:</strong> Upon submission, your event will enter <strong>Pending Review</strong>. An administrator will review and approve it before it becomes <strong>Public</strong> for student registrations.
+                </span>
+              </div>
+            )}
 
             <div className="space-y-4">
               {([
@@ -668,10 +800,19 @@ export function OrganizerPortal() {
               </button>
               <button
                 onClick={handleSaveEvent}
-                className="flex-1 h-11 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                className="flex-1 h-11 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_20px_-4px_var(--primary-glow)] flex items-center justify-center gap-2"
               >
-                <Save className="size-4 inline-block mr-2" />
-                {editingEvent ? "Save Changes" : "Create Event"}
+                {editingEvent ? (
+                  <>
+                    <Save className="size-4" />
+                    Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Send className="size-4" />
+                    Submit Event for Admin Review
+                  </>
+                )}
               </button>
             </div>
           </div>
