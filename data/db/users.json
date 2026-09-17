@@ -7,7 +7,7 @@
       "id": "usr_student_1",
       "name": "Aarav Sharma",
       "email": "aarav.sharma@campus.edu",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "avatar": "",
       "role": "student",
       "isRoleSelected": true,
       "headline": "CS and AI Undergraduate",
@@ -28,7 +28,7 @@
       "id": "usr_org_1",
       "name": "DevSphere Foundation",
       "email": "events@devsphere.org",
-      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+      "avatar": "",
       "role": "organizer",
       "isRoleSelected": true,
       "headline": "Global Technical Community and Hackathon Organizers",
@@ -45,7 +45,7 @@
       "id": "usr_admin_1",
       "name": "Sarah Chen (Admin)",
       "email": "sarah.chen@enginow.io",
-      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      "avatar": "",
       "role": "admin",
       "isRoleSelected": true,
       "headline": "Platform Operations and Governance Lead"
@@ -59,7 +59,7 @@
       "id": "usr_5fa173d4-8b7c-4b51-b35d-b52c92a390a4",
       "name": "Jainarchi555",
       "email": "jainarchi555@gmail.com",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "avatar": "",
       "role": "student",
       "isRoleSelected": true
     }

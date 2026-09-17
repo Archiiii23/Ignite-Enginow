@@ -38,7 +38,7 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
         id: `usr_${role}_${Math.random().toString(36).slice(2, 7)}`,
         name: role === "admin" ? "Sarah Chen (Admin)" : role === "organizer" ? "Alex DevSphere" : "Alex Rivera",
         email: `${role}@enginow.ignite`,
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        avatar: "",
         role,
         isRoleSelected: true,
       };
@@ -73,7 +73,7 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
       id: "usr_student_dev",
       name: "Alex Rivera",
       email: "alex.rivera@campus.edu",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      avatar: "",
       role: finalRole,
       isRoleSelected: true,
     };
@@ -120,8 +120,7 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
       id: `usr_${crypto.randomUUID()}`,
       name: body.name.trim(),
       email: body.email.trim().toLowerCase(),
-      avatar:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      avatar: "",
       role: body.role || "student",
       isRoleSelected: true,
     };
@@ -143,7 +142,7 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
         id: `usr_${crypto.randomUUID()}`,
         name: body.email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
         email: body.email.trim().toLowerCase(),
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        avatar: "",
         role: body.role || "student",
         isRoleSelected: true,
       };

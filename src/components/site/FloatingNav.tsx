@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useNotifications, type NotificationType } from "@/lib/notifications";
 import { RequestRoleChangeModal } from "@/components/auth/RequestRoleChangeModal";
 import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 const links = [
   { label: "Events", to: "/events" as const },
@@ -200,7 +201,7 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                   onClick={() => { setProfileOpen((v) => !v); setNotifOpen(false); }}
                   className="flex items-center gap-2.5 h-9 pl-1 pr-3 rounded-xl border border-foreground/10 hover:border-foreground/20 hover:bg-foreground/5 transition-all"
                 >
-                  <img src={user.avatar} alt={user.name} className="size-7 rounded-lg object-cover" />
+                  <UserAvatar name={user.name} email={user.email} className="size-7 rounded-lg text-xs" />
                   <div className="text-left">
                     <div className="text-xs font-semibold leading-tight max-w-[90px] truncate">{user.name.split(" ")[0]}</div>
                     {rc && (
@@ -329,7 +330,7 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
           {isAuthenticated && user ? (
             <>
               <div className="px-3 py-2 flex items-center gap-3">
-                <img src={user.avatar} alt={user.name} className="size-8 rounded-lg object-cover" />
+                <UserAvatar name={user.name} email={user.email} className="size-8 rounded-lg text-sm" />
                 <div>
                   <div className="text-sm font-semibold">{user.name}</div>
                   {rc && <div className={`text-xs font-medium ${rc.cls}`}>{rc.label}</div>}

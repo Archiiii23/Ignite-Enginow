@@ -25,6 +25,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { usePlatformStore } from "@/lib/platform-store";
 import type { PlatformEvent } from "@/lib/platform-store";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 type Tab = "events" | "verification" | "analytics";
 
@@ -152,10 +153,10 @@ export function OrganizerPortal() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-          <img
-            src={user?.avatar}
-            alt={user?.name}
-            className="size-16 rounded-2xl object-cover border-2 border-primary/30 shadow-lg"
+          <UserAvatar
+            name={user?.name}
+            email={user?.email}
+            className="size-16 rounded-2xl text-2xl border-2 border-primary/30 shadow-lg"
           />
           <div>
             <div className="flex items-center gap-2">
