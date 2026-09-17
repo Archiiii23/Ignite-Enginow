@@ -337,12 +337,21 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
       return null;
     };
 
+    const fetchFast = (url: string) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 1000);
+      return fetch(url, { credentials: "include", signal: controller.signal })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)
+        .finally(() => clearTimeout(id));
+    };
+
     Promise.allSettled([
-      fetch("/api/events?limit=100", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/registrations/me", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/organizers", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/categories", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/announcements", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+      fetchFast("/api/events?limit=100"),
+      fetchFast("/api/registrations/me"),
+      fetchFast("/api/organizers"),
+      fetchFast("/api/categories"),
+      fetchFast("/api/announcements"),
     ])
       .then(([evRes, regRes, orgRes, catRes, annRes]) => {
         if (cancelled) return;

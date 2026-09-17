@@ -48,13 +48,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function authRequest<T>(path: string, body?: unknown) {
-  const response = await fetch(`/api/auth/${path}`, {
+function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 1200): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, {
+    ...options,
+    signal: options.signal ?? controller.signal,
+  }).finally(() => clearTimeout(id));
+}
+
+const ensureMinAuthDuration = async (startTime: number, targetMs = 1200) => {
+  const elapsed = Date.now() - startTime;
+  if (elapsed < targetMs) {
+    await new Promise((resolve) => setTimeout(resolve, targetMs - elapsed));
+  }
+};
+
+async function authRequest<T>(path: string, body?: unknown, timeoutMs = 1200) {
+  const response = await fetchWithTimeout(`/api/auth/${path}`, {
     method: body ? "POST" : "GET",
     headers: body ? { "content-type": "application/json" } : undefined,
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
-  });
+  }, timeoutMs);
   const data = (await response.json()) as T & { error?: string; success?: boolean; data?: T };
   if (!response.ok) throw new Error(data.error || "Authentication request failed");
   if (data && typeof data === "object" && "data" in data && data.data) {
@@ -64,12 +80,20 @@ async function authRequest<T>(path: string, body?: unknown) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = window.localStorage.getItem("ignite_auth_user");
+        if (stored) return JSON.parse(stored) as UserProfile;
+      } catch {}
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const refreshUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" });
+      const res = await fetchWithTimeout("/api/auth/me", { credentials: "include" }, 1000);
       if (res.ok) {
         const payload = await res.json();
         if (payload?.data) {
@@ -102,6 +126,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       // Backend may be offline or starting up
+    } finally {
+      setIsLoading(false);
     }
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem("ignite_auth_user");
@@ -117,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   }, []);
 
-  // On initial mount, fetch current authenticated session
+  // On initial mount, refresh session in background without blocking
   useEffect(() => {
     if (typeof window === "undefined") {
       setIsLoading(false);
@@ -127,14 +153,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refreshUser]);
 
   const loginWithGoogle = useCallback(async (preferredRole: UserRole = "student") => {
+    const startTime = Date.now();
     try {
-      const res = await authRequest<UserProfile>("demo-login", { role: preferredRole });
+      const res = await authRequest<UserProfile>("demo-login", { role: preferredRole }, 1200);
+      await ensureMinAuthDuration(startTime, 1200);
       setUser(res);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
       }
       return res;
     } catch {
+      await ensureMinAuthDuration(startTime, 1200);
       const googleProfile: UserProfile = {
         id: "usr_google_" + Math.random().toString(36).slice(2, 9),
         name: "Alex Rivera",
@@ -142,7 +171,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
         role: preferredRole,
         isRoleSelected: false,
-        accountStatus: "active",
       };
       setUser(googleProfile);
       if (typeof window !== "undefined") {
@@ -157,38 +185,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ? (passwordOrRole as UserRole)
       : "student";
 
+    const startTime = Date.now();
     try {
-      const res = await authRequest<UserProfile>("login", { email, password: passwordOrRole, role });
-      setUser(res);
-      return res;
-    } catch {
-      return loginWithGoogle(role);
-    }
-  }, [loginWithGoogle]);
-
-  const signupWithEmail = useCallback(async (name: string, email: string, passwordOrRole?: string | UserRole) => {
-    const role = typeof passwordOrRole === "string" && ["student", "organizer", "admin"].includes(passwordOrRole)
-      ? (passwordOrRole as UserRole)
-      : "student";
-
-    try {
-      const res = await authRequest<UserProfile>("signup", { name, email, password: passwordOrRole, role });
-      setUser(res);
-      return res;
-    } catch {
-      return loginWithGoogle(role);
-    }
-  }, [loginWithGoogle]);
-
-  const selectRole = useCallback(async (role: "participant" | "organizer") => {
-    try {
-      const res = await authRequest<UserProfile>("select-role", { role });
+      const res = await authRequest<UserProfile>("login", { email, password: passwordOrRole, role }, 1200);
+      await ensureMinAuthDuration(startTime, 1200);
       setUser(res);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
       }
       return res;
     } catch {
+      await ensureMinAuthDuration(startTime, 1200);
+      const fallbackUser: UserProfile = {
+        id: "usr_" + Math.random().toString(36).slice(2, 9),
+        name: email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        email,
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        role,
+        isRoleSelected: true,
+      };
+      setUser(fallbackUser);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("ignite_auth_user", JSON.stringify(fallbackUser));
+      }
+      return fallbackUser;
+    }
+  }, []);
+
+  const signupWithEmail = useCallback(async (name: string, email: string, passwordOrRole?: string | UserRole) => {
+    const role = typeof passwordOrRole === "string" && ["student", "organizer", "admin"].includes(passwordOrRole)
+      ? (passwordOrRole as UserRole)
+      : "student";
+
+    const startTime = Date.now();
+    try {
+      const res = await authRequest<UserProfile>("signup", { name, email, password: passwordOrRole, role }, 1200);
+      await ensureMinAuthDuration(startTime, 1200);
+      setUser(res);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
+      }
+      return res;
+    } catch {
+      await ensureMinAuthDuration(startTime, 1200);
+      const fallbackUser: UserProfile = {
+        id: "usr_" + Math.random().toString(36).slice(2, 9),
+        name: name.trim() || email.split("@")[0],
+        email,
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        role,
+        isRoleSelected: true,
+      };
+      setUser(fallbackUser);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("ignite_auth_user", JSON.stringify(fallbackUser));
+      }
+      return fallbackUser;
+    }
+  }, []);
+
+  const selectRole = useCallback(async (role: "participant" | "organizer") => {
+    const startTime = Date.now();
+    try {
+      const res = await authRequest<UserProfile>("select-role", { role }, 1200);
+      await ensureMinAuthDuration(startTime, 1200);
+      setUser(res);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
+      }
+      return res;
+    } catch {
+      await ensureMinAuthDuration(startTime, 1200);
       const finalRole = role.toLowerCase() === "organizer" ? "organizer" : "student";
       const updated: UserProfile = {
         ...(user || {
@@ -209,7 +276,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const requestRoleChange = useCallback(async (requestedRole: "participant" | "organizer", reason?: string) => {
-    const res = await authRequest<UserProfile>("request-role-change", { requestedRole, reason });
+    const res = await authRequest<UserProfile>("request-role-change", { requestedRole, reason }, 1500);
     setUser(res);
     return res;
   }, []);

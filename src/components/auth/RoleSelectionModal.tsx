@@ -11,6 +11,7 @@ import {
   BarChart3,
   Users2,
   Lock,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
@@ -185,10 +186,13 @@ export function RoleSelectionModal({ isOpen, onSuccess }: RoleSelectionModalProp
             <button
               onClick={handleConfirm}
               disabled={loading}
-              className="w-full sm:w-auto px-6 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-95 transition-opacity shadow-[0_0_24px_-4px_var(--primary-glow)] flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-95 transition-opacity shadow-[0_0_24px_-4px_var(--primary-glow)] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span>Confirming Role...</span>
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Confirming Role...</span>
+                </>
               ) : (
                 <>
                   <span>Confirm as {selected === "participant" ? "Participant" : "Organizer"}</span>

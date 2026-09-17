@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { canonical, pageMeta } from "@/lib/seo";
-import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -55,20 +55,37 @@ function ContactPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.message.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     setSending(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(form),
+        signal: controller.signal,
       });
-      const result = (await response.json()) as { error?: string };
+      clearTimeout(timeoutId);
+
+      const result = (await response.json().catch(() => ({}))) as { error?: string; success?: boolean };
       if (!response.ok) throw new Error(result.error || "Unable to send your message");
-      toast.success("Message sent", { description: "We'll be in touch shortly." });
+      toast.success("Message sent successfully!", { description: "We'll be in touch shortly." });
       setForm({ firstName: "", lastName: "", email: "", topic: "Partnership", message: "" });
     } catch (error) {
+      clearTimeout(timeoutId);
+      const isAbort = error instanceof DOMException && error.name === "AbortError";
       toast.error("Message not sent", {
-        description: error instanceof Error ? error.message : "Please try again.",
+        description: isAbort
+          ? "Request timed out. Please try again."
+          : error instanceof Error
+          ? error.message
+          : "Please try again.",
       });
     } finally {
       setSending(false);
@@ -119,12 +136,14 @@ function ContactPage() {
               <Field
                 label="First name"
                 placeholder="Ada"
+                required
                 value={form.firstName}
                 onChange={(value) => updateField("firstName", value)}
               />
               <Field
                 label="Last name"
                 placeholder="Lovelace"
+                required
                 value={form.lastName}
                 onChange={(value) => updateField("lastName", value)}
               />
@@ -134,6 +153,7 @@ function ContactPage() {
                 label="Email"
                 type="email"
                 placeholder="you@building.com"
+                required
                 value={form.email}
                 onChange={(value) => updateField("email", value)}
               />
@@ -158,6 +178,7 @@ function ContactPage() {
                 <span className="text-caption text-muted-foreground">Message</span>
                 <textarea
                   rows={5}
+                  required
                   value={form.message}
                   onChange={(event) => updateField("message", event.target.value)}
                   placeholder="Tell us a little about what you have in mind…"
@@ -166,10 +187,12 @@ function ContactPage() {
               </label>
             </div>
             <button
+              type="submit"
               disabled={sending}
-              className="mt-6 w-full bg-foreground text-background h-11 rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-60"
+              className="mt-6 w-full bg-foreground text-background h-11 rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {sending ? "Sending..." : "Send message"}
+              {sending && <Loader2 className="size-4 animate-spin" />}
+              <span>{sending ? "Sending message..." : "Send message"}</span>
             </button>
           </form>
         </div>
@@ -184,18 +207,21 @@ function Field({
   type = "text",
   value,
   onChange,
+  required = false,
 }: {
   label: string;
   placeholder: string;
   type?: string;
   value: string;
   onChange: (value: string) => void;
+  required?: boolean;
 }) {
   return (
     <label className="block">
       <span className="text-caption text-muted-foreground">{label}</span>
       <input
         type={type}
+        required={required}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

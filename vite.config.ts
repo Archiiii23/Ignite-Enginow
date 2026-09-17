@@ -19,6 +19,13 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:5000",
         changeOrigin: true,
+        timeout: 1500,
+        proxyTimeout: 1500,
+        bypass(req) {
+          if (req.url && req.url.startsWith("/api/contact")) {
+            return req.url;
+          }
+        },
       },
     },
   },
