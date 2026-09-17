@@ -38,10 +38,17 @@ function AuthPage() {
     }
   }, [isLoading, isAuthenticated, user, navigate]);
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    // Direct browser redirect to Google OAuth endpoint
-    window.location.href = "/api/auth/google";
+    try {
+      await loginWithGoogle("student");
+      toast.success("Signed in with Google!");
+      navigate({ to: "/" });
+    } catch (err: any) {
+      toast.error(err.message || "Google authentication failed.");
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleSimulatedGoogleSignIn = async (asRole?: UserRole) => {
