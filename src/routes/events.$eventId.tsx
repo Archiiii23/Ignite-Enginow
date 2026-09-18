@@ -159,12 +159,20 @@ function EventDetail() {
   const deadlinePassed = deadline ? (deadline.d === 0 && deadline.h === 0 && deadline.m === 0 && deadline.s === 0) : false;
 
   const handleOpenRegisterModal = () => {
+    if (!isAuthenticated || !user) {
+      navigate({ to: "/auth" });
+      return;
+    }
+    if (user.role !== "student") {
+      toast.error("Only participant accounts can register for events.");
+      return;
+    }
     setRegistrationModalOpen(true);
   };
 
-  const handleCompleteRegistration = (formData: Partial<Registration>) => {
+  const handleCompleteRegistration = async (formData: Partial<Registration>) => {
     try {
-      const newReg = registerForEvent(event.id, formData);
+      const newReg = await registerForEvent(event.id, formData);
       setActiveRegistration(newReg);
       setJustRegistered(true);
       setRegistrationModalOpen(false);

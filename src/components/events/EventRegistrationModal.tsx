@@ -30,7 +30,7 @@ interface EventRegistrationModalProps {
   event: EventItem;
   isOpen: boolean;
   onClose: () => void;
-  onSubmitRegistration: (formData: Partial<Registration>) => void;
+  onSubmitRegistration: (formData: Partial<Registration>) => Promise<void>;
 }
 
 const COMMON_SKILLS = [
@@ -118,7 +118,7 @@ export function EventRegistrationModal({
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
       return;
@@ -126,7 +126,7 @@ export function EventRegistrationModal({
 
     setSubmitting(true);
     try {
-      onSubmitRegistration({
+      await onSubmitRegistration({
         userName: fullName.trim(),
         userEmail: email.trim(),
         college: college.trim(),
