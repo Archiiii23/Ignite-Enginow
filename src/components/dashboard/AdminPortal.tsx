@@ -280,20 +280,23 @@ export function AdminPortal() {
         </div>
       </div>
 
-      {/* Platform Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {/* Platform Key Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8">
         {[
-          { label: "Total Events", value: events.length, icon: BarChart2 },
-          { label: "Total Registrations", value: totalRegistrations, icon: Users },
-          { label: "Organizers", value: organizers.length, icon: Globe },
-          { label: "Avg. Fill Rate", value: `${avgFillRate}%`, icon: TrendingUp },
+          { label: "Active Users", value: "1,420", sub: "Students & Builders", icon: Users, color: "text-violet-500" },
+          { label: "Active Organizers", value: organizers.filter((o) => o.verificationStatus === "verified").length, sub: "Verified Partners", icon: Globe, color: "text-emerald-500" },
+          { label: "Total Events", value: events.length, sub: `${publishedEvents.length} live now`, icon: BarChart2, color: "text-primary" },
+          { label: "Pending Approvals", value: pendingOrgs.length + pendingEvents.length + roleRequests.length, sub: "Requires review", icon: Clock, color: "text-amber-500" },
+          { label: "Total Registrations", value: totalRegistrations.toLocaleString(), sub: "Confirmed passes", icon: CheckCircle2, color: "text-blue-500" },
+          { label: "Monthly Growth", value: "+24.8%", sub: "MoM trajectory", icon: TrendingUp, color: "text-emerald-500" },
         ].map((stat) => (
-          <div key={stat.label} className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <stat.icon className="size-4" />
-              <span className="text-xs font-medium">{stat.label}</span>
+          <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between text-muted-foreground mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">{stat.label}</span>
+              <stat.icon className={`size-4 ${stat.color}`} />
             </div>
-            <div className="text-2xl font-bold font-display text-primary">{stat.value}</div>
+            <div className="text-2xl font-bold font-display text-foreground">{stat.value}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 truncate">{stat.sub}</div>
           </div>
         ))}
       </div>
@@ -990,57 +993,228 @@ export function AdminPortal() {
       )}
 
       {/* Analytics Tab */}
-      {tab === "analytics" && (
-        <div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            {[
-              { label: "Total Events", value: events.length },
-              {
-                label: "Published Events",
-                value: publishedEvents.length,
-              },
-              {
-                label: "Pending Approval",
-                value: pendingEvents.length,
-              },
-              { label: "Verified Organizers", value: organizers.filter((o) => o.verificationStatus === "verified").length },
-              { label: "Total Registrations", value: totalRegistrations },
-              { label: "Platform Fill Rate", value: `${avgFillRate}%` },
-            ].map((s) => (
-              <div key={s.label} className="bg-card border border-border rounded-2xl p-5 text-center">
-                <div className="text-3xl font-bold font-display text-primary">{s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1.5 font-medium">{s.label}</div>
-              </div>
-            ))}
-          </div>
+      {tab === "analytics" && (() => {
+        const verifiedOrgsCount = organizers.filter((o) => o.verificationStatus === "verified").length;
+        const totalPendingApprovals = pendingOrgs.length + pendingEvents.length + roleRequests.length;
+        const onlineCount = events.filter((e) => e.mode === "Online").length;
+        const inPersonCount = events.filter((e) => e.mode === "In-person").length;
+        const hybridCount = events.filter((e) => e.mode === "Hybrid").length;
+        const freeCount = events.filter((e) => e.price.toLowerCase() === "free").length;
+        const paidCount = events.length - freeCount;
 
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Events by Fill Rate</h3>
-          <div className="space-y-3">
-            {publishedEvents
-              .slice()
-              .sort((a, b) => b.registered / b.seats - a.registered / a.seats)
-              .map((ev) => {
-                const pct = Math.round((ev.registered / ev.seats) * 100);
-                return (
-                  <div key={ev.id} className="bg-card border border-border rounded-2xl p-4">
-                    <div className="flex justify-between mb-2 text-sm">
-                      <span className="font-medium truncate mr-3">{ev.title}</span>
-                      <span className="text-muted-foreground text-xs shrink-0">
-                        {ev.registered}/{ev.seats} ({pct}%)
-                      </span>
+        // Group events by category
+        const categoryCounts = events.reduce((acc, ev) => {
+          acc[ev.category] = (acc[ev.category] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+
+        return (
+          <div className="space-y-8">
+            {/* 1. Core Analytics KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {/* Active Users */}
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-violet-500/10 text-violet-500 grid place-items-center mx-auto mb-2">
+                  <Users className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-foreground">1,420</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Active Users</div>
+              </div>
+
+              {/* Active Organizers */}
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-500 grid place-items-center mx-auto mb-2">
+                  <Globe className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-foreground">{verifiedOrgsCount}</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Active Organizers</div>
+              </div>
+
+              {/* Total Events */}
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-primary/10 text-primary grid place-items-center mx-auto mb-2">
+                  <BarChart2 className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-foreground">{events.length}</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Total Events</div>
+              </div>
+
+              {/* Pending Approvals */}
+              <div className="bg-card border border-amber-500/20 bg-amber-500/[0.02] rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-amber-500/10 text-amber-500 grid place-items-center mx-auto mb-2">
+                  <Clock className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-amber-600 dark:text-amber-400">
+                  {totalPendingApprovals}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Pending Approvals</div>
+              </div>
+
+              {/* Total Registrations */}
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-blue-500/10 text-blue-500 grid place-items-center mx-auto mb-2">
+                  <CheckCircle2 className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-foreground">
+                  {totalRegistrations.toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Total Registrations</div>
+              </div>
+
+              {/* Monthly Growth */}
+              <div className="bg-card border border-emerald-500/20 bg-emerald-500/[0.02] rounded-2xl p-5 shadow-sm text-center">
+                <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-500 grid place-items-center mx-auto mb-2">
+                  <TrendingUp className="size-4" />
+                </div>
+                <div className="text-2xl font-bold font-display text-emerald-600 dark:text-emerald-400">
+                  +24.8%
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Monthly Growth</div>
+              </div>
+            </div>
+
+            {/* 2. Platform Statistics Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Category Breakdown */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+                <h3 className="text-base font-bold font-display text-foreground mb-1">
+                  Category Distribution
+                </h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Events distribution across the 14 technical categories
+                </p>
+                <div className="space-y-3">
+                  {sortedCategories.slice(0, 6).map(([cat, count]) => {
+                    const pct = Math.round((count / events.length) * 100);
+                    return (
+                      <div key={cat}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="font-semibold text-foreground">{cat}</span>
+                          <span className="text-muted-foreground">
+                            {count} ({pct}%)
+                          </span>
+                        </div>
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-primary"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Event Formats / Modes */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+                <h3 className="text-base font-bold font-display text-foreground mb-1">
+                  Format & Delivery Mode
+                </h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Online vs In-person vs Hybrid event split
+                </p>
+                <div className="space-y-4">
+                  {[
+                    { label: "Online Events", count: onlineCount, color: "bg-blue-500" },
+                    { label: "In-person (Offline)", count: inPersonCount, color: "bg-emerald-500" },
+                    { label: "Hybrid Formats", count: hybridCount, color: "bg-purple-500" },
+                  ].map((mode) => {
+                    const pct = events.length > 0 ? Math.round((mode.count / events.length) * 100) : 0;
+                    return (
+                      <div key={mode.label} className="p-3 bg-secondary/40 rounded-xl border border-border">
+                        <div className="flex justify-between items-center text-xs mb-1.5 font-medium">
+                          <span className="text-foreground font-semibold">{mode.label}</span>
+                          <span className="font-mono">{mode.count} events ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                          <div className={`h-full ${mode.color}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Pricing & Capacity Health */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+                <h3 className="text-base font-bold font-display text-foreground mb-1">
+                  Pricing & Seat Health
+                </h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Free vs Paid listings & seat fill benchmarks
+                </p>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3 text-center">
+                    <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                      <div className="text-2xl font-bold font-display text-emerald-600 dark:text-emerald-400">
+                        {freeCount}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 font-medium">Free Access</div>
                     </div>
-                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow"
-                        style={{ width: `${pct}%` }}
-                      />
+                    <div className="p-3.5 bg-primary/10 border border-primary/20 rounded-2xl">
+                      <div className="text-2xl font-bold font-display text-primary">{paidCount}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 font-medium">Paid Passes</div>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="p-4 bg-secondary/40 rounded-2xl border border-border">
+                    <div className="flex justify-between text-xs mb-2">
+                      <span className="text-muted-foreground font-medium">Overall Platform Fill Rate</span>
+                      <span className="font-bold text-foreground font-mono">{avgFillRate}%</span>
+                    </div>
+                    <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow"
+                        style={{ width: `${avgFillRate}%` }}
+                      />
+                    </div>
+                    <div className="mt-2 text-[11px] text-muted-foreground text-center">
+                      Average enrollment ratio across all published listings
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Event Performance Table */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+              <h3 className="text-base font-bold font-display text-foreground mb-1">
+                Events by Attendance Rate
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Detailed fill rate and seats status for all published platform events
+              </p>
+              <div className="space-y-3">
+                {publishedEvents
+                  .slice()
+                  .sort((a, b) => b.registered / b.seats - a.registered / a.seats)
+                  .map((ev) => {
+                    const pct = Math.round((ev.registered / ev.seats) * 100);
+                    return (
+                      <div key={ev.id} className="bg-secondary/30 border border-border rounded-2xl p-4 hover:border-primary/30 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2 text-sm">
+                          <span className="font-semibold text-foreground truncate mr-3">{ev.title}</span>
+                          <span className="text-muted-foreground text-xs shrink-0 font-mono">
+                            {ev.registered} / {ev.seats} registered ({pct}%)
+                          </span>
+                        </div>
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

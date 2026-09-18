@@ -16,6 +16,44 @@ export function TicketModal({ registration, isOpen, onClose }: TicketModalProps)
     window.print();
   };
 
+  const handleDownloadConfirmation = () => {
+    const confirmationText = `=====================================================
+ENGINOW IGNITE - OFFICIAL EVENT CONFIRMATION PASS
+=====================================================
+Event: ${registration.eventTitle}
+Ticket Code: ${registration.ticketCode}
+Seat Number: ${registration.seatNumber}
+Date & Time: ${registration.eventDate}
+Venue / Location: ${registration.eventLocation}
+
+ATTENDEE DETAILS:
+Name: ${registration.userName}
+Email: ${registration.userEmail}
+College: ${registration.college || "N/A"}
+Phone: ${registration.phone || "N/A"}
+Degree & Year: ${[registration.degree, registration.yearOfStudy].filter(Boolean).join(" · ") || "N/A"}
+Student Roll ID: ${registration.rollNumber || "N/A"}
+Participation: ${registration.participationType || "Solo"} ${registration.teamName ? `(Team: ${registration.teamName})` : ""}
+Registered Date: ${new Date(registration.registeredAt).toLocaleString()}
+Status: ${registration.status.toUpperCase()}
+
+INSTRUCTIONS:
+1. Please present this confirmation pass or QR Code at the registration desk.
+2. Carry a valid student/government ID for verification.
+3. For questions, contact support@enginow.io.
+=====================================================`;
+
+    const blob = new Blob([confirmationText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `confirmation-${registration.ticketCode}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -160,8 +198,14 @@ export function TicketModal({ registration, isOpen, onClose }: TicketModalProps)
 
                 <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
                   <button
-                    onClick={handlePrint}
+                    onClick={handleDownloadConfirmation}
                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    <Download className="size-3.5" /> Download Confirmation
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs font-medium hover:bg-secondary transition-colors"
                   >
                     <Printer className="size-3.5" /> Print / Save PDF
                   </button>

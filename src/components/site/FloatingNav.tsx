@@ -56,6 +56,7 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifFilter, setNotifFilter] = useState<"all" | "registrations" | "approvals" | "reminders">("all");
   const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -152,43 +153,115 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                       className="absolute top-full right-0 mt-2 w-80 bg-card border border-border rounded-2xl shadow-xl overflow-hidden z-50"
                     >
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                        <span className="text-sm font-semibold">Notifications</span>
+                        <span className="text-sm font-semibold text-foreground">Notifications</span>
                         {unreadCount > 0 && (
-                          <button onClick={markAllRead} className="text-xs text-primary hover:underline">
+                          <button onClick={markAllRead} className="text-xs text-primary hover:underline font-medium">
                             Mark all read
                           </button>
                         )}
                       </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="py-10 text-center">
-                            <Bell className="size-8 text-muted-foreground mx-auto mb-2" />
-                            <p className="text-sm text-muted-foreground">No notifications yet</p>
-                          </div>
-                        ) : (
-                          notifications.slice(0, 10).map((n) => {
+
+                      {/* Notification Category Filter Tabs */}
+                      <div className="flex items-center gap-1 px-3 py-2 border-b border-border bg-secondary/30 overflow-x-auto text-[11px] font-medium scrollbar-none">
+                        {[
+                          ["all", "All"],
+                          ["registrations", "Registrations"],
+                          ["approvals", "Approvals"],
+                          ["reminders", "Reminders"],
+                        ].map(([key, label]) => (
+                          <button
+                            key={key}
+                            onClick={() => setNotifFilter(key as any)}
+                            className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${
+                              notifFilter === key
+                                ? "bg-primary text-primary-foreground font-semibold"
+                                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                        {(() => {
+                          const filteredNotifs = notifications.filter((n) => {
+                            if (notifFilter === "registrations") return n.category === "registration_success";
+                            if (notifFilter === "approvals")
+                              return (
+                                n.category === "approval_status" ||
+                                n.category === "event_published" ||
+                                n.category === "event_rejected"
+                              );
+                            if (notifFilter === "reminders")
+                              return (
+                                n.category === "registration_closing" ||
+                                n.category === "event_reminder"
+                              );
+                            return true;
+                          });
+
+                          if (filteredNotifs.length === 0) {
+                            return (
+                              <div className="py-10 text-center">
+                                <Bell className="size-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                                <p className="text-sm text-muted-foreground">No notifications in this tab</p>
+                              </div>
+                            );
+                          }
+
+                          const categoryBadgeLabels: Record<string, { label: string; cls: string }> = {
+                            registration_success: { label: "Registration", cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+                            approval_status: { label: "Approval", cls: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+                            event_published: { label: "Published", cls: "bg-primary/10 text-primary border-primary/20" },
+                            event_rejected: { label: "Rejected", cls: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" },
+                            registration_closing: { label: "Closing Soon", cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
+                            event_reminder: { label: "Reminder", cls: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" },
+                          };
+
+                          return filteredNotifs.map((n) => {
                             const Icon = notifIcons[n.type];
+                            const badge = n.category ? categoryBadgeLabels[n.category] : null;
+
                             return (
                               <div
                                 key={n.id}
-                                className={`flex items-start gap-3 px-4 py-3 border-b border-border last:border-0 hover:bg-secondary/40 transition-colors ${!n.read ? "bg-primary/5" : ""}`}
+                                className={`flex items-start gap-3 p-3.5 hover:bg-secondary/40 transition-colors ${
+                                  !n.read ? "bg-primary/5" : ""
+                                }`}
                               >
                                 <Icon className={`size-4 shrink-0 mt-0.5 ${notifColors[n.type]}`} />
                                 <div className="flex-1 min-w-0">
-                                  <div className="text-xs font-semibold text-foreground">{n.title}</div>
-                                  <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</div>
-                                  <div className="text-[10px] text-muted-foreground mt-1">{timeAgo(n.createdAt)}</div>
+                                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                    <div className="text-xs font-semibold text-foreground leading-tight">
+                                      {n.title}
+                                    </div>
+                                    {badge && (
+                                      <span
+                                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badge.cls}`}
+                                      >
+                                        {badge.label}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                                    {n.message}
+                                  </div>
+                                  <div className="text-[10px] text-muted-foreground mt-1.5 font-medium">
+                                    {timeAgo(n.createdAt)}
+                                  </div>
                                 </div>
                                 <button
                                   onClick={() => clearNotification(n.id)}
-                                  className="shrink-0 p-1 rounded hover:bg-secondary transition-colors"
+                                  className="shrink-0 p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Dismiss"
                                 >
-                                  <X className="size-3 text-muted-foreground" />
+                                  <X className="size-3" />
                                 </button>
                               </div>
                             );
-                          })
-                        )}
+                          });
+                        })()}
                       </div>
                     </motion.div>
                   )}

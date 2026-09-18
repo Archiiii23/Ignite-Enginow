@@ -239,14 +239,22 @@ function EventDetail() {
             <img src={event.cover} alt={event.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="text-micro bg-background/90 backdrop-blur px-2 py-1 rounded-md border border-border">{event.category}</span>
-                <span className="text-micro bg-background/90 backdrop-blur px-2 py-1 rounded-md border border-border">{event.mode}</span>
+              {/* Tags & Badges */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="text-micro bg-background/90 backdrop-blur px-2.5 py-1 rounded-md border border-border font-semibold">{event.category}</span>
+                {event.eventType && (
+                  <span className="text-micro bg-primary text-primary-foreground font-semibold px-2.5 py-1 rounded-md shadow-sm">{event.eventType}</span>
+                )}
+                <span className="text-micro bg-background/90 backdrop-blur px-2.5 py-1 rounded-md border border-border">{event.mode}</span>
+                {event.college && (
+                  <span className="text-micro bg-secondary backdrop-blur px-2.5 py-1 rounded-md border border-border flex items-center gap-1 font-medium">
+                    🎓 {event.college}
+                  </span>
+                )}
                 {event.status === "live" && (
                   <span className="text-micro bg-[color:var(--live)]/15 text-[color:var(--live)] px-2 py-1 rounded-md border border-[color:var(--live)]/25">● Registering</span>
                 )}
-                {event.tags?.slice(0, 3).map((tag) => (
+                {event.tags?.map((tag) => (
                   <span key={tag} className="text-micro bg-background/70 backdrop-blur px-2 py-1 rounded-md border border-border/60 flex items-center gap-1">
                     <Tag className="size-2" /> {tag}
                   </span>
@@ -516,12 +524,19 @@ function EventDetail() {
               <div className="mt-6 pt-6 border-t border-border">
                 <p className="text-eyebrow text-muted-foreground mb-3">Hosted by</p>
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-gradient-to-br from-primary/20 to-primary-glow/20 grid place-items-center text-sm font-bold text-primary">
-                    {event.host.name[0]}
+                  <div className="size-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary-glow/20 border border-primary/20 overflow-hidden grid place-items-center text-sm font-bold text-primary shrink-0 shadow-sm">
+                    {event.host.avatar ? (
+                      <img src={event.host.avatar} alt={event.host.name} className="size-full object-cover" />
+                    ) : (
+                      event.host.name[0]
+                    )}
                   </div>
                   <div>
-                    <div className="text-sm font-medium">{event.host.name}</div>
-                    <div className="text-caption">{event.host.role}</div>
+                    <div className="text-sm font-semibold flex items-center gap-1.5">
+                      {event.host.name}
+                      <CheckCircle2 className="size-3 text-primary" />
+                    </div>
+                    <div className="text-caption text-muted-foreground">{event.host.role}</div>
                   </div>
                 </div>
               </div>

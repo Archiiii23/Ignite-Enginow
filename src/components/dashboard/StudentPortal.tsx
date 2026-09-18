@@ -74,6 +74,35 @@ export function StudentPortal() {
     setTicketOpen(true);
   };
 
+  const downloadConfirmationPass = (reg: Registration) => {
+    const text = `=====================================================
+ENGINOW IGNITE - OFFICIAL REGISTRATION CONFIRMATION
+=====================================================
+Event: ${reg.eventTitle}
+Ticket Code: ${reg.ticketCode}
+Seat Number: ${reg.seatNumber}
+Date & Time: ${reg.eventDate}
+Venue / Location: ${reg.eventLocation}
+
+ATTENDEE:
+Name: ${reg.userName}
+Email: ${reg.userEmail}
+College: ${reg.college || "N/A"}
+Phone: ${reg.phone || "N/A"}
+Registered On: ${new Date(reg.registeredAt).toLocaleString()}
+Status: ${reg.status.toUpperCase()}
+=====================================================`;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `confirmation-${reg.ticketCode || reg.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSaveProfile = () => {
     updateUserProfile({
       name: profileDraft.name,
@@ -223,12 +252,21 @@ export function StudentPortal() {
                         </span>
 
                         {reg.status !== "cancelled" && (
-                          <button
-                            onClick={() => openTicket(reg)}
-                            className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-95 transition-opacity shadow-sm"
-                          >
-                            <Ticket className="size-3.5" /> View Ticket
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => openTicket(reg)}
+                              className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-95 transition-opacity shadow-sm"
+                            >
+                              <Ticket className="size-3.5" /> View Ticket
+                            </button>
+                            <button
+                              onClick={() => downloadConfirmationPass(reg)}
+                              className="inline-flex items-center gap-1.5 h-9 px-3 border border-border bg-background hover:bg-secondary text-foreground text-xs font-medium rounded-xl transition-colors"
+                              title="Download Confirmation Pass"
+                            >
+                              <Download className="size-3.5" /> Download Pass
+                            </button>
+                          </div>
                         )}
                         {reg.status === "confirmed" && (
                           <button
@@ -359,12 +397,21 @@ export function StudentPortal() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => openTicket(reg)}
-                      className="shrink-0 inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 transition-opacity"
-                    >
-                      <Ticket className="size-4" /> View Admission Pass
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => openTicket(reg)}
+                        className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 transition-opacity"
+                      >
+                        <Ticket className="size-4" /> View Admission Pass
+                      </button>
+                      <button
+                        onClick={() => downloadConfirmationPass(reg)}
+                        className="inline-flex items-center justify-center gap-1.5 h-10 px-3.5 border border-border bg-background hover:bg-secondary text-foreground text-xs font-medium rounded-xl transition-colors"
+                        title="Download Confirmation Pass"
+                      >
+                        <Download className="size-3.5" /> Download Pass
+                      </button>
+                    </div>
                   </div>
                 );
               })

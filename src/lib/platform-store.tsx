@@ -15,9 +15,11 @@ export interface PlatformEvent {
   title: string;
   tagline: string;
   category: string;
+  eventType?: string;
   mode: "Online" | "In-person" | "Hybrid";
   location: string;
   city?: string;
+  college?: string;
   dateISO: string;
   dateLabel: string;
   registrationDeadline?: string;
@@ -26,10 +28,12 @@ export interface PlatformEvent {
   prize?: string;
   seats: number;
   registered: number;
+  viewsCount?: number;
+  clicksCount?: number;
   cover: string;
   status: "live" | "closing" | "upcoming" | "ended";
   tags?: string[];
-  host?: { name: string; role: string; avatar?: string };
+  host?: { name: string; role: string; avatar?: string; logo?: string };
   speakers?: { name: string; role: string; avatar?: string }[];
   sponsors?: { name: string; logoText?: string }[];
   faqs?: { q: string; a: string }[];
@@ -149,12 +153,12 @@ interface PlatformContextType {
   cancelRegistrationAdmin: (registrationId: string) => void;
 }
 
-const STORAGE_KEY_EVENTS = "ignite-platform-events-v3";
-const STORAGE_KEY_REGISTRATIONS = "ignite-platform-registrations-v3";
-const STORAGE_KEY_ORGANIZERS = "ignite-platform-organizers";
-const STORAGE_KEY_FAVORITES = "ignite-platform-favorites";
-const STORAGE_KEY_CATEGORIES = "ignite-platform-categories";
-const STORAGE_KEY_ANNOUNCEMENTS = "ignite-platform-announcements";
+const STORAGE_KEY_EVENTS = "ignite-platform-events-v4";
+const STORAGE_KEY_REGISTRATIONS = "ignite-platform-registrations-v4";
+const STORAGE_KEY_ORGANIZERS = "ignite-platform-organizers-v4";
+const STORAGE_KEY_FAVORITES = "ignite-platform-favorites-v4";
+const STORAGE_KEY_CATEGORIES = "ignite-platform-categories-v4";
+const STORAGE_KEY_ANNOUNCEMENTS = "ignite-platform-announcements-v4";
 
 // Convert initial static seed events into platform events
 const defaultEventsSeed: PlatformEvent[] = initialEventsSeed.map((e, idx) => ({
@@ -164,6 +168,9 @@ const defaultEventsSeed: PlatformEvent[] = initialEventsSeed.map((e, idx) => ({
   organizerName: idx % 2 === 0 ? "DevSphere Foundation" : "OpenKernel Community",
   isFeatured: idx < 3,
   registrationsOpen: e.status !== "ended",
+  viewsCount: e.viewsCount ?? Math.floor(3200 + Math.random() * 9500),
+  clicksCount: e.clicksCount ?? Math.floor(750 + Math.random() * 2500),
+  college: e.college ?? (idx % 2 === 0 ? "IIT Bombay" : "BITS Pilani"),
 }));
 
 // Initial organizers seed
@@ -177,7 +184,7 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
     website: "https://devsphere.org",
     verificationStatus: "verified",
     documentsSubmitted: "Certificate of Incorporation & Gov ID (Verified by Admin on Aug 2026)",
-    eventsCount: 4,
+    eventsCount: 5,
     joinedAt: "2026-07-10",
   },
   {
@@ -187,9 +194,9 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
     email: "team@openkernel.org",
     orgName: "OpenKernel Community",
     website: "https://openkernel.org",
-    verificationStatus: "pending",
+    verificationStatus: "verified",
     documentsSubmitted: "Open Source Non-Profit Registration PDF & Domain TXT verification",
-    eventsCount: 2,
+    eventsCount: 3,
     joinedAt: "2026-08-28",
   },
   {
@@ -206,7 +213,7 @@ const defaultOrganizersSeed: OrganizerRecord[] = [
   },
 ];
 
-// Initial registrations seed for student demo
+// Initial registrations seed for student demo & organizer roster viewing
 const defaultRegistrationsSeed: Registration[] = [
   {
     id: "reg_1",
@@ -217,7 +224,10 @@ const defaultRegistrationsSeed: Registration[] = [
     userId: "usr_student_1",
     userName: "Aarav Sharma",
     userEmail: "aarav.sharma@campus.edu",
-    college: "Indian Institute of Technology (IIT)",
+    college: "Indian Institute of Technology (IIT Bombay)",
+    phone: "+91 98765 43210",
+    degree: "B.Tech Computer Science",
+    yearOfStudy: "3rd Year",
     registeredAt: "2026-10-10T14:30:00Z",
     status: "confirmed",
     ticketCode: "IGN-QNT-8812",
@@ -232,7 +242,10 @@ const defaultRegistrationsSeed: Registration[] = [
     userId: "usr_student_1",
     userName: "Aarav Sharma",
     userEmail: "aarav.sharma@campus.edu",
-    college: "Indian Institute of Technology (IIT)",
+    college: "Indian Institute of Technology (IIT Bombay)",
+    phone: "+91 98765 43210",
+    degree: "B.Tech Computer Science",
+    yearOfStudy: "3rd Year",
     registeredAt: "2026-10-12T09:15:00Z",
     status: "attended",
     ticketCode: "IGN-AGT-1904",
@@ -248,10 +261,49 @@ const defaultRegistrationsSeed: Registration[] = [
     userName: "Priya Sundaram",
     userEmail: "priya.s@tech.ac.in",
     college: "BITS Pilani",
+    phone: "+91 98111 22334",
+    degree: "M.Sc AI & Robotics",
+    yearOfStudy: "2nd Year",
     registeredAt: "2026-10-11T10:00:00Z",
     status: "confirmed",
     ticketCode: "IGN-QNT-9021",
     seatNumber: "HACK-B05",
+  },
+  {
+    id: "reg_4",
+    eventId: "e-ws-1",
+    eventTitle: "Designing Systems That Scale",
+    eventDate: "Oct 24, 2026",
+    eventLocation: "Live on Enginow Interactive Stage",
+    userId: "usr_student_3",
+    userName: "Rohan Varma",
+    userEmail: "rohan.varma@iiit.ac.in",
+    college: "IIIT Hyderabad",
+    phone: "+91 97234 56789",
+    degree: "B.Tech Computer Science",
+    yearOfStudy: "4th Year",
+    registeredAt: "2026-10-14T11:20:00Z",
+    status: "confirmed",
+    ticketCode: "IGN-SYS-3419",
+    seatNumber: "SYS-A12",
+  },
+  {
+    id: "reg_5",
+    eventId: "e-ws-1",
+    eventTitle: "Designing Systems That Scale",
+    eventDate: "Oct 24, 2026",
+    eventLocation: "Live on Enginow Interactive Stage",
+    userId: "usr_student_4",
+    userName: "Neha Iyer",
+    userEmail: "neha.iyer@stanford.edu",
+    college: "Stanford University",
+    phone: "+1 650 498 1234",
+    degree: "M.S. Software Systems",
+    yearOfStudy: "1st Year",
+    registeredAt: "2026-10-15T16:45:00Z",
+    status: "confirmed",
+    ticketCode: "IGN-SYS-7721",
+    seatNumber: "SYS-A14",
   },
 ];
 
