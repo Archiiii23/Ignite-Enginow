@@ -121,7 +121,7 @@ interface PlatformContextType {
   registerForEvent: (
     eventId: string,
     studentInfo?: Partial<Registration> & { name?: string; email?: string }
-  ) => Registration;
+  ) => Promise<Registration>;
   cancelRegistration: (registrationId: string) => void;
   isRegistered: (eventId: string, userId?: string) => boolean;
   getRegistration: (eventId: string, userId?: string) => Registration | undefined;
@@ -518,53 +518,26 @@ export function PlatformStoreProvider({ children }: { children: ReactNode }) {
     (
       eventId: string,
       studentInfo?: Partial<Registration> & { name?: string; email?: string }
-    ) => {
+    ): Promise<Registration> => {
       const ev = events.find((e) => e.id === eventId || e.slug === eventId);
       if (!ev) throw new Error("Event not found");
 
-      const uid = user?.id ?? "guest_user";
-      const uName = studentInfo?.userName || studentInfo?.name || user?.name || "Participant";
-      const uEmail = studentInfo?.userEmail || studentInfo?.email || user?.email || "participant@example.com";
-      const uCollege = studentInfo?.college || user?.college || "Global Tech University";
+      return fetch("/api/registrations", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ eventId: ev.id, ...studentInfo }),
+      }).then(async (response) => {
+        const payload = (await response.json().catch(() => ({}))) as Registration & { error?: string };
+        if (!response.ok) throw new Error(payload.error || "Registration failed");
 
-      const randDigits = Math.floor(1000 + Math.random() * 9000);
-      const newReg: Registration = {
-        id: `reg_${Date.now()}`,
-        eventId: ev.id,
-        eventTitle: ev.title,
-        eventDate: ev.dateLabel,
-        eventLocation: ev.location,
-        userId: uid,
-        userName: uName,
-        userEmail: uEmail,
-        college: uCollege,
-        phone: studentInfo?.phone || "",
-        degree: studentInfo?.degree || "",
-        yearOfStudy: studentInfo?.yearOfStudy || "",
-        rollNumber: studentInfo?.rollNumber || "",
-        githubUrl: studentInfo?.githubUrl || "",
-        linkedinUrl: studentInfo?.linkedinUrl || "",
-        experienceLevel: studentInfo?.experienceLevel || "Intermediate",
-        skills: studentInfo?.skills || [],
-        participationType: studentInfo?.participationType || "solo",
-        teamName: studentInfo?.teamName || "",
-        teamSize: studentInfo?.teamSize || 1,
-        teamRole: studentInfo?.teamRole || "",
-        reasonForAttending: studentInfo?.reasonForAttending || "",
-        tshirtSize: studentInfo?.tshirtSize || "M",
-        dietaryPreference: studentInfo?.dietaryPreference || "None",
-        registeredAt: new Date().toISOString(),
-        status: "confirmed",
-        ticketCode: `IGN-${ev.category.slice(0, 3).toUpperCase()}-${randDigits}`,
-        seatNumber: `${ev.category.slice(0, 3).toUpperCase()}-${Math.floor(10 + Math.random() * 90)}`,
-      };
-
-      setRegistrations((prev) => [newReg, ...prev]);
-      setEvents((prev) =>
-        prev.map((e) => (e.id === ev.id ? { ...e, registered: e.registered + 1 } : e))
-      );
-
-      return newReg;
+        const savedRegistration = payload as Registration;
+        setRegistrations((prev) => [savedRegistration, ...prev.filter((item) => item.id !== savedRegistration.id)]);
+        setEvents((prev) =>
+          prev.map((item) => (item.id === ev.id ? { ...item, registered: Math.max(item.registered, ev.registered + 1) } : item))
+        );
+        return savedRegistration;
+      });
     },
     [events, user]
   );
