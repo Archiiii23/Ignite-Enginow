@@ -408,6 +408,22 @@ export const db = {
     return profile;
   },
 
+  async deleteUser(userId: string): Promise<boolean> {
+    if (pool) {
+      try {
+        await ready();
+        await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+      } catch {
+        // fallback
+      }
+    }
+    const accounts = await readJsonFile<StoredUserAccount[]>("users.json", []);
+    const filtered = accounts.filter((a) => a.id !== userId);
+    if (filtered.length === accounts.length) return false;
+    await writeJsonFile("users.json", filtered);
+    return true;
+  },
+
   async createSession(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
     if (pool) {
       try {

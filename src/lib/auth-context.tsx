@@ -29,6 +29,8 @@ export interface UserProfile {
   orgWebsite?: string;
   orgBio?: string;
   verificationStatus?: "not_submitted" | "pending" | "verified" | "rejected" | "suspended";
+  isSuspended?: boolean;
+  joinedAt?: string;
 }
 
 export interface GoogleAuthOptions {

@@ -120,6 +120,16 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
               {l.label}
             </Link>
           ))}
+          {user?.role === "admin" && (
+            <Link
+              to="/admin"
+              className="text-sm font-semibold text-rose-500 hover:text-rose-400 transition-colors px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center gap-1.5 ml-1"
+              activeProps={{ className: "bg-rose-500/20 text-rose-500 font-bold" }}
+            >
+              <ShieldCheck className="size-3.5" />
+              Admin
+            </Link>
+          )}
         </div>
 
         {/* Desktop right */}
@@ -306,6 +316,15 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                       >
                         <LayoutDashboard className="size-4 text-muted-foreground" />Dashboard
                       </Link>
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 transition-colors font-medium border-t border-border/40"
+                        >
+                          <ShieldCheck className="size-4 text-rose-500" />Admin Control Panel
+                        </Link>
+                      )}
                       <div className="px-3 py-2.5 border-t border-border/80 bg-secondary/30">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Active Role</span>
@@ -412,6 +431,11 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
               <Link to="/dashboard" onClick={() => setOpen(false)} className="text-sm px-3 py-2 rounded-lg hover:bg-foreground/5 flex items-center gap-2">
                 <LayoutDashboard className="size-4 text-muted-foreground" />Dashboard
               </Link>
+              {user.role === "admin" && (
+                <Link to="/admin" onClick={() => setOpen(false)} className="text-sm px-3 py-2 rounded-lg hover:bg-rose-500/10 text-rose-500 flex items-center gap-2 font-medium">
+                  <ShieldCheck className="size-4 text-rose-500" />Admin Control Panel
+                </Link>
+              )}
               <button
                 onClick={() => { logout(); setOpen(false); }}
                 className="text-sm text-left px-3 py-2 rounded-lg hover:bg-foreground/5 text-muted-foreground flex items-center gap-2"

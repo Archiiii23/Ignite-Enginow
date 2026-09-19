@@ -101,5 +101,18 @@
       "role": "student",
       "isRoleSelected": false
     }
+  },
+  {
+    "id": "usr_google_5rwykd9",
+    "email": "admin@enginow.ignite",
+    "passwordHash": "271a3995df2298fa266bad89312a27a7:17b00730ae3b1a9c8f68cc46694e4509f8b8b35bdf5d6004555952b6d0482e87cd34bbfa0c1846a8ef5ce851522133d2ade99b241b5b6d6b5605488ee3444338",
+    "profile": {
+      "id": "usr_google_5rwykd9",
+      "name": "Sarah Chen (Admin)",
+      "email": "admin@enginow.ignite",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sarah%20Chen%20(Admin)",
+      "role": "admin",
+      "isRoleSelected": false
+    }
   }
 ]

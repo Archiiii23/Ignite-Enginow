@@ -25,20 +25,26 @@ import {
   RefreshCw,
   FileSpreadsheet,
   Download,
+  UserCog,
+  ShieldAlert,
+  SlidersHorizontal,
+  Check,
+  Layers,
+  ArrowUpRight,
 } from "lucide-react";
 import { usePlatformStore } from "@/lib/platform-store";
 import type { PlatformEvent } from "@/lib/platform-store";
 import { toast } from "sonner";
 
 type Tab =
+  | "users"
   | "organizers"
   | "events"
-  | "role-requests"
-  | "users"
-  | "categories"
+  | "analytics"
   | "reports"
-  | "announcements"
-  | "analytics";
+  | "categories"
+  | "role-requests"
+  | "announcements";
 
 export function AdminPortal() {
   const {
@@ -62,7 +68,7 @@ export function AdminPortal() {
     cancelRegistrationAdmin,
   } = usePlatformStore();
 
-  const [tab, setTab] = useState<Tab>("organizers");
+  const [tab, setTab] = useState<Tab>("users");
   const [rejectingEventId, setRejectingEventId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectingOrgId, setRejectingOrgId] = useState<string | null>(null);
@@ -77,6 +83,48 @@ export function AdminPortal() {
   const [loadingRoleRequests, setLoadingRoleRequests] = useState(false);
   const [rejectingRoleUserId, setRejectingRoleUserId] = useState<string | null>(null);
   const [roleRejectReason, setRoleRejectReason] = useState("");
+
+  // User Management State
+  const [platformUsers, setPlatformUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [userRoleFilter, setUserRoleFilter] = useState<"all" | "student" | "organizer" | "admin" | "suspended">("all");
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [selectedNewRole, setSelectedNewRole] = useState<"student" | "organizer" | "admin">("student");
+
+  // Filter States
+  const [orgFilter, setOrgFilter] = useState<"all" | "pending" | "verified" | "suspended" | "rejected">("pending");
+  const [eventFilter, setEventFilter] = useState<"all" | "pending" | "published" | "rejected">("pending");
+  const [inspectingEvent, setInspectingEvent] = useState<PlatformEvent | null>(null);
+
+  // Reports & Audit State
+  const [reportTableTab, setReportTableTab] = useState<"registrations" | "organizers" | "events" | "audit">("registrations");
+  const [reportSearch, setReportSearch] = useState("");
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await fetch("/api/admin/users", { credentials: "include" });
+      if (res.ok) {
+        const json = await res.json();
+        setPlatformUsers(json.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch admin users:", err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      const res = await fetch("/api/admin/audit-log", { credentials: "include" });
+      if (res.ok) {
+        const json = await res.json();
+        setAuditLogs(json.data || []);
+      }
+    } catch {}
+  };
 
   const fetchRoleRequests = async () => {
     setLoadingRoleRequests(true);
@@ -94,8 +142,58 @@ export function AdminPortal() {
   };
 
   useEffect(() => {
+    fetchUsers();
     fetchRoleRequests();
+    fetchAuditLogs();
   }, []);
+
+  const handleUpdateRole = async (userId: string, newRole: "student" | "organizer" | "admin") => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) throw new Error("Role update failed");
+      toast.success(`User role updated to ${newRole === "student" ? "Participant" : newRole}`);
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update role");
+    }
+  };
+
+  const handleToggleSuspendUser = async (userId: string, currentSuspended: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/status`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isSuspended: !currentSuspended }),
+      });
+      if (!res.ok) throw new Error("Status update failed");
+      toast.info(currentSuspended ? "User account unsuspended" : "User account suspended");
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update user status");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to permanently delete this user account?")) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      toast.success("User account deleted");
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user");
+    }
+  };
 
   const handleApproveRole = async (userId: string) => {
     try {
@@ -106,6 +204,7 @@ export function AdminPortal() {
       if (!res.ok) throw new Error("Approval failed");
       toast.success("Role change approved!");
       fetchRoleRequests();
+      fetchUsers();
     } catch (err: any) {
       toast.error(err.message || "Failed to approve role request");
     }
@@ -124,6 +223,7 @@ export function AdminPortal() {
       setRejectingRoleUserId(null);
       setRoleRejectReason("");
       fetchRoleRequests();
+      fetchUsers();
     } catch (err: any) {
       toast.error(err.message || "Failed to reject role request");
     }
@@ -241,6 +341,28 @@ export function AdminPortal() {
     toast.success("Events report CSV downloaded!");
   };
 
+  const exportAuditLogCsv = () => {
+    const headers = ["ID", "Action", "Target", "Admin", "Timestamp", "Details"];
+    const rows = auditLogs.map((l) => [
+      l.id,
+      l.action,
+      `"${(l.target || "").replace(/"/g, '""')}"`,
+      `"${(l.admin || "").replace(/"/g, '""')}"`,
+      l.timestamp,
+      `"${(l.details || "").replace(/"/g, '""')}"`,
+    ]);
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `ignite-audit-log-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("System audit log CSV downloaded!");
+  };
+
   // Aggregate students from registration data
   const allUsers = Array.from(
     new Map(
@@ -321,27 +443,27 @@ export function AdminPortal() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 p-1 bg-secondary rounded-xl mb-8">
+      <div className="flex flex-wrap gap-1.5 p-1.5 bg-secondary/80 rounded-2xl mb-8 border border-border">
         {([
-          ["organizers", "Organizers", ShieldCheck],
-          ["events", "Events Queue", Eye],
-          ["role-requests", `Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
-          ["users", "Users", Users],
-          ["categories", "Categories", Tag],
-          ["reports", "Reports", FileSpreadsheet],
-          ["announcements", "Announcements", Megaphone],
+          ["users", "User Management", Users],
+          ["organizers", `Organizer Approval${pendingOrgs.length > 0 ? ` (${pendingOrgs.length})` : ""}`, ShieldCheck],
+          ["events", `Event Approval${pendingEvents.length > 0 ? ` (${pendingEvents.length})` : ""}`, Eye],
           ["analytics", "Analytics", BarChart2],
+          ["reports", "Reports", FileSpreadsheet],
+          ["categories", "Category Management", Tag],
+          ["role-requests", `Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
+          ["announcements", "Announcements", Megaphone],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
             onClick={() => setTab(id as Tab)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               tab === id
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-card text-foreground shadow-sm border border-border"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
             }`}
           >
-            <Icon className="size-3.5" />
+            <Icon className="size-4" />
             {label}
           </button>
         ))}
@@ -359,7 +481,41 @@ export function AdminPortal() {
             </span>
           </div>
 
-          {organizers.map((org) => {
+          {/* Organizer Status Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: "all", label: "All Organizers", count: organizers.length },
+              { id: "pending", label: "Pending Review", count: pendingOrgs.length },
+              { id: "verified", label: "Verified Partners", count: organizers.filter((o) => o.verificationStatus === "verified").length },
+              { id: "suspended", label: "Suspended", count: organizers.filter((o) => o.verificationStatus === "suspended").length },
+              { id: "rejected", label: "Rejected", count: organizers.filter((o) => o.verificationStatus === "rejected").length },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setOrgFilter(f.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  orgFilter === f.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                  orgFilter === f.id ? "bg-white/20 text-white" : "bg-background/80 text-muted-foreground"
+                }`}>
+                  {f.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {organizers.filter((o) => orgFilter === "all" || o.verificationStatus === orgFilter).length === 0 && (
+            <div className="py-12 text-center text-muted-foreground text-sm bg-card border border-border rounded-2xl">
+              No organizers found in this filter category.
+            </div>
+          )}
+
+          {organizers.filter((o) => orgFilter === "all" || o.verificationStatus === orgFilter).map((org) => {
             const s = orgStatusConfig[org.verificationStatus as keyof typeof orgStatusConfig];
             const isRejecting = rejectingOrgId === org.id;
             return (
@@ -458,133 +614,311 @@ export function AdminPortal() {
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex items-center justify-between">
             <span>
-              <strong>Event Approval Workflow:</strong> Review organizer-submitted events in <strong>Pending Review</strong>. Approving an event transitions it to <strong>Public</strong>, enabling student discovery and registrations.
+              <strong>Event Moderation & Publishing Governance:</strong> Review organizer-submitted events. Approving an event transitions it to <strong>Public</strong>, enabling student discovery and registrations.
             </span>
             <span className="font-semibold text-foreground shrink-0 ml-3">
               {pendingEvents.length} pending review
             </span>
           </div>
 
-          {pendingEvents.length === 0 && (
-            <div className="text-center py-16 bg-card border border-border rounded-2xl">
-              <CheckCircle2 className="size-10 text-emerald-500 mx-auto mb-3" />
-              <p className="text-muted-foreground font-medium">No pending events for review.</p>
-            </div>
-          )}
-          {pendingEvents.map((ev) => {
-            const isRejecting = rejectingEventId === ev.id;
+          {/* Event Status Filter Tabs */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: "all", label: "All Listings", count: events.length },
+              { id: "pending", label: "Pending Approval", count: pendingEvents.length },
+              { id: "published", label: "Published & Live", count: publishedEvents.length },
+              { id: "rejected", label: "Rejected", count: events.filter((e) => e.approvalStatus === "rejected").length },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setEventFilter(f.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  eventFilter === f.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                  eventFilter === f.id ? "bg-white/20 text-white" : "bg-background/80 text-muted-foreground"
+                }`}>
+                  {f.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {(() => {
+            const displayEvents = events.filter((e) => {
+              if (eventFilter === "all") return true;
+              if (eventFilter === "pending") return e.approvalStatus === "pending_approval";
+              return e.approvalStatus === eventFilter;
+            });
+
+            if (displayEvents.length === 0) {
+              return (
+                <div className="text-center py-16 bg-card border border-border rounded-2xl">
+                  <CheckCircle2 className="size-10 text-emerald-500 mx-auto mb-3" />
+                  <p className="text-muted-foreground font-medium">No events found in this filter.</p>
+                </div>
+              );
+            }
+
             return (
-              <div key={ev.id} className="bg-card border border-amber-500/20 rounded-2xl p-5">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {ev.cover && (
-                    <img src={ev.cover} alt="" className="size-16 rounded-xl object-cover shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold">{ev.title}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{ev.tagline}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      By {ev.organizerName} · {ev.mode} · {ev.dateLabel} · {ev.seats} seats · {ev.price}
-                    </div>
-                    {ev.about && (
-                      <div className="mt-2 text-xs text-muted-foreground bg-secondary rounded-lg p-2.5 line-clamp-2">
-                        {ev.about}
+              <div className="space-y-3">
+                {displayEvents.map((ev) => {
+                  const isRejecting = rejectingEventId === ev.id;
+                  const isPending = ev.approvalStatus === "pending_approval";
+                  const isPub = ev.approvalStatus === "published";
+                  const isRej = ev.approvalStatus === "rejected";
+
+                  return (
+                    <div
+                      key={ev.id}
+                      className={`bg-card border rounded-2xl p-5 transition-all ${
+                        isPending
+                          ? "border-amber-500/30 bg-amber-500/[0.02]"
+                          : isRej
+                          ? "border-red-500/20 opacity-80"
+                          : "border-border"
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {ev.cover && (
+                          <img
+                            src={ev.cover}
+                            alt=""
+                            className="size-20 rounded-xl object-cover shrink-0 border border-border"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="font-bold text-foreground text-base">{ev.title}</span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                isPending
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                                  : isPub
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                  : "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                              }`}
+                            >
+                              {isPending ? "Pending Review" : isPub ? "Published" : "Rejected"}
+                            </span>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                              {ev.category}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.tagline}</div>
+                          <div className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span>By <strong className="text-foreground">{ev.organizerName}</strong></span>
+                            <span>·</span>
+                            <span>{ev.mode}</span>
+                            <span>·</span>
+                            <span>{ev.dateLabel}</span>
+                            <span>·</span>
+                            <span>{ev.seats} seats ({ev.registered} registered)</span>
+                            <span>·</span>
+                            <span className="font-semibold text-primary">{ev.price}</span>
+                          </div>
+
+                          {ev.rejectReason && (
+                            <div className="mt-2 text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5">
+                              Rejection feedback: "{ev.rejectReason}"
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex flex-wrap items-start gap-2 shrink-0">
+                          <button
+                            onClick={() => setInspectingEvent(ev)}
+                            className="h-9 px-3 rounded-xl border border-border bg-secondary hover:bg-secondary/80 text-xs font-semibold text-foreground flex items-center gap-1.5 transition-colors"
+                          >
+                            <Eye className="size-3.5 text-muted-foreground" />
+                            <span>Inspect</span>
+                          </button>
+
+                          {isPending && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  approveEvent(ev.id);
+                                  toast.success(`Event "${ev.title}" approved! It is now live.`);
+                                }}
+                                className="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                              >
+                                <CheckCircle2 className="size-3.5" />
+                                <span>Approve & Publish</span>
+                              </button>
+                              <button
+                                onClick={() => setRejectingEventId(ev.id)}
+                                className="h-9 px-3 rounded-xl border border-border hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 text-xs font-semibold text-muted-foreground transition-colors"
+                              >
+                                <XCircle className="size-3.5" />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          )}
+
+                          {isPub && (
+                            <>
+                              <button
+                                onClick={() => toggleFeatureEvent(ev.id)}
+                                className={`inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs font-semibold border transition-colors ${
+                                  ev.isFeatured
+                                    ? "bg-primary/15 text-primary border-primary/20 hover:bg-primary/25"
+                                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
+                                }`}
+                              >
+                                {ev.isFeatured ? (
+                                  <Star className="size-3.5 fill-current" />
+                                ) : (
+                                  <StarOff className="size-3.5" />
+                                )}
+                                {ev.isFeatured ? "Featured" : "Feature"}
+                              </button>
+                              <button
+                                onClick={() => removeInappropriateEvent(ev.id)}
+                                className="h-9 px-2.5 rounded-xl border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                                title="Takedown / Remove"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    )}
+
+                      {/* Rejection input */}
+                      {isRejecting && (
+                        <div className="mt-4 pt-3 border-t border-border/80 space-y-2">
+                          <textarea
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            rows={2}
+                            placeholder="State reason for rejection (shown to organizer for revisions)..."
+                            className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary resize-none"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleRejectEvent(ev.id)}
+                              disabled={!rejectReason.trim()}
+                              className="h-8 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold disabled:opacity-50 transition-colors"
+                            >
+                              Confirm Rejection
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRejectingEventId(null);
+                                setRejectReason("");
+                              }}
+                              className="h-8 px-3 rounded-lg border border-border text-xs hover:bg-secondary transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* Event Inspection Modal */}
+          {inspectingEvent && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <div
+                className="w-full max-w-2xl bg-card border border-border rounded-3xl p-6 md:p-8 shadow-2xl space-y-5 animate-in zoom-in-95 max-h-[85vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                      {inspectingEvent.category} · {inspectingEvent.mode}
+                    </span>
+                    <h2 className="text-xl font-bold font-display mt-0.5">{inspectingEvent.title}</h2>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Organized by <strong className="text-foreground">{inspectingEvent.organizerName}</strong>
+                    </p>
                   </div>
-                  <div className="flex flex-wrap items-start gap-2 shrink-0">
-                    <button
-                      onClick={() => {
-                        approveEvent(ev.id);
-                        toast.success(`Event "${ev.title}" approved! It is now Public for student registration.`);
-                      }}
-                      className="h-9 px-4 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center gap-1"
-                    >
-                      <CheckCircle2 className="size-3.5" /> Approve & Publish
-                    </button>
-                    <button
-                      onClick={() => setRejectingEventId(ev.id)}
-                      className="h-9 px-4 rounded-xl bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-semibold hover:bg-red-500/25 flex items-center gap-1"
-                    >
-                      <XCircle className="size-3.5" /> Reject
-                    </button>
+                  <button
+                    onClick={() => setInspectingEvent(null)}
+                    className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </div>
+
+                {inspectingEvent.cover && (
+                  <img
+                    src={inspectingEvent.cover}
+                    alt=""
+                    className="w-full h-48 rounded-2xl object-cover border border-border"
+                  />
+                )}
+
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                    <div className="text-[10px] text-muted-foreground font-semibold uppercase">Schedule</div>
+                    <div className="text-xs font-bold text-foreground mt-0.5">{inspectingEvent.dateLabel}</div>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                    <div className="text-[10px] text-muted-foreground font-semibold uppercase">Seats & Regs</div>
+                    <div className="text-xs font-bold text-foreground mt-0.5">
+                      {inspectingEvent.registered} / {inspectingEvent.seats}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                    <div className="text-[10px] text-muted-foreground font-semibold uppercase">Ticket Fee</div>
+                    <div className="text-xs font-bold text-primary mt-0.5">{inspectingEvent.price}</div>
                   </div>
                 </div>
 
-                {isRejecting && (
-                  <div className="mt-4 space-y-2">
-                    <textarea
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      rows={2}
-                      placeholder="Reason for rejection (shown to organizer)..."
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleRejectEvent(ev.id)}
-                        disabled={!rejectReason.trim()}
-                        className="h-9 px-4 rounded-lg bg-red-500 text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50"
-                      >
-                        Confirm Rejection
-                      </button>
-                      <button
-                        onClick={() => setRejectingEventId(null)}
-                        className="h-9 px-3 rounded-lg border border-border text-xs hover:bg-secondary"
-                      >
-                        Cancel
-                      </button>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-1.5">Overview</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {inspectingEvent.about || inspectingEvent.tagline}
+                  </p>
+                </div>
+
+                {inspectingEvent.tags && inspectingEvent.tags.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-1.5">Tags</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {inspectingEvent.tags.map((t) => (
+                        <span key={t} className="px-2 py-0.5 rounded-md bg-secondary text-[11px] text-foreground font-medium">
+                          #{t}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}
-              </div>
-            );
-          })}
 
-          {/* All published events — feature toggle */}
-          {publishedEvents.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3 mt-6">
-                Published Events — Feature Control
-              </h3>
-              <div className="space-y-3">
-                {publishedEvents.map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="bg-card border border-border rounded-2xl px-5 py-3 flex items-center gap-4"
+                <div className="pt-3 border-t border-border flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => setInspectingEvent(null)}
+                    className="h-10 px-4 rounded-xl border border-border text-xs font-semibold hover:bg-secondary"
                   >
-                    {ev.cover && (
-                      <img src={ev.cover} alt="" className="size-10 rounded-lg object-cover" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{ev.title}</div>
-                      <div className="text-xs text-muted-foreground">{ev.organizerName}</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleFeatureEvent(ev.id)}
-                        className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold border transition-colors ${
-                          ev.isFeatured
-                            ? "bg-primary/15 text-primary border-primary/20 hover:bg-primary/25"
-                            : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
-                        }`}
-                      >
-                        {ev.isFeatured ? (
-                          <Star className="size-3.5 fill-current" />
-                        ) : (
-                          <StarOff className="size-3.5" />
-                        )}
-                        {ev.isFeatured ? "Featured" : "Feature"}
-                      </button>
-                      <button
-                        onClick={() => removeInappropriateEvent(ev.id)}
-                        className="h-8 px-2.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
-                        title="Remove event"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                    Close Preview
+                  </button>
+                  {inspectingEvent.approvalStatus === "pending_approval" && (
+                    <button
+                      onClick={() => {
+                        approveEvent(inspectingEvent.id);
+                        setInspectingEvent(null);
+                        toast.success(`Event "${inspectingEvent.title}" approved!`);
+                      }}
+                      className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5"
+                    >
+                      <CheckCircle2 className="size-4" />
+                      <span>Approve & Publish Now</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -726,129 +1060,431 @@ export function AdminPortal() {
 
       {/* Users Tab */}
       {tab === "users" && (
-        <div>
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchUser}
-              onChange={(e) => setSearchUser(e.target.value)}
-              className="w-full h-11 bg-card border border-border rounded-xl pl-10 pr-4 text-sm focus:outline-none focus:border-primary transition-colors"
-            />
-          </div>
-          <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-[1fr_1fr_auto] p-4 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              <span>Name</span>
-              <span>Email / College</span>
-              <span>Actions</span>
+        <div className="space-y-4">
+          {/* Header Controls: Search & Filter Pills */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search users by name, email, college, or org..."
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+                className="w-full h-11 bg-card border border-border rounded-xl pl-10 pr-4 text-sm focus:outline-none focus:border-primary transition-colors"
+              />
             </div>
-            {allUsers.length === 0 && (
-              <div className="py-12 text-center text-muted-foreground text-sm">
-                No users found.
-              </div>
-            )}
-            {allUsers.map((u) => {
-              const userRegs = registrations.filter(
-                (r) => r.userId === u.id && r.status !== "cancelled"
-              );
-              return (
-                <div
-                  key={u.id}
-                  className="grid grid-cols-[1fr_1fr_auto] items-center p-4 border-b border-border last:border-0 hover:bg-secondary/40 transition-colors"
-                >
-                  <div className="text-sm font-medium">{u.name}</div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">{u.email}</div>
-                    <div className="text-xs text-muted-foreground">{u.college ?? "—"}</div>
+            <button
+              onClick={fetchUsers}
+              className="h-11 px-4 rounded-xl border border-border bg-card hover:bg-secondary text-xs font-semibold flex items-center justify-center gap-2 transition-colors shrink-0"
+            >
+              <RefreshCw className={`size-3.5 ${loadingUsers ? "animate-spin" : ""}`} />
+              <span>Refresh Users</span>
+            </button>
+          </div>
+
+          {/* Role Filter Tabs */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: "all", label: "All Users", count: platformUsers.length },
+              { id: "student", label: "Participants", count: platformUsers.filter((u) => u.role === "student").length },
+              { id: "organizer", label: "Organizers", count: platformUsers.filter((u) => u.role === "organizer").length },
+              { id: "admin", label: "Admins", count: platformUsers.filter((u) => u.role === "admin").length },
+              { id: "suspended", label: "Suspended", count: platformUsers.filter((u) => u.isSuspended).length },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setUserRoleFilter(f.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  userRoleFilter === f.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                  userRoleFilter === f.id ? "bg-white/20 text-white" : "bg-background/80 text-muted-foreground"
+                }`}>
+                  {f.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Role Change Requests Alert Banner */}
+          {roleRequests.length > 0 && (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 grid place-items-center shrink-0">
+                  <UserCheck className="size-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-foreground">
+                    {roleRequests.length} User Role Change Request{roleRequests.length !== 1 ? "s" : ""} Pending Review
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{userRegs.length} regs</span>
-                    <button
-                      onClick={() => {
-                        userRegs.forEach((r) => cancelRegistrationAdmin(r.id));
-                      }}
-                      disabled={userRegs.length === 0}
-                      className="h-7 px-2.5 rounded-lg border border-border text-[11px] text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors disabled:opacity-40"
-                      title="Cancel all registrations"
-                    >
-                      Cancel All
-                    </button>
+                  <div className="text-[11px] text-muted-foreground">
+                    Participants waiting for approval to become verified event organizers.
                   </div>
                 </div>
-              );
-            })}
+              </div>
+              <button
+                onClick={() => setTab("role-requests")}
+                className="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-colors shrink-0"
+              >
+                Review Requests
+              </button>
+            </div>
+          )}
+
+          {/* Users Table / Grid */}
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_auto] p-4 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/30">
+              <span>User</span>
+              <span>Email / Affiliation</span>
+              <span>Role</span>
+              <span>Platform Activity</span>
+              <span className="text-right">Governance Actions</span>
+            </div>
+
+            {loadingUsers && (
+              <div className="py-16 text-center text-muted-foreground text-sm flex items-center justify-center gap-2">
+                <RefreshCw className="size-4 animate-spin" />
+                <span>Loading users from database...</span>
+              </div>
+            )}
+
+            {!loadingUsers && (() => {
+              const filtered = platformUsers.filter((u) => {
+                const matchesSearch =
+                  searchUser === "" ||
+                  u.name.toLowerCase().includes(searchUser.toLowerCase()) ||
+                  u.email.toLowerCase().includes(searchUser.toLowerCase()) ||
+                  (u.college && u.college.toLowerCase().includes(searchUser.toLowerCase())) ||
+                  (u.orgName && u.orgName.toLowerCase().includes(searchUser.toLowerCase()));
+
+                if (!matchesSearch) return false;
+                if (userRoleFilter === "all") return true;
+                if (userRoleFilter === "suspended") return !!u.isSuspended;
+                return u.role === userRoleFilter;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <div className="py-16 text-center text-muted-foreground text-sm">
+                    No users matching criteria.
+                  </div>
+                );
+              }
+
+              return filtered.map((u) => {
+                const isStudent = u.role === "student";
+                const isOrg = u.role === "organizer";
+                const isAdmin = u.role === "admin";
+                const isSuspended = !!u.isSuspended;
+
+                return (
+                  <div
+                    key={u.id}
+                    className={`grid grid-cols-[1.5fr_1.5fr_1fr_1fr_auto] items-center p-4 border-b border-border last:border-0 hover:bg-secondary/40 transition-colors ${
+                      isSuspended ? "bg-red-500/[0.03]" : ""
+                    }`}
+                  >
+                    {/* User info */}
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <div className="relative shrink-0">
+                        <img
+                          src={
+                            u.avatar ||
+                            `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.name)}`
+                          }
+                          alt=""
+                          className="size-9 rounded-full object-cover border border-border"
+                        />
+                        <div
+                          className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-background ${
+                            isSuspended ? "bg-red-500" : "bg-emerald-500"
+                          }`}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold truncate flex items-center gap-1.5">
+                          <span>{u.name}</span>
+                          {isSuspended && (
+                            <span className="text-[10px] font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-1 rounded">
+                              Suspended
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">Joined {u.joinedAt || "Aug 2026"}</div>
+                      </div>
+                    </div>
+
+                    {/* Email / College */}
+                    <div className="min-w-0 pr-2">
+                      <div className="text-xs text-foreground truncate">{u.email}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {u.orgName ? `Org: ${u.orgName}` : u.college ? u.college : "Independent Member"}
+                      </div>
+                    </div>
+
+                    {/* Role badge */}
+                    <div>
+                      <span
+                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                          isAdmin
+                            ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                            : isOrg
+                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                            : "bg-violet-500/10 text-violet-500 border-violet-500/20"
+                        }`}
+                      >
+                        {isAdmin && <ShieldCheck className="size-3" />}
+                        {isOrg && <Globe className="size-3" />}
+                        {isStudent && <Users className="size-3" />}
+                        <span>{isAdmin ? "Admin" : isOrg ? "Organizer" : "Participant"}</span>
+                      </span>
+                    </div>
+
+                    {/* Activity stats */}
+                    <div className="text-xs space-y-0.5">
+                      <div className="text-muted-foreground">
+                        <strong className="text-foreground">{u.registrationsCount || 0}</strong> registered passes
+                      </div>
+                      {isOrg && (
+                        <div className="text-muted-foreground">
+                          <strong className="text-foreground">{u.eventsCount || 0}</strong> events hosted
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <button
+                        onClick={() => {
+                          setEditingUser(u);
+                          setSelectedNewRole(u.role);
+                        }}
+                        className="h-8 px-2.5 rounded-lg border border-border text-xs font-semibold hover:bg-secondary flex items-center gap-1 transition-colors"
+                        title="Change role"
+                      >
+                        <UserCog className="size-3.5 text-muted-foreground" />
+                        <span>Role</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleToggleSuspendUser(u.id, isSuspended)}
+                        className={`h-8 px-2.5 rounded-lg border text-xs font-semibold transition-colors flex items-center gap-1 ${
+                          isSuspended
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/25"
+                            : "border-border text-muted-foreground hover:bg-orange-500/10 hover:text-orange-500 hover:border-orange-500/20"
+                        }`}
+                        title={isSuspended ? "Unsuspend account" : "Suspend account"}
+                      >
+                        <Ban className="size-3" />
+                        <span>{isSuspended ? "Unsuspend" : "Suspend"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteUser(u.id)}
+                        className="h-8 px-2 rounded-lg border border-border text-muted-foreground hover:text-red-500 hover:border-red-500/30 transition-colors"
+                        title="Delete user"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
+
+          {/* Role Change Modal */}
+          {editingUser && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <div
+                className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UserCog className="size-5 text-primary" />
+                    <h3 className="font-bold text-base">Change User Role</h3>
+                  </div>
+                  <button
+                    onClick={() => setEditingUser(null)}
+                    className="p-1 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+
+                <div className="p-3 bg-secondary/50 rounded-2xl border border-border text-xs space-y-1">
+                  <div className="font-semibold text-foreground text-sm">{editingUser.name}</div>
+                  <div className="text-muted-foreground">{editingUser.email}</div>
+                  <div className="text-muted-foreground">
+                    Current active role: <strong className="capitalize">{editingUser.role}</strong>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-muted-foreground">
+                    Select New Assigned Role
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { role: "student", label: "Participant", icon: Users, color: "text-violet-500" },
+                      { role: "organizer", label: "Organizer", icon: Globe, color: "text-amber-500" },
+                      { role: "admin", label: "Admin", icon: ShieldCheck, color: "text-rose-500" },
+                    ].map((r) => (
+                      <button
+                        key={r.role}
+                        type="button"
+                        onClick={() => setSelectedNewRole(r.role as any)}
+                        className={`p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1.5 transition-all ${
+                          selectedNewRole === r.role
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <r.icon className={`size-4 ${r.color}`} />
+                        <span>{r.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => setEditingUser(null)}
+                    className="flex-1 h-10 rounded-xl border border-border text-xs font-semibold hover:bg-secondary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleUpdateRole(editingUser.id, selectedNewRole)}
+                    className="flex-1 h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    Save Role Change
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Categories Tab */}
       {tab === "categories" && (
-        <div className="max-w-2xl space-y-4">
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-            <h3 className="font-semibold text-sm">Add New Category</h3>
-            <input
-              type="text"
-              placeholder="Category name"
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              className="w-full h-10 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:border-primary"
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={newCatDesc}
-              onChange={(e) => setNewCatDesc(e.target.value)}
-              className="w-full h-10 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:border-primary"
-            />
-            <button
-              onClick={handleAddCategory}
-              disabled={!newCatName.trim()}
-              className="h-10 px-4 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
-            >
-              <Plus className="size-4" /> Add Category
-            </button>
+        <div className="space-y-6">
+          <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex items-center justify-between">
+            <span>
+              <strong>Category & Taxonomy Governance:</strong> Manage technical event tracks. Events are filtered and indexed by these categories across the discovery catalog.
+            </span>
+            <span className="font-semibold text-foreground shrink-0 ml-3">
+              {categories.length} categories active
+            </span>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                className="flex items-center justify-between px-5 py-3.5 border-b border-border last:border-0"
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Create Category Card */}
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4 h-fit">
+              <div className="flex items-center gap-2">
+                <Tag className="size-5 text-primary" />
+                <h3 className="font-bold text-base">Add New Category</h3>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Robotics & Hardware"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="w-full h-10 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe technical scope and attendee expectations..."
+                  value={newCatDesc}
+                  onChange={(e) => setNewCatDesc(e.target.value)}
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary resize-none"
+                />
+              </div>
+              <button
+                onClick={handleAddCategory}
+                disabled={!newCatName.trim()}
+                className="w-full h-11 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity shadow-sm"
               >
-                <div>
-                  <span className={`text-sm font-medium ${!cat.active ? "opacity-40" : ""}`}>
-                    {cat.name}
-                  </span>
-                  <div className="text-xs text-muted-foreground">{cat.description}</div>
+                <Plus className="size-4" /> Create Category
+              </button>
+            </div>
+
+            {/* Existing Categories List */}
+            <div className="lg:col-span-2 space-y-3">
+              <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-border bg-secondary/30 flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span>Category Name & Description</span>
+                  <span>Status & Actions</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleCategory(cat.id)}
-                    className={`h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ${
-                      cat.active
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                        : "bg-secondary text-muted-foreground border-border"
-                    }`}
-                  >
-                    {cat.active ? "Active" : "Disabled"}
-                  </button>
-                  <button
-                    onClick={() => deleteCategory(cat.id)}
-                    className="h-7 px-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+                <div className="divide-y divide-border">
+                  {categories.map((cat) => {
+                    const eventCount = events.filter((e) => e.category === cat.name).length;
+                    return (
+                      <div
+                        key={cat.id}
+                        className="p-4 flex items-center justify-between gap-4 hover:bg-secondary/40 transition-colors"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-semibold ${!cat.active ? "opacity-50 line-through" : "text-foreground"}`}>
+                              {cat.name}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                              {eventCount} event{eventCount !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          {cat.description && (
+                            <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{cat.description}</div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => toggleCategory(cat.id)}
+                            className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-colors ${
+                              cat.active
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                : "bg-secondary text-muted-foreground border-border"
+                            }`}
+                          >
+                            {cat.active ? "Active" : "Disabled"}
+                          </button>
+                          <button
+                            onClick={() => deleteCategory(cat.id)}
+                            className="h-8 px-2.5 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                            title="Delete category"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* Reports Tab */}
       {tab === "reports" && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <span>
               <strong>Platform Reports & Compliance Exports:</strong> Generate auditable CSV data ledgers for participant admissions, organizer verifications, and event fill metrics.
@@ -858,62 +1494,274 @@ export function AdminPortal() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* 4 CSV Report Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Registrations Report Card */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="size-12 rounded-xl bg-primary/10 text-primary grid place-items-center mb-4">
-                  <Users className="size-6" />
+                <div className="size-10 rounded-xl bg-primary/10 text-primary grid place-items-center mb-3">
+                  <Users className="size-5" />
                 </div>
-                <h3 className="font-semibold text-base">Registrations Ledger</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                  Complete roster of {registrations.length} student registrations across all events with ticket codes, colleges, and attendance status.
+                <h3 className="font-semibold text-sm">Registrations Ledger</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Roster of {registrations.length} student registrations with ticket codes, colleges, and attendance status.
                 </p>
               </div>
               <button
                 onClick={exportRegistrationsCsv}
-                className="mt-6 w-full h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 flex items-center justify-center gap-2 transition-opacity shadow-sm"
+                className="mt-5 w-full h-9 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 flex items-center justify-center gap-1.5 transition-opacity shadow-sm"
               >
-                <Download className="size-4" /> Download Registrations CSV
+                <Download className="size-3.5" /> Download CSV
               </button>
             </div>
 
             {/* Organizers Report Card */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="size-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 grid place-items-center mb-4">
-                  <ShieldCheck className="size-6" />
+                <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 grid place-items-center mb-3">
+                  <ShieldCheck className="size-5" />
                 </div>
-                <h3 className="font-semibold text-base">Organizer Audit Ledger</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                  Directory of all {organizers.length} organizer entities, verification records, document submissions, and approval states.
+                <h3 className="font-semibold text-sm">Organizer Audit Ledger</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Directory of {organizers.length} organizer entities, verification credentials, and approval states.
                 </p>
               </div>
               <button
                 onClick={exportOrganizersCsv}
-                className="mt-6 w-full h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold hover:bg-amber-500/25 flex items-center justify-center gap-2 transition-colors"
+                className="mt-5 w-full h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold hover:bg-amber-500/25 flex items-center justify-center gap-1.5 transition-colors"
               >
-                <Download className="size-4" /> Download Organizers CSV
+                <Download className="size-3.5" /> Download CSV
               </button>
             </div>
 
             {/* Events Performance Report Card */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid place-items-center mb-4">
-                  <BarChart2 className="size-6" />
+                <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid place-items-center mb-3">
+                  <BarChart2 className="size-5" />
                 </div>
-                <h3 className="font-semibold text-base">Event Performance Report</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                  Comprehensive metric report of all {events.length} listings, capacity fill rates, pricing tiers, and public visibility states.
+                <h3 className="font-semibold text-sm">Event Performance</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Metric report of all {events.length} listings, capacity fill rates, pricing tiers, and public visibility states.
                 </p>
               </div>
               <button
                 onClick={exportEventsCsv}
-                className="mt-6 w-full h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center justify-center gap-2 transition-colors"
+                className="mt-5 w-full h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/25 flex items-center justify-center gap-1.5 transition-colors"
               >
-                <Download className="size-4" /> Download Events CSV
+                <Download className="size-3.5" /> Download CSV
               </button>
+            </div>
+
+            {/* System Audit Trail Card */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="size-10 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 grid place-items-center mb-3">
+                  <Layers className="size-5" />
+                </div>
+                <h3 className="font-semibold text-sm">System Audit Trail</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Log of {auditLogs.length} administrator actions, role transitions, approvals, and security checks.
+                </p>
+              </div>
+              <button
+                onClick={exportAuditLogCsv}
+                className="mt-5 w-full h-9 rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 text-xs font-semibold hover:bg-violet-500/25 flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Download className="size-3.5" /> Download CSV
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Live Data Explorer */}
+          <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold font-display text-foreground">Interactive Data Explorer</h3>
+                <p className="text-xs text-muted-foreground">Inspect live platform records directly on screen</p>
+              </div>
+              <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-xl">
+                {[
+                  { id: "registrations", label: "Registrations" },
+                  { id: "organizers", label: "Organizers" },
+                  { id: "events", label: "Events" },
+                  { id: "audit", label: "Audit Trail" },
+                ].map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => setReportTableTab(st.id as any)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      reportTableTab === st.id
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {st.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Filter explorer records..."
+                value={reportSearch}
+                onChange={(e) => setReportSearch(e.target.value)}
+                className="w-full h-10 bg-background border border-border rounded-xl pl-10 pr-4 text-xs focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            {/* Tabular View */}
+            <div className="border border-border rounded-2xl overflow-x-auto max-h-96">
+              {reportTableTab === "registrations" && (
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-secondary/50 text-muted-foreground font-semibold uppercase border-b border-border sticky top-0">
+                    <tr>
+                      <th className="p-3">Ticket</th>
+                      <th className="p-3">Student Name</th>
+                      <th className="p-3">Email</th>
+                      <th className="p-3">College</th>
+                      <th className="p-3">Event Title</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {registrations
+                      .filter((r) =>
+                        reportSearch === "" ||
+                        r.userName?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        r.userEmail?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        r.eventTitle?.toLowerCase().includes(reportSearch.toLowerCase())
+                      )
+                      .map((r) => (
+                        <tr key={r.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="p-3 font-mono font-bold text-primary">{r.ticketCode || r.id}</td>
+                          <td className="p-3 font-medium text-foreground">{r.userName}</td>
+                          <td className="p-3 text-muted-foreground">{r.userEmail}</td>
+                          <td className="p-3 text-muted-foreground">{r.college || "—"}</td>
+                          <td className="p-3 font-medium text-foreground max-w-[200px] truncate">{r.eventTitle}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              r.status === "confirmed" ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted-foreground"
+                            }`}>
+                              {r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+
+              {reportTableTab === "organizers" && (
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-secondary/50 text-muted-foreground font-semibold uppercase border-b border-border sticky top-0">
+                    <tr>
+                      <th className="p-3">Organization</th>
+                      <th className="p-3">Representative</th>
+                      <th className="p-3">Email</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Events Count</th>
+                      <th className="p-3">Joined Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {organizers
+                      .filter((o) =>
+                        reportSearch === "" ||
+                        o.orgName?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        o.name?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        o.email?.toLowerCase().includes(reportSearch.toLowerCase())
+                      )
+                      .map((o) => (
+                        <tr key={o.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="p-3 font-bold text-foreground">{o.orgName || o.name}</td>
+                          <td className="p-3 text-foreground">{o.name}</td>
+                          <td className="p-3 text-muted-foreground">{o.email}</td>
+                          <td className="p-3">
+                            <span className="capitalize font-semibold text-emerald-600 dark:text-emerald-400">
+                              {o.verificationStatus}
+                            </span>
+                          </td>
+                          <td className="p-3 text-foreground font-bold">{o.eventsCount}</td>
+                          <td className="p-3 text-muted-foreground">{o.joinedAt}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+
+              {reportTableTab === "events" && (
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-secondary/50 text-muted-foreground font-semibold uppercase border-b border-border sticky top-0">
+                    <tr>
+                      <th className="p-3">Event Title</th>
+                      <th className="p-3">Organizer</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Seats / Regs</th>
+                      <th className="p-3">Price</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {events
+                      .filter((e) =>
+                        reportSearch === "" ||
+                        e.title?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        e.organizerName?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        e.category?.toLowerCase().includes(reportSearch.toLowerCase())
+                      )
+                      .map((e) => (
+                        <tr key={e.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="p-3 font-bold text-foreground max-w-[200px] truncate">{e.title}</td>
+                          <td className="p-3 text-foreground">{e.organizerName}</td>
+                          <td className="p-3 text-muted-foreground">{e.category}</td>
+                          <td className="p-3 text-muted-foreground font-mono">{e.registered} / {e.seats}</td>
+                          <td className="p-3 text-primary font-semibold">{e.price}</td>
+                          <td className="p-3">
+                            <span className="capitalize font-bold text-xs">
+                              {e.approvalStatus === "published" ? "Published" : e.approvalStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+
+              {reportTableTab === "audit" && (
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-secondary/50 text-muted-foreground font-semibold uppercase border-b border-border sticky top-0">
+                    <tr>
+                      <th className="p-3">Timestamp</th>
+                      <th className="p-3">Action</th>
+                      <th className="p-3">Target</th>
+                      <th className="p-3">Admin</th>
+                      <th className="p-3">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {auditLogs
+                      .filter((l) =>
+                        reportSearch === "" ||
+                        l.action?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        l.target?.toLowerCase().includes(reportSearch.toLowerCase()) ||
+                        l.details?.toLowerCase().includes(reportSearch.toLowerCase())
+                      )
+                      .map((l) => (
+                        <tr key={l.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="p-3 text-muted-foreground font-mono">{l.timestamp.slice(0, 16).replace("T", " ")}</td>
+                          <td className="p-3 font-bold text-primary">{l.action}</td>
+                          <td className="p-3 font-medium text-foreground">{l.target}</td>
+                          <td className="p-3 text-muted-foreground">{l.admin}</td>
+                          <td className="p-3 text-muted-foreground">{l.details}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
