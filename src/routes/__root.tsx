@@ -146,6 +146,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script src="https://accounts.google.com/gsi/client" async defer />
         <HeadContent />
       </head>
       <body className="bg-background text-foreground antialiased min-h-screen">

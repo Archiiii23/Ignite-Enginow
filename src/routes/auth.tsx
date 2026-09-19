@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import { PageShell } from "@/components/site/PageShell";
 import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth, type UserRole } from "@/lib/auth-context";
-import { GraduationCap, Briefcase, ShieldCheck, CheckCircle2, Lock, ArrowRight, Loader2 } from "lucide-react";
+import {
+  GoogleAccountChooserModal,
+  getSavedGoogleAccounts,
+  type GoogleAccount,
+} from "@/components/auth/GoogleAccountChooserModal";
+import { GraduationCap, Briefcase, ShieldCheck, CheckCircle2, Lock, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
@@ -30,6 +35,54 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [isChooserOpen, setIsChooserOpen] = useState(false);
+  const [suggestedAccount, setSuggestedAccount] = useState<GoogleAccount | null>(null);
+
+  // Load saved/suggested Google accounts from previous visits
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = getSavedGoogleAccounts();
+      if (saved.length > 0) {
+        setSuggestedAccount(saved[0]);
+      }
+    }
+  }, []);
+
+  // Initialize Google Identity Services (GIS) One Tap if available in browser
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || "915830948214-mock.apps.googleusercontent.com";
+    const google = (window as any).google;
+    if (google?.accounts?.id) {
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response: any) => {
+            if (response?.credential) {
+              setGoogleLoading(true);
+              try {
+                const loggedIn = await loginWithGoogle({
+                  credential: response.credential,
+                  role: "student",
+                });
+                toast.success(`Welcome back, ${loggedIn.name}! Signed in with Google.`);
+                navigate({ to: "/" });
+              } catch (err: any) {
+                toast.error(err?.message || "Google verification failed");
+              } finally {
+                setGoogleLoading(false);
+              }
+            }
+          },
+          auto_select: false,
+          cancel_on_tap_outside: false,
+        });
+        google.accounts.id.prompt();
+      } catch (err) {
+        console.debug("[GIS One Tap] Note:", err);
+      }
+    }
+  }, [loginWithGoogle, navigate]);
 
   // If already authenticated and role selected, redirect to landing page
   useEffect(() => {
@@ -38,11 +91,17 @@ function AuthPage() {
     }
   }, [isLoading, isAuthenticated, user, navigate]);
 
-  const handleGoogleSignIn = async () => {
+  const handleSelectGoogleAccount = async (account: GoogleAccount) => {
     setGoogleLoading(true);
     try {
-      await loginWithGoogle("student");
-      toast.success("Signed in with Google!");
+      const loggedIn = await loginWithGoogle({
+        email: account.email,
+        name: account.name,
+        avatar: account.avatar,
+        role: "student",
+      });
+      setSuggestedAccount(account);
+      toast.success(`Signed in as ${loggedIn.email} via Google!`);
       navigate({ to: "/" });
     } catch (err: any) {
       toast.error(err.message || "Google authentication failed.");
@@ -111,11 +170,57 @@ function AuthPage() {
           </div>
 
           <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+            {/* Automatic Suggested Gmail Account Chip */}
+            {suggestedAccount && (
+              <div className="mb-4 p-3.5 rounded-2xl bg-primary/5 border border-primary/15 flex items-center justify-between gap-3 animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative shrink-0">
+                    <img
+                      src={
+                        suggestedAccount.avatar ||
+                        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(suggestedAccount.name)}`
+                      }
+                      alt={suggestedAccount.name}
+                      className="size-10 rounded-full object-cover border border-border"
+                    />
+                    <div className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 ring-2 ring-background" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold truncate flex items-center gap-1.5 text-foreground">
+                      <span>{suggestedAccount.name}</span>
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-primary/10 text-primary flex items-center gap-1">
+                        <Sparkles className="size-2.5" /> Suggested
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground truncate">{suggestedAccount.email}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectGoogleAccount(suggestedAccount)}
+                    disabled={googleLoading}
+                    className="h-8 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 disabled:opacity-70 shadow-sm"
+                  >
+                    {googleLoading ? <Loader2 className="size-3.5 animate-spin" /> : "Continue"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsChooserOpen(true)}
+                    className="h-8 px-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    Switch
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Primary Google Login Button */}
             <div className="space-y-3">
               <button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={() => setIsChooserOpen(true)}
                 disabled={googleLoading}
                 className="w-full h-12 rounded-2xl bg-white hover:bg-neutral-50 text-neutral-900 border border-neutral-200 font-semibold text-sm flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md active:scale-[0.99] dark:bg-card dark:text-foreground dark:border-border dark:hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed"
               >
@@ -141,13 +246,13 @@ function AuthPage() {
                     />
                   </svg>
                 )}
-                <span>{googleLoading ? "Authenticating (1-2s)..." : "Continue with Google"}</span>
+                <span>{googleLoading ? "Connecting to Google..." : "Choose Gmail / Google Account"}</span>
               </button>
 
               <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-muted-foreground">
                 <Lock className="size-3.5 text-primary shrink-0 mt-0.5" />
                 <span>
-                  <strong>First-time sign-in:</strong> You will select your role (<strong>Participant</strong> or <strong>Organizer</strong>) upon verification. Once established, role changes require admin approval.
+                  <strong>First-time sign-in:</strong> Connect your Gmail ID and you will select your role (<strong>Participant</strong> or <strong>Organizer</strong>).
                 </span>
               </div>
             </div>
@@ -205,7 +310,18 @@ function AuthPage() {
               )}
 
               <label className="block">
-                <span className="text-caption text-muted-foreground">Email address</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-caption text-muted-foreground">Email address</span>
+                  {suggestedAccount && !email && (
+                    <button
+                      type="button"
+                      onClick={() => setEmail(suggestedAccount.email)}
+                      className="text-[11px] text-primary hover:underline flex items-center gap-1"
+                    >
+                      <Sparkles className="size-2.5" /> Use {suggestedAccount.email}
+                    </button>
+                  )}
+                </div>
                 <input
                   type="email"
                   required
@@ -287,6 +403,13 @@ function AuthPage() {
             </Link>
           </p>
         </div>
+
+        {/* Google Account Chooser Modal */}
+        <GoogleAccountChooserModal
+          isOpen={isChooserOpen}
+          onClose={() => setIsChooserOpen(false)}
+          onSelectAccount={handleSelectGoogleAccount}
+        />
       </section>
     </PageShell>
   );

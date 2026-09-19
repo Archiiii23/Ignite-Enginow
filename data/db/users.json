@@ -69,5 +69,31 @@
         "requestedAt": "2026-09-17T17:26:40.522Z"
       }
     }
+  },
+  {
+    "id": "usr_google_t0gw07x",
+    "email": "alex.testing@gmail.com",
+    "passwordHash": "49e1cda2c88ec54ee9456c707e568135:564c7ea238d8bf690deafc90e3fac1ae81ca3f0db1c6172438f0e446acd4336ab10f13d99cded2cf56feb4018ea6d81889247c97ca83db6423563637cd0adefa",
+    "profile": {
+      "id": "usr_google_t0gw07x",
+      "name": "Alex Testing",
+      "email": "alex.testing@gmail.com",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Alex%20Testing",
+      "role": "student",
+      "isRoleSelected": false
+    }
+  },
+  {
+    "id": "usr_google_o0wfscp",
+    "email": "jwt.user@gmail.com",
+    "passwordHash": "30ccdc7aa7f60b0d7294701d36d31081:307d6955b569157763b29872e6a7b7a4c254dc29d6fd663190b798a58dd323d7a27c51a4e66d6e7118b0090b3e3b9d8296b573e3df57051c1f89b7d59989504d",
+    "profile": {
+      "id": "usr_google_o0wfscp",
+      "name": "Google JWT User",
+      "email": "jwt.user@gmail.com",
+      "avatar": "https://lh3.googleusercontent.com/test",
+      "role": "student",
+      "isRoleSelected": false
+    }
   }
 ]

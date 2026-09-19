@@ -31,11 +31,19 @@ export interface UserProfile {
   verificationStatus?: "not_submitted" | "pending" | "verified" | "rejected" | "suspended";
 }
 
+export interface GoogleAuthOptions {
+  role?: UserRole;
+  credential?: string;
+  email?: string;
+  name?: string;
+  avatar?: string;
+}
+
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginWithGoogle: (preferredRole?: UserRole) => Promise<UserProfile>;
+  loginWithGoogle: (options?: GoogleAuthOptions | UserRole) => Promise<UserProfile>;
   loginWithEmail: (email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   signupWithEmail: (name: string, email: string, passwordOrRole?: string | UserRole) => Promise<UserProfile>;
   selectRole: (
@@ -161,23 +169,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const loginWithGoogle = useCallback(async (preferredRole: UserRole = "student") => {
+  const loginWithGoogle = useCallback(async (options?: GoogleAuthOptions | UserRole) => {
     const startTime = Date.now();
+    const payload: GoogleAuthOptions =
+      typeof options === "string" ? { role: options } : (options ?? { role: "student" });
+    const preferredRole: UserRole = payload.role || "student";
+
     try {
-      const res = await authRequest<UserProfile>("demo-login", { role: preferredRole }, 1200);
-      await ensureMinAuthDuration(startTime, 1200);
+      const res = await authRequest<UserProfile>("google", payload, 2000);
+      await ensureMinAuthDuration(startTime, 800);
       setUser(res);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("ignite_auth_user", JSON.stringify(res));
       }
       return res;
-    } catch {
-      await ensureMinAuthDuration(startTime, 1200);
+    } catch (err) {
+      console.warn("[Google Auth] Server request failed, falling back to client session:", err);
+      await ensureMinAuthDuration(startTime, 800);
+      const email = payload.email || "alex.rivera@gmail.com";
+      const name = payload.name || email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
       const googleProfile: UserProfile = {
         id: "usr_google_" + Math.random().toString(36).slice(2, 9),
-        name: "Alex Rivera",
-        email: "alex.rivera@campus.edu",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        name: name,
+        email: email,
+        avatar: payload.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         role: preferredRole,
         isRoleSelected: false,
       };

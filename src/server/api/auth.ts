@@ -23,6 +23,81 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
     return Response.json({ success: !!user, data: user, user });
   }
 
+  // Google Sign-In (Supports Google Identity Services JWT credential or selected Google account)
+  if (request.method === "POST" && subRoute === "google") {
+    const body = (await request.json().catch(() => ({}))) as {
+      credential?: string;
+      email?: string;
+      name?: string;
+      avatar?: string;
+      role?: UserRole;
+    };
+
+    let email = body.email?.trim().toLowerCase();
+    let name = body.name?.trim();
+    let avatar = body.avatar?.trim();
+
+    // If Google Identity Services ID Token (JWT) provided, decode payload
+    if (body.credential) {
+      try {
+        const parts = body.credential.split(".");
+        if (parts.length === 3) {
+          const payloadJson = Buffer.from(parts[1], "base64").toString("utf-8");
+          const payload = JSON.parse(payloadJson);
+          if (payload.email) email = payload.email.trim().toLowerCase();
+          if (payload.name) name = payload.name.trim();
+          if (payload.picture) avatar = payload.picture.trim();
+        }
+      } catch (err) {
+        console.error("[Google Auth] Error decoding credential:", err);
+      }
+    }
+
+    if (!email) {
+      return Response.json({ error: "Google email address is required" }, { status: 400 });
+    }
+
+    const preferredRole: UserRole = body.role && ["student", "organizer", "admin"].includes(body.role)
+      ? body.role
+      : "student";
+
+    const account = await db.getUserByEmail(email);
+    let profile: UserProfile;
+
+    if (!account) {
+      const generatedName = name || email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      profile = {
+        id: `usr_google_${Math.random().toString(36).slice(2, 9)}`,
+        name: generatedName,
+        email: email,
+        avatar: avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(generatedName)}`,
+        role: preferredRole,
+        isRoleSelected: false, // Prompt role selection modal on first sign-in
+      };
+      await db.createUser(profile, await hashPassword(`google_oauth_${Math.random().toString(36)}`));
+    } else {
+      profile = account.profile;
+      let hasUpdates = false;
+      if (avatar && (!profile.avatar || profile.avatar.includes("dicebear") || profile.avatar.includes("unsplash"))) {
+        profile.avatar = avatar;
+        hasUpdates = true;
+      }
+      if (name && (!profile.name || profile.name === "User")) {
+        profile.name = name;
+        hasUpdates = true;
+      }
+      if (hasUpdates) {
+        await db.updateUser(profile);
+      }
+    }
+
+    const sessionToken = await createSession(profile.id);
+    return withSession(
+      Response.json({ success: true, data: profile, user: profile }),
+      sessionToken,
+    );
+  }
+
   // Developer Demo Login
   if (request.method === "POST" && subRoute === "demo-login") {
     const body = (await request.json().catch(() => ({}))) as { role?: UserRole };
