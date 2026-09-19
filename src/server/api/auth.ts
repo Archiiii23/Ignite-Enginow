@@ -72,7 +72,7 @@ export async function handleAuthApi(request: Request, pathParts: string[]): Prom
         email: email,
         avatar: avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(generatedName)}`,
         role: preferredRole,
-        isRoleSelected: false, // Prompt role selection modal on first sign-in
+        isRoleSelected: true,
       };
       await db.createUser(profile, await hashPassword(`google_oauth_${Math.random().toString(36)}`));
     } else {

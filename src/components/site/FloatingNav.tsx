@@ -11,7 +11,6 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications, type NotificationType } from "@/lib/notifications";
 import { RequestRoleChangeModal } from "@/components/auth/RequestRoleChangeModal";
-import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 
 const links = [
@@ -452,11 +451,6 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
             </>
           )}
         </motion.div>
-      )}
-
-      {/* First-Login Role Selection Modal */}
-      {user && user.isRoleSelected === false && (
-        <RoleSelectionModal isOpen={true} />
       )}
 
       {/* Admin-Governed Role Change Request Modal */}

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { RoleSelectionModal } from "@/components/auth/RoleSelectionModal";
 import { canonical, pageMeta } from "@/lib/seo";
 import { homeDescription } from "@/lib/seo-descriptions";
 import { FloatingNav } from "@/components/site/FloatingNav";
@@ -66,7 +65,6 @@ function Landing() {
 
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      {user && user.isRoleSelected === false && <RoleSelectionModal isOpen={true} />}
       <ScrollProgress />
       <AnnouncementBanner />
       <FloatingNav />

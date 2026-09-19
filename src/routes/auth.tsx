@@ -89,10 +89,14 @@ function AuthPage() {
     }
   }, [loginWithGoogle, navigate]);
 
-  // If already authenticated and role selected, redirect to landing page
+  // If already authenticated, redirect appropriately
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user && user.isRoleSelected !== false) {
-      navigate({ to: "/" });
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === "admin") {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/" });
+      }
     }
   }, [isLoading, isAuthenticated, user, navigate]);
 
@@ -118,11 +122,24 @@ function AuthPage() {
   const handleSimulatedGoogleSignIn = async (asRole?: UserRole) => {
     setGoogleLoading(true);
     try {
-      await loginWithGoogle(asRole || "student");
-      toast.success("Signed in successfully via Google session!");
-      navigate({ to: "/" });
+      const targetRole = asRole || "student";
+      await loginWithGoogle(
+        targetRole === "admin"
+          ? { role: "admin", email: "admin@enginow.ignite", name: "Sarah Chen (Admin)" }
+          : targetRole === "organizer"
+          ? { role: "organizer", email: "organizer@enginow.ignite", name: "Alex DevSphere" }
+          : { role: "student", email: "student@enginow.ignite", name: "Alex Rivera" }
+      );
+      toast.success(`Signed in as ${targetRole === "admin" ? "Administrator" : targetRole === "organizer" ? "Organizer" : "Participant"}!`);
+      if (targetRole === "admin") {
+        navigate({ to: "/admin" });
+      } else if (targetRole === "organizer") {
+        navigate({ to: "/dashboard" });
+      } else {
+        navigate({ to: "/" });
+      }
     } catch (err: any) {
-      toast.error(err.message || "Google authentication failed.");
+      toast.error(err.message || "Authentication failed.");
     } finally {
       setGoogleLoading(false);
     }
@@ -257,7 +274,7 @@ function AuthPage() {
               <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-muted-foreground">
                 <Lock className="size-3.5 text-primary shrink-0 mt-0.5" />
                 <span>
-                  <strong>First-time sign-in:</strong> Connect your Gmail ID and you will select your role (<strong>Participant</strong> or <strong>Organizer</strong>).
+                  <strong>Instant Sign-In:</strong> Connect your Google account to access registered events, certificates, and portals immediately.
                 </span>
               </div>
             </div>

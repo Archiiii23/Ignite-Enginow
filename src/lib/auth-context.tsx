@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: email,
         avatar: payload.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         role: preferredRole,
-        isRoleSelected: false,
+        isRoleSelected: true,
       };
       setUser(googleProfile);
       if (typeof window !== "undefined") {
