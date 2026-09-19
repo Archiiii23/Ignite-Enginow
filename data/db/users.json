@@ -66,7 +66,7 @@
       "id": "usr_5fa173d4-8b7c-4b51-b35d-b52c92a390a4",
       "name": "Jainarchi555",
       "email": "jainarchi555@gmail.com",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Archi%20Jain",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Jainarchi555",
       "role": "student",
       "isRoleSelected": true,
       "roleChangeRequest": {
@@ -114,6 +114,19 @@
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sarah%20Chen%20(Admin)",
       "role": "admin",
       "isRoleSelected": false
+    }
+  },
+  {
+    "id": "usr_google_e2knxa6",
+    "email": "organizer@enginow.ignite",
+    "passwordHash": "1857e47a37b651353ce3ab793175e118:d29b1ded5971fda5751c83afa750a03d44ba060f95ffc53cc81a64fdc481f50c921a947fd9a86ae591507a68073ac0599117f65dd412e199476fb85d869fc60c",
+    "profile": {
+      "id": "usr_google_e2knxa6",
+      "name": "Alex DevSphere",
+      "email": "organizer@enginow.ignite",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Alex%20DevSphere",
+      "role": "organizer",
+      "isRoleSelected": true
     }
   }
 ]
