@@ -64,17 +64,12 @@
     "passwordHash": "1de1b558d105e564d66edbc41a6fc540:59a9e63c2705715ae19e321d483136c3259ec480937e341a610944e1ac8a62acb021eaea7868b8ee076d1eab89b027e120a961f3e3d9d743a54446c6595230ab",
     "profile": {
       "id": "usr_5fa173d4-8b7c-4b51-b35d-b52c92a390a4",
-      "name": "Jainarchi555",
+      "name": "Archi Jain",
       "email": "jainarchi555@gmail.com",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Jainarchi555",
-      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Archi%20Jain",
+      "role": "admin",
       "isRoleSelected": true,
-      "roleChangeRequest": {
-        "requestedRole": "organizer",
-        "reason": "capable",
-        "status": "PENDING",
-        "requestedAt": "2026-09-17T17:26:40.522Z"
-      }
+      "headline": "Platform Administrator & Lead"
     }
   },
   {

@@ -25,12 +25,14 @@ function OrganizerRoute() {
 
   const handleSwitchToOrganizer = async () => {
     try {
+      const currentEmail = user?.email || "jainarchi555@gmail.com";
+      const currentName = user?.name || "Archi Jain";
       await loginWithGoogle({
         role: "organizer",
-        email: "organizer@enginow.ignite",
-        name: "Alex DevSphere",
+        email: currentEmail,
+        name: currentName,
       });
-      toast.success("Switched to Organizer persona!");
+      toast.success(`Active as ${currentName} (Organizer)`);
     } catch (err: any) {
       toast.error(err.message || "Failed to switch role");
     }

@@ -123,18 +123,18 @@ function AuthPage() {
     setGoogleLoading(true);
     try {
       const targetRole = asRole || "student";
-      await loginWithGoogle(
-        targetRole === "admin"
-          ? { role: "admin", email: "admin@enginow.ignite", name: "Sarah Chen (Admin)" }
-          : targetRole === "organizer"
-          ? { role: "organizer", email: "organizer@enginow.ignite", name: "Alex DevSphere" }
-          : { role: "student", email: "student@enginow.ignite", name: "Alex Rivera" }
-      );
-      toast.success(`Signed in as ${targetRole === "admin" ? "Administrator" : targetRole === "organizer" ? "Organizer" : "Participant"}!`);
+      const targetEmail = suggestedAccount?.email || user?.email || "jainarchi555@gmail.com";
+      const targetName = suggestedAccount?.name || user?.name || "Archi Jain";
+      await loginWithGoogle({
+        role: targetRole,
+        email: targetEmail,
+        name: targetName,
+      });
+      toast.success(`Active as ${targetName} (${targetRole === "admin" ? "Administrator" : targetRole === "organizer" ? "Organizer" : "Participant"})`);
       if (targetRole === "admin") {
         navigate({ to: "/admin" });
       } else if (targetRole === "organizer") {
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/organizer" });
       } else {
         navigate({ to: "/" });
       }

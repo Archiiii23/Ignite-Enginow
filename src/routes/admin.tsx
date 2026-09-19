@@ -25,8 +25,14 @@ function AdminRoute() {
 
   const handleSwitchToAdmin = async () => {
     try {
-      await loginWithGoogle({ role: "admin", email: "admin@enginow.ignite", name: "Sarah Chen (Admin)" });
-      toast.success("Switched to Admin persona!");
+      const currentEmail = user?.email || "jainarchi555@gmail.com";
+      const currentName = user?.name || "Archi Jain";
+      await loginWithGoogle({
+        role: "admin",
+        email: currentEmail,
+        name: currentName,
+      });
+      toast.success(`Active as ${currentName} (Admin)`);
     } catch (err: any) {
       toast.error(err.message || "Failed to switch role");
     }
