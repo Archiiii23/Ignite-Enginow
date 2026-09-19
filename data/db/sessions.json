@@ -15,13 +15,13 @@
     "expiresAt": "2026-09-24T17:04:57.433Z"
   },
   {
-    "tokenHash": "703650fceedb49b0de1c0bf330f82f94a54afb1e07991dfe00a2ce43632117d3",
-    "userId": "usr_admin_1",
-    "expiresAt": "2026-09-24T17:27:27.591Z"
-  },
-  {
     "tokenHash": "9f960aa5700b5df3a21ca4007846be22caa567cb1fdc5e0a80186a3ec3a0419c",
     "userId": "usr_admin_1",
     "expiresAt": "2026-09-25T10:47:46.840Z"
+  },
+  {
+    "tokenHash": "43946b6768a37ee0a1c8e0b15df8bedfd15ef895d4ab6bb394e70238b147ba0e",
+    "userId": "usr_student_1",
+    "expiresAt": "2026-09-26T09:15:10.617Z"
   }
 ]
