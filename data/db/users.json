@@ -8,7 +8,7 @@
       "name": "Aarav Sharma",
       "email": "aarav.sharma@campus.edu",
       "avatar": "",
-      "role": "student",
+      "role": "organizer",
       "isRoleSelected": true,
       "headline": "CS and AI Undergraduate",
       "college": "Indian Institute of Technology (IIT)",
@@ -21,8 +21,9 @@
       "roleChangeRequest": {
         "requestedRole": "organizer",
         "reason": "bjn",
-        "status": "PENDING",
-        "requestedAt": "2026-09-19T09:30:55.928Z"
+        "status": "APPROVED",
+        "requestedAt": "2026-09-19T09:30:55.928Z",
+        "reviewedAt": "2026-09-19T14:43:34.438Z"
       },
       "isSuspended": false
     }
