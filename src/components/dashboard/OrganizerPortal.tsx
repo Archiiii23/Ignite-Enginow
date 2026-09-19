@@ -192,11 +192,11 @@ export function OrganizerPortal() {
       toast.info("No registration records to export");
       return;
     }
-    const header = "Name,Email,Phone,College,Degree,Year,Roll Number,GitHub,LinkedIn,Skills,Participation,Team Name,Team Role,T-Shirt,Seat,Status,Registered At\n";
+    const header = "Participant Name,Email,College,Phone,Registration Date,Event Title,Seat Number,Status\n";
     const rows = regs
       .map(
         (r) =>
-          `"${r.userName}","${r.userEmail}","${r.phone ?? ""}","${r.college ?? ""}","${r.degree ?? ""}","${r.yearOfStudy ?? ""}","${r.rollNumber ?? ""}","${r.githubUrl ?? ""}","${r.linkedinUrl ?? ""}","${(r.skills || []).join("; ")}","${r.participationType ?? "solo"}","${r.teamName ?? ""}","${r.teamRole ?? ""}","${r.tshirtSize ?? ""}","${r.seatNumber}","${r.status}","${r.registeredAt}"`
+          `"${r.userName}","${r.userEmail}","${r.college ?? "Independent"}","${r.phone ?? "N/A"}","${new Date(r.registeredAt).toLocaleString()}","${r.eventTitle || "Event"}","${r.seatNumber}","${r.status}"`
       )
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
@@ -217,27 +217,23 @@ export function OrganizerPortal() {
     }
     const headers = [
       "Participant Name",
-      "Email Address",
-      "Phone Number",
-      "College / Institution",
-      "Degree & Branch",
-      "Year of Study",
-      "Student ID / Roll No",
-      "Seat Number",
-      "Attendance Status",
+      "Email",
+      "College",
+      "Phone",
       "Registration Date",
+      "Event Title",
+      "Seat Number",
+      "Status",
     ];
     const rows = regs.map((r) => [
       r.userName,
       r.userEmail,
+      r.college || "Independent",
       r.phone || "N/A",
-      r.college || "N/A",
-      r.degree || "N/A",
-      r.yearOfStudy || "N/A",
-      r.rollNumber || "N/A",
+      new Date(r.registeredAt).toLocaleString(),
+      r.eventTitle || "Event",
       r.seatNumber || "N/A",
       r.status,
-      new Date(r.registeredAt).toLocaleString(),
     ]);
 
     const content =
@@ -977,9 +973,11 @@ export function OrganizerPortal() {
                             <table className="w-full text-left text-xs">
                               <thead>
                                 <tr className="border-b border-border/80 text-muted-foreground font-mono">
-                                  <th className="pb-2">Name</th>
+                                  <th className="pb-2">Participant Name</th>
                                   <th className="pb-2">Email</th>
                                   <th className="pb-2">College</th>
+                                  <th className="pb-2">Phone</th>
+                                  <th className="pb-2">Registration Date</th>
                                   <th className="pb-2">Seat</th>
                                   <th className="pb-2">Status</th>
                                   <th className="pb-2 text-right">Action</th>
@@ -990,7 +988,9 @@ export function OrganizerPortal() {
                                   <tr key={r.id} className="hover:bg-secondary/40">
                                     <td className="py-2.5 font-semibold text-foreground">{r.userName}</td>
                                     <td className="py-2.5 text-muted-foreground font-mono">{r.userEmail}</td>
-                                    <td className="py-2.5 text-muted-foreground">{r.college || "Independent"}</td>
+                                    <td className="py-2.5 text-foreground">{r.college || "Independent"}</td>
+                                    <td className="py-2.5 text-muted-foreground font-mono">{r.phone || "—"}</td>
+                                    <td className="py-2.5 text-muted-foreground font-mono">{new Date(r.registeredAt).toLocaleDateString()}</td>
                                     <td className="py-2.5 font-mono">{r.seatNumber}</td>
                                     <td className="py-2.5">
                                       <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
@@ -1096,10 +1096,12 @@ export function OrganizerPortal() {
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-border bg-secondary/30 text-muted-foreground uppercase tracking-wider font-mono">
-                      <th className="py-3 px-4">Student</th>
+                      <th className="py-3 px-4">Participant Name</th>
+                      <th className="py-3 px-4">Email</th>
+                      <th className="py-3 px-4">College</th>
+                      <th className="py-3 px-4">Phone</th>
+                      <th className="py-3 px-4">Registration Date</th>
                       <th className="py-3 px-4">Event</th>
-                      <th className="py-3 px-4">Institution & ID</th>
-                      <th className="py-3 px-4">Team</th>
                       <th className="py-3 px-4">Seat</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Attendance Action</th>
@@ -1108,28 +1110,26 @@ export function OrganizerPortal() {
                   <tbody className="divide-y divide-border">
                     {filteredRegistrations.map((reg) => (
                       <tr key={reg.id} className="hover:bg-secondary/30 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-foreground text-sm">{reg.userName}</div>
-                          <div className="text-muted-foreground text-[11px] font-mono">{reg.userEmail}</div>
-                          {reg.phone && <div className="text-muted-foreground text-[10px]">📞 {reg.phone}</div>}
+                        <td className="py-3.5 px-4 font-bold text-foreground text-sm">
+                          {reg.userName}
                         </td>
-                        <td className="py-3.5 px-4 font-medium text-foreground max-w-xs truncate">
-                          {reg.eventTitle}
+                        <td className="py-3.5 px-4 text-muted-foreground font-mono">
+                          {reg.userEmail}
                         </td>
-                        <td className="py-3.5 px-4 text-muted-foreground">
-                          <div>{reg.college || "Independent"}</div>
+                        <td className="py-3.5 px-4 text-foreground">
+                          {reg.college || "Independent"}
                           {reg.rollNumber && (
-                            <div className="text-[10px] font-mono text-muted-foreground">ID: {reg.rollNumber}</div>
+                            <span className="block text-[10px] font-mono text-muted-foreground">ID: {reg.rollNumber}</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-muted-foreground">
-                          {reg.teamName ? (
-                            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium text-[10px]">
-                              {reg.teamName}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground text-[10px]">Solo</span>
-                          )}
+                        <td className="py-3.5 px-4 text-muted-foreground font-mono">
+                          {reg.phone || "—"}
+                        </td>
+                        <td className="py-3.5 px-4 text-muted-foreground font-mono">
+                          {new Date(reg.registeredAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3.5 px-4 font-medium text-foreground max-w-[150px] truncate" title={reg.eventTitle}>
+                          {reg.eventTitle}
                         </td>
                         <td className="py-3.5 px-4 font-mono font-bold text-foreground">
                           {reg.seatNumber}
