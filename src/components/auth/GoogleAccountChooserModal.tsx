@@ -24,6 +24,12 @@ export function getSavedGoogleAccounts(): GoogleAccount[] {
   // Default accounts for instant developer/testing suggestion
   return [
     {
+      name: "Archi Jain",
+      email: "jainarchi555@gmail.com",
+      avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Archi%20Jain",
+      lastUsed: "Current user",
+    },
+    {
       name: "Alex Rivera",
       email: "alex.rivera@gmail.com",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",

@@ -48,15 +48,20 @@ function AuthPage() {
     }
   }, []);
 
-  // Initialize Google Identity Services (GIS) One Tap if available in browser
+  // Initialize Google Identity Services (GIS) One Tap only if a REAL Google Client ID is configured
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || "915830948214-mock.apps.googleusercontent.com";
+    const rawClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+    // Prevent Google Error 401: invalid_client when client ID is missing or a mock placeholder
+    if (!rawClientId || rawClientId.includes("mock") || rawClientId.includes("your_google_client_id")) {
+      return;
+    }
+
     const google = (window as any).google;
     if (google?.accounts?.id) {
       try {
         google.accounts.id.initialize({
-          client_id: clientId,
+          client_id: rawClientId,
           callback: async (response: any) => {
             if (response?.credential) {
               setGoogleLoading(true);
