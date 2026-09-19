@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as OrganizerRouteImport } from './routes/organizer'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
@@ -56,6 +57,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganizerRoute = OrganizerRouteImport.update({
+  id: '/organizer',
+  path: '/organizer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/organizer': typeof OrganizerRoute
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/organizer': typeof OrganizerRoute
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/organizer': typeof OrganizerRoute
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/dashboard'
+    | '/organizer'
     | '/resources'
     | '/sitemap.xml'
     | '/events/$eventId'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/dashboard'
+    | '/organizer'
     | '/resources'
     | '/sitemap.xml'
     | '/events/$eventId'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/dashboard'
+    | '/organizer'
     | '/resources'
     | '/sitemap.xml'
     | '/events/$eventId'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  OrganizerRoute: typeof OrganizerRoute
   ResourcesRoute: typeof ResourcesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/organizer': {
+      id: '/organizer'
+      path: '/organizer'
+      fullPath: '/organizer'
+      preLoaderRoute: typeof OrganizerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources': {
       id: '/resources'
       path: '/resources'
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  OrganizerRoute: OrganizerRoute,
   ResourcesRoute: ResourcesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   EventsEventIdRoute: EventsEventIdRoute,
