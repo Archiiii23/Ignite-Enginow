@@ -363,14 +363,14 @@ export function OrganizerPortal() {
       {/* Top 7 Navigation Tabs Matching Page 6 Spec */}
       <div className="flex items-center gap-1 p-1.5 bg-secondary/80 border border-border rounded-2xl mb-8 overflow-x-auto scrollbar-none">
         {([
-          ["overview", "Overview", Activity],
-          ["total-events", `Total Events (${totalEventsCount})`, Calendar],
-          ["pending-events", `Pending Events (${pendingEventsCount})`, Clock],
-          ["approved-events", `Approved Events (${approvedEventsCount})`, CheckCircle2],
-          ["registrations", `Registrations (${totalRegistrationsCount})`, Users],
-          ["analytics", "Analytics", TrendingUp],
-          ["management", "Event Management", Layers],
-          ["verification", "Verification", ShieldCheck],
+          ["overview", "⚡ Overview", Activity],
+          ["total-events", `📅 Total Events (${totalEventsCount})`, Calendar],
+          ["pending-events", `⏳ Pending Events (${pendingEventsCount})`, Clock],
+          ["approved-events", `🎯 Approved Events (${approvedEventsCount})`, CheckCircle2],
+          ["registrations", `👥 Registrations (${totalRegistrationsCount})`, Users],
+          ["analytics", "📈 Analytics", TrendingUp],
+          ["management", "🛠️ Event Management", Layers],
+          ["verification", "🛡️ Verification", ShieldCheck],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}

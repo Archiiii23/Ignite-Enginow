@@ -405,14 +405,14 @@ export function AdminPortal() {
       {/* Platform Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8">
         {[
-          { label: "Active Users", value: "1,420", sub: "Students & Builders", icon: Users, color: "text-violet-500" },
-          { label: "Active Organizers", value: organizers.filter((o) => o.verificationStatus === "verified").length, sub: "Verified Partners", icon: Globe, color: "text-emerald-500" },
-          { label: "Total Events", value: events.length, sub: `${publishedEvents.length} live now`, icon: BarChart2, color: "text-primary" },
-          { label: "Pending Approvals", value: pendingOrgs.length + pendingEvents.length + roleRequests.length, sub: "Requires review", icon: Clock, color: "text-amber-500" },
-          { label: "Total Registrations", value: totalRegistrations.toLocaleString(), sub: "Confirmed passes", icon: CheckCircle2, color: "text-blue-500" },
-          { label: "Monthly Growth", value: "+24.8%", sub: "MoM trajectory", icon: TrendingUp, color: "text-emerald-500" },
+          { label: "👥 Active Users", value: "1,420", sub: "Students & Builders", icon: Users, color: "text-violet-500" },
+          { label: "🛡️ Active Organizers", value: organizers.filter((o) => o.verificationStatus === "verified").length, sub: "Verified Partners", icon: Globe, color: "text-emerald-500" },
+          { label: "🚀 Total Events", value: events.length, sub: `${publishedEvents.length} live now`, icon: BarChart2, color: "text-primary" },
+          { label: "⏳ Pending Approvals", value: pendingOrgs.length + pendingEvents.length + roleRequests.length, sub: "Requires review", icon: Clock, color: "text-amber-500" },
+          { label: "🎟️ Registrations", value: totalRegistrations.toLocaleString(), sub: "Confirmed passes", icon: CheckCircle2, color: "text-blue-500" },
+          { label: "📈 Monthly Growth", value: "+24.8%", sub: "MoM trajectory", icon: TrendingUp, color: "text-emerald-500" },
         ].map((stat) => (
-          <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+          <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between text-muted-foreground mb-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider">{stat.label}</span>
               <stat.icon className={`size-4 ${stat.color}`} />
@@ -426,40 +426,40 @@ export function AdminPortal() {
       {/* Pending badges */}
       <div className="flex flex-wrap gap-2 mb-6">
         {roleRequests.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-            <RefreshCw className="size-3" /> {roleRequests.length} role change request{roleRequests.length !== 1 ? "s" : ""} pending
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 shadow-xs">
+            <RefreshCw className="size-3" /> 👑 {roleRequests.length} role change request{roleRequests.length !== 1 ? "s" : ""} pending
           </span>
         )}
         {pendingOrgs.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            <Clock className="size-3" /> {pendingOrgs.length} organizer verification{pendingOrgs.length !== 1 ? "s" : ""} pending
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
+            <Clock className="size-3" /> 🛡️ {pendingOrgs.length} organizer verification{pendingOrgs.length !== 1 ? "s" : ""} pending
           </span>
         )}
         {pendingEvents.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <Eye className="size-3" /> {pendingEvents.length} event{pendingEvents.length !== 1 ? "s" : ""} awaiting review
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">
+            <Eye className="size-3" /> 🎟️ {pendingEvents.length} event{pendingEvents.length !== 1 ? "s" : ""} awaiting review
           </span>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1.5 p-1.5 bg-secondary/80 rounded-2xl mb-8 border border-border">
+      <div className="flex flex-wrap gap-1.5 p-1.5 bg-secondary/80 rounded-2xl mb-8 border border-border backdrop-blur-xs">
         {([
-          ["users", "User Management", Users],
-          ["organizers", `Organizer Approval${pendingOrgs.length > 0 ? ` (${pendingOrgs.length})` : ""}`, ShieldCheck],
-          ["events", `Event Approval${pendingEvents.length > 0 ? ` (${pendingEvents.length})` : ""}`, Eye],
-          ["analytics", "Analytics", BarChart2],
-          ["reports", "Reports", FileSpreadsheet],
-          ["categories", "Category Management", Tag],
-          ["role-requests", `Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
-          ["announcements", "Announcements", Megaphone],
+          ["users", "👥 User Management", Users],
+          ["organizers", `🛡️ Organizer Approval${pendingOrgs.length > 0 ? ` (${pendingOrgs.length})` : ""}`, ShieldCheck],
+          ["events", `🎟️ Event Approval${pendingEvents.length > 0 ? ` (${pendingEvents.length})` : ""}`, Eye],
+          ["analytics", "📊 Analytics", BarChart2],
+          ["reports", "📑 Reports & Audits", FileSpreadsheet],
+          ["categories", "🏷️ Category Management", Tag],
+          ["role-requests", `👑 Role Requests${roleRequests.length > 0 ? ` (${roleRequests.length})` : ""}`, UserCheck],
+          ["announcements", "📢 Announcements", Megaphone],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
             onClick={() => setTab(id as Tab)}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               tab === id
-                ? "bg-card text-foreground shadow-sm border border-border"
+                ? "bg-card text-foreground shadow-sm border border-border scale-[1.02]"
                 : "text-muted-foreground hover:text-foreground hover:bg-card/50"
             }`}
           >

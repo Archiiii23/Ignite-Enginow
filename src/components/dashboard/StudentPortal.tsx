@@ -157,22 +157,58 @@ Status: ${reg.status.toUpperCase()}
         </div>
       </motion.div>
 
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-8">
+        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs hover:border-primary/40 transition-colors">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>🎟️ Total Passes</span>
+            <Ticket className="size-4 text-primary" />
+          </div>
+          <div className="text-2xl font-bold font-display text-foreground">{myRegistrations.length}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">Registered events</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs hover:border-emerald-500/40 transition-colors">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>📅 Upcoming</span>
+            <Calendar className="size-4 text-emerald-500" />
+          </div>
+          <div className="text-2xl font-bold font-display text-foreground">{upcomingRegistrations.length}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">Ready to attend</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs hover:border-rose-500/40 transition-colors">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>💖 Bookmarked</span>
+            <Heart className="size-4 text-rose-500" />
+          </div>
+          <div className="text-2xl font-bold font-display text-foreground">{favoriteEvents.length}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">Saved for later</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs hover:border-amber-500/40 transition-colors">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>🏆 Credentials</span>
+            <Award className="size-4 text-amber-500" />
+          </div>
+          <div className="text-2xl font-bold font-display text-foreground">{myRegistrations.filter(r => r.status === "confirmed").length}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">Verified certificates</div>
+        </div>
+      </div>
+
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 p-1 bg-secondary rounded-xl mb-8 w-fit">
+      <div className="flex flex-wrap gap-1.5 p-1.5 bg-secondary/80 rounded-2xl mb-8 w-fit border border-border backdrop-blur-xs">
         {([
-          ["events", `Registered Events (${myRegistrations.length})`, Ticket],
-          ["saved", `Saved Events (${favoriteEvents.length})`, Heart],
-          ["upcoming", `Upcoming Events (${upcomingRegistrations.length})`, Calendar],
-          ["certificates", "Certificates (Future)", Award],
-          ["profile", "Profile", User],
+          ["events", `🎟️ Registered Events (${myRegistrations.length})`, Ticket],
+          ["saved", `💖 Saved Events (${favoriteEvents.length})`, Heart],
+          ["upcoming", `📅 Upcoming (${upcomingRegistrations.length})`, Calendar],
+          ["certificates", "🏆 Certificates & Rewards", Award],
+          ["profile", "👤 My Profile", User],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
             onClick={() => setTab(id as Tab)}
-            className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+            className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               tab === id
-                ? "bg-card text-foreground shadow-sm font-semibold"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-card text-foreground shadow-sm border border-border scale-[1.02]"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
             }`}
           >
             <Icon className="size-3.5" />
