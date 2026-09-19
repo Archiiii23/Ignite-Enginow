@@ -20,6 +20,7 @@ export type EventCategory =
   | "Career"
   | "College Events"
   | "Hackathons"
+  | "Hackathon"
   // Aliases and legacy types for backwards compatibility
   | "Workshops"
   | "Workshop"

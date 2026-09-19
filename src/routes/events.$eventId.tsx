@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/site/PageShell";
 import { events, type EventItem } from "@/data/events";
@@ -123,6 +123,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 function EventDetail() {
+  const navigate = useNavigate();
   const { event } = Route.useLoaderData() as { event: EventItem };
   const { user, isAuthenticated } = useAuth();
   const { addNotification } = useNotifications();

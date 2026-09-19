@@ -723,9 +723,9 @@ export function AdminPortal() {
                             <span className="font-semibold text-primary">{ev.price}</span>
                           </div>
 
-                          {ev.rejectReason && (
+                          {ev.rejectionReason && (
                             <div className="mt-2 text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5">
-                              Rejection feedback: "{ev.rejectReason}"
+                              Rejection feedback: "{ev.rejectionReason}"
                             </div>
                           )}
                         </div>
