@@ -232,96 +232,96 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Developer Credits Spotlight */}
-          <div className="border-t border-border/70 pt-8 pb-8 my-8 flex flex-col lg:flex-row items-center justify-between gap-6 bg-secondary/30 rounded-2xl p-6 border border-border/80 shadow-xs">
-            <div className="flex items-center gap-3.5">
-              <div className="size-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/25 text-primary grid place-items-center shrink-0 shadow-xs">
-                <Code2 className="size-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] uppercase tracking-wider font-mono font-bold text-primary flex items-center gap-1">
-                    <Sparkles className="size-3" /> Core Engineering Team
-                  </span>
-                </div>
-                <div className="text-sm font-bold text-foreground mt-0.5">
-                  Developed by <span className="text-primary font-display">Aarchi Jain</span> &amp;{" "}
-                  <span className="text-primary font-display">Pranya Patel</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Architected with modern full-stack performance, responsive motion, and modular design.
-                </p>
-              </div>
+          {/* DEVELOPED BY Section Matching Reference Design */}
+          <div className="border-t border-border/70 pt-8 pb-4 my-8">
+            <div className="mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500/90 font-mono">
+                DEVELOPED BY
+              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3.5">
-              {/* Aarchi Jain Profile Card */}
-              <div className="flex items-center gap-3 bg-card border border-border hover:border-primary/40 p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-xs group">
-                <div className="size-9 rounded-lg bg-primary/15 border border-primary/30 text-primary font-bold text-xs grid place-items-center shrink-0 group-hover:scale-105 transition-transform font-mono">
-                  AJ
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
-                    Aarchi Jain
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Archi Jain Pill - Pink Hover */}
+              <div className="group relative flex items-center justify-between px-6 py-4 rounded-2xl bg-secondary/40 border border-border/80 hover:border-pink-500/60 hover:bg-pink-500/[0.08] hover:shadow-[0_0_25px_rgba(236,72,153,0.18)] transition-all duration-300">
+                <span className="text-sm font-semibold text-foreground group-hover:text-pink-400 transition-colors">
+                  Archi Jain
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="relative group/btn">
+                    <a
+                      href="https://www.linkedin.com/in/archi-jain-8a9967332?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-500/40 hover:!bg-pink-600 hover:!text-white hover:!border-pink-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                      title="LinkedIn: Archi Jain"
+                      aria-label="Archi Jain LinkedIn"
+                    >
+                      <Linkedin className="size-3.5" />
+                    </a>
+                    {/* ID Tooltip */}
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-500/30 text-pink-400 shadow-lg z-20">
+                      @archi-jain
+                    </span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Full Stack Developer</div>
-                </div>
-                <div className="flex items-center gap-1.5 ml-2 border-l border-border pl-2.5">
-                  <a
-                    href="https://github.com/Archiiii23"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="size-7 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
-                    title="Aarchi Jain GitHub Profile"
-                    aria-label="Aarchi Jain GitHub Profile"
-                  >
-                    <Github className="size-3.5" />
-                  </a>
-                  <a
-                    href="https://linkedin.com/in/aarchijain"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="size-7 rounded-lg bg-secondary hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
-                    title="Aarchi Jain LinkedIn Profile"
-                    aria-label="Aarchi Jain LinkedIn Profile"
-                  >
-                    <Linkedin className="size-3.5" />
-                  </a>
+
+                  <div className="relative group/btn">
+                    <a
+                      href="https://github.com/Archiiii23"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-500/40 hover:!bg-pink-600 hover:!text-white hover:!border-pink-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                      title="GitHub: @Archiiii23"
+                      aria-label="Archi Jain GitHub (@Archiiii23)"
+                    >
+                      <Github className="size-3.5" />
+                    </a>
+                    {/* ID Tooltip */}
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-500/30 text-pink-400 shadow-lg z-20">
+                      @Archiiii23
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Pranya Patel Profile Card */}
-              <div className="flex items-center gap-3 bg-card border border-border hover:border-emerald-500/40 p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-xs group">
-                <div className="size-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs grid place-items-center shrink-0 group-hover:scale-105 transition-transform font-mono">
-                  PP
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                    Pranya Patel
+              {/* Pranya Patel Pill - Blue Hover */}
+              <div className="group relative flex items-center justify-between px-6 py-4 rounded-2xl bg-secondary/40 border border-border/80 hover:border-blue-500/60 hover:bg-blue-500/[0.08] hover:shadow-[0_0_25px_rgba(59,130,246,0.18)] transition-all duration-300">
+                <span className="text-sm font-semibold text-foreground group-hover:text-blue-400 transition-colors">
+                  Pranya Patel
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="relative group/btn">
+                    <a
+                      href="https://www.linkedin.com/in/pranya-patel-15p"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-blue-500/40 hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+                      title="LinkedIn: Pranya Patel"
+                      aria-label="Pranya Patel LinkedIn"
+                    >
+                      <Linkedin className="size-3.5" />
+                    </a>
+                    {/* ID Tooltip */}
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-blue-500/30 text-blue-400 shadow-lg z-20">
+                      @pranya-patel-15p
+                    </span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Full Stack Developer</div>
-                </div>
-                <div className="flex items-center gap-1.5 ml-2 border-l border-border pl-2.5">
-                  <a
-                    href="https://github.com/pranyapatel"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="size-7 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
-                    title="Pranya Patel GitHub Profile"
-                    aria-label="Pranya Patel GitHub Profile"
-                  >
-                    <Github className="size-3.5" />
-                  </a>
-                  <a
-                    href="https://linkedin.com/in/pranyapatel"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="size-7 rounded-lg bg-secondary hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
-                    title="Pranya Patel LinkedIn Profile"
-                    aria-label="Pranya Patel LinkedIn Profile"
-                  >
-                    <Linkedin className="size-3.5" />
-                  </a>
+
+                  <div className="relative group/btn">
+                    <a
+                      href="https://github.com/Pranya15"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-blue-500/40 hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+                      title="GitHub: @Pranya15"
+                      aria-label="Pranya Patel GitHub (@Pranya15)"
+                    >
+                      <Github className="size-3.5" />
+                    </a>
+                    {/* ID Tooltip */}
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-blue-500/30 text-blue-400 shadow-lg z-20">
+                      @Pranya15
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -358,25 +358,26 @@ export function Footer() {
                 <ThemeToggle showLabel />
               </div>
               <div className="text-muted-foreground text-xs text-left md:text-right">
-                © {new Date().getFullYear()} Enginow Ignite · Developed with{" "}
-                <Heart className="size-3 inline text-red-500 fill-red-500 mx-0.5" /> by{" "}
-                <a
-                  href="https://github.com/Archiiii23"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-primary/40 underline-offset-2"
-                >
-                  Aarchi Jain
-                </a>{" "}
-                &amp;{" "}
-                <a
-                  href="https://github.com/pranyapatel"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-primary/40 underline-offset-2"
-                >
-                  Pranya Patel
-                </a>
+                <p>
+                  &copy; {new Date().getFullYear()} Enginow Ignite · Developed with <Heart className="size-3 inline text-red-500 fill-red-500 mx-0.5" /> by{" "}
+                  <a
+                    href="https://github.com/Archiiii23"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-foreground hover:text-pink-400 transition-colors cursor-pointer underline underline-offset-2"
+                  >
+                    Archi Jain
+                  </a>{" "}
+                  &amp;{" "}
+                  <a
+                    href="https://github.com/Pranya15"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-foreground hover:text-blue-400 transition-colors cursor-pointer underline underline-offset-2"
+                  >
+                    Pranya Patel
+                  </a>
+                </p>
               </div>
             </div>
           </div>
