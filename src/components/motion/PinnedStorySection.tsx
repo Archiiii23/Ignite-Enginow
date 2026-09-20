@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useGSAPScrollTrigger } from "@/animations/scrollAnimations";
 import {
   Compass,
@@ -8,6 +9,7 @@ import {
   LayoutDashboard,
   BarChart3,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,6 +22,8 @@ const storySteps = [
     desc: "Explore hackathons, workshops, and conferences tailored to your technical skills. Filter by format, prize pool, or track.",
     icon: Compass,
     highlights: ["500k+ Active Participants", "AI & Custom Filters", "Instant Proof of Skill"],
+    to: "/events",
+    ctaLabel: "Explore Opportunities",
   },
   {
     step: "02",
@@ -29,6 +33,8 @@ const storySteps = [
     desc: "Claim your pass or join a team in seconds. Receive instant QR tickets and live calendar synced reminders.",
     icon: UserCheck,
     highlights: ["Team Matchmaker", "Instant QR Pass", "Integrated Schedule"],
+    to: "/events",
+    ctaLabel: "Browse Passes & Tickets",
   },
   {
     step: "03",
@@ -38,6 +44,8 @@ const storySteps = [
     desc: "Build custom event pages, configure custom tracks, set submission guidelines, and publish in minutes.",
     icon: PlusCircle,
     highlights: ["Custom Landing Pages", "Flexible Tracks", "Sponsor Showcase"],
+    to: "/organizer",
+    ctaLabel: "Launch Organizer Studio",
   },
   {
     step: "04",
@@ -47,6 +55,8 @@ const storySteps = [
     desc: "Administrators inspect submitted events, verify organizer credentials, and publish directly to the global ecosystem.",
     icon: ShieldCheck,
     highlights: ["Verification Queue", "Compliance Checks", "Ecosystem Moderation"],
+    to: "/admin",
+    ctaLabel: "Access Admin Verification",
   },
   {
     step: "05",
@@ -56,6 +66,8 @@ const storySteps = [
     desc: "Track live registrations, check-in attendees via QR codes, assign judges, and evaluate project submissions in real time.",
     icon: LayoutDashboard,
     highlights: ["Live QR Check-in", "Automated Judging", "Participant Broadcasts"],
+    to: "/organizer",
+    ctaLabel: "Manage Attendees & Live QR",
   },
   {
     step: "06",
@@ -65,6 +77,8 @@ const storySteps = [
     desc: "Measure attendee engagement, export analytics reports, issue verifiable certificates, and pipeline top talent.",
     icon: BarChart3,
     highlights: ["Deep Analytics", "Verifiable Certificates", "Direct Talent Highway"],
+    to: "/dashboard",
+    ctaLabel: "View Analytics & Certificates",
   },
 ];
 
@@ -182,14 +196,28 @@ export function PinnedStorySection() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-border/40">
                   {activeStep.highlights.map((item) => (
-                    <div
+                    <Link
                       key={item}
-                      className="flex items-center gap-2 p-3 rounded-xl bg-secondary/40 border border-border/50 text-xs font-medium text-foreground"
+                      to={activeStep.to}
+                      className="flex items-center gap-2 p-3 rounded-xl bg-secondary/40 border border-border/50 text-xs font-medium text-foreground hover:bg-secondary/80 hover:border-primary/30 transition-all cursor-pointer group/pill"
                     >
-                      <CheckCircle2 className="size-4 text-primary shrink-0" />
-                      <span>{item}</span>
-                    </div>
+                      <CheckCircle2 className="size-4 text-primary shrink-0 group-hover/pill:scale-110 transition-transform" />
+                      <span className="group-hover/pill:text-primary transition-colors truncate">{item}</span>
+                    </Link>
                   ))}
+                </div>
+
+                <div className="pt-2 flex items-center gap-3">
+                  <Link
+                    to={activeStep.to}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs sm:text-sm font-semibold hover:opacity-95 transition-all shadow-[0_0_20px_-4px_var(--primary-glow)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <span>{activeStep.ctaLabel}</span>
+                    <ArrowRight className="size-4" />
+                  </Link>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Direct access for {activeStep.role}
+                  </span>
                 </div>
               </motion.div>
             </AnimatePresence>

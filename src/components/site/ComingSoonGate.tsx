@@ -329,16 +329,19 @@ export function ComingSoonGate({ children }: { children: ReactNode }) {
                   { icon: Trophy, label: "Prize Pools", value: "₹25L+" },
                   { icon: ShieldCheck, label: "Verified Hub", value: "100%" },
                 ].map((stat) => (
-                  <div
+                  <button
                     key={stat.label}
-                    className="flex flex-col items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] py-2.5 px-2 backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+                    type="button"
+                    onClick={handleSkip}
+                    title="Click to enter platform"
+                    className="flex flex-col items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] py-2.5 px-2 backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-white/[0.08] hover:scale-105 cursor-pointer active:scale-95"
                   >
                     <stat.icon className="size-3.5 text-primary/80 mb-1" />
                     <span className="font-display text-sm font-bold text-white">{stat.value}</span>
                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                       {stat.label}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </motion.div>
 

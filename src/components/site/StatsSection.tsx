@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { usePlatformStore } from "@/lib/platform-store";
-import { CalendarDays, Users, Building2, Star } from "lucide-react";
+import { CalendarDays, Users, Building2, Star, ArrowUpRight } from "lucide-react";
 
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
   const [val, setVal] = useState(0);
@@ -35,10 +36,38 @@ export function StatsSection() {
   const featuredEvents = events.filter((e) => e.isFeatured).length;
 
   const stats = [
-    { icon: CalendarDays, label: "Events Hosted", value: Math.max(publishedEvents, 12000), suffix: "+" },
-    { icon: Users, label: "Participants", value: Math.max(totalRegs, 500000), suffix: "+" },
-    { icon: Building2, label: "Verified Organizers", value: Math.max(verifiedOrgs, 850), suffix: "+" },
-    { icon: Star, label: "Featured Events", value: Math.max(featuredEvents, 240), suffix: "+" },
+    {
+      icon: CalendarDays,
+      label: "Events Hosted",
+      value: Math.max(publishedEvents, 12000),
+      suffix: "+",
+      to: "/events" as const,
+      tooltip: "Browse all published events",
+    },
+    {
+      icon: Users,
+      label: "Participants",
+      value: Math.max(totalRegs, 500000),
+      suffix: "+",
+      to: "/events" as const,
+      tooltip: "Join live community events",
+    },
+    {
+      icon: Building2,
+      label: "Verified Organizers",
+      value: Math.max(verifiedOrgs, 850),
+      suffix: "+",
+      to: "/organizer" as const,
+      tooltip: "Explore organizer ecosystem",
+    },
+    {
+      icon: Star,
+      label: "Featured Events",
+      value: Math.max(featuredEvents, 240),
+      suffix: "+",
+      to: "/events" as const,
+      tooltip: "Discover hand-picked spotlights",
+    },
   ];
 
   return (
@@ -52,13 +81,24 @@ export function StatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="flex flex-col items-center md:items-start gap-2 md:pl-8 md:border-l border-border first:border-l-0 first:pl-0"
+              className="md:pl-8 md:border-l border-border first:border-l-0 first:pl-0"
             >
-              <stat.icon className="size-5 text-primary" />
-              <div className="text-stat text-primary">
-                <AnimatedNumber target={stat.value} suffix={stat.suffix} />
-              </div>
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</div>
+              <Link
+                to={stat.to}
+                title={stat.tooltip}
+                className="group flex flex-col items-center md:items-start gap-2 p-3 -m-3 rounded-2xl transition-all duration-200 hover:bg-secondary/40 cursor-pointer text-left"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <stat.icon className="size-5 text-primary group-hover:scale-110 transition-transform duration-200" />
+                  <ArrowUpRight className="size-4 text-muted-foreground opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-200 text-primary" />
+                </div>
+                <div className="text-stat text-primary group-hover:text-primary-glow transition-colors">
+                  <AnimatedNumber target={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors flex items-center gap-1">
+                  <span>{stat.label}</span>
+                </div>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -66,3 +106,4 @@ export function StatsSection() {
     </section>
   );
 }
+

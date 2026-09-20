@@ -24,6 +24,7 @@ const capabilities = [
     color: "from-violet-500/20 via-violet-500/5 to-transparent",
     border: "border-violet-500/30",
     badge: "bg-violet-500/10 text-violet-500",
+    to: "/events" as const,
   },
   {
     step: "02",
@@ -34,6 +35,7 @@ const capabilities = [
     color: "from-blue-500/20 via-blue-500/5 to-transparent",
     border: "border-blue-500/30",
     badge: "bg-blue-500/10 text-blue-500",
+    to: "/events" as const,
   },
   {
     step: "03",
@@ -44,6 +46,7 @@ const capabilities = [
     color: "from-emerald-500/20 via-emerald-500/5 to-transparent",
     border: "border-emerald-500/30",
     badge: "bg-emerald-500/10 text-emerald-500",
+    to: "/events" as const,
   },
   {
     step: "04",
@@ -54,6 +57,7 @@ const capabilities = [
     color: "from-amber-500/20 via-amber-500/5 to-transparent",
     border: "border-amber-500/30",
     badge: "bg-amber-500/10 text-amber-500",
+    to: "/organizer" as const,
   },
   {
     step: "05",
@@ -64,6 +68,7 @@ const capabilities = [
     color: "from-rose-500/20 via-rose-500/5 to-transparent",
     border: "border-rose-500/30",
     badge: "bg-rose-500/10 text-rose-500",
+    to: "/dashboard" as const,
   },
   {
     step: "06",
@@ -74,6 +79,7 @@ const capabilities = [
     color: "from-primary/20 via-primary/5 to-transparent",
     border: "border-primary/30",
     badge: "bg-primary/10 text-primary",
+    to: "/careers" as const,
   },
 ];
 
@@ -139,51 +145,53 @@ export function HorizontalStorySection() {
           {capabilities.map((c) => {
             const Icon = c.icon;
             return (
-              <motion.div
+              <Link
                 key={c.step}
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ duration: 0.25 }}
-                className={`w-[320px] sm:w-[380px] md:w-[420px] shrink-0 bg-card/80 backdrop-blur-xl border ${c.border} rounded-3xl p-8 flex flex-col justify-between shadow-xl relative overflow-hidden group`}
+                to={c.to}
+                className="block shrink-0 cursor-pointer"
               >
-                <div
-                  className={`absolute -top-10 -right-10 size-40 bg-gradient-to-br ${c.color} rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500`}
-                />
+                <motion.div
+                  whileHover={{ y: -6, scale: 1.015 }}
+                  transition={{ duration: 0.25 }}
+                  className={`w-[320px] sm:w-[380px] md:w-[420px] bg-card/80 backdrop-blur-xl border ${c.border} hover:border-primary/50 rounded-3xl p-8 flex flex-col justify-between shadow-xl relative overflow-hidden group h-full`}
+                >
+                  <div
+                    className={`absolute -top-10 -right-10 size-40 bg-gradient-to-br ${c.color} rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500`}
+                  />
 
-                <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <span className="font-mono text-2xl font-bold tracking-tight text-foreground/30 group-hover:text-primary transition-colors">
-                      {c.step}
-                    </span>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full border border-current/20 ${c.badge}`}>
-                      {c.tag}
-                    </span>
+                  <div>
+                    <div className="flex items-center justify-between mb-8">
+                      <span className="font-mono text-2xl font-bold tracking-tight text-foreground/30 group-hover:text-primary transition-colors">
+                        {c.step}
+                      </span>
+                      <span className={`text-xs font-semibold px-3 py-1 rounded-full border border-current/20 ${c.badge}`}>
+                        {c.tag}
+                      </span>
+                    </div>
+
+                    <div className={`size-12 rounded-2xl ${c.badge} border border-current/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                      <Icon className="size-6" />
+                    </div>
+
+                    <h3 className="text-xl font-display font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                      {c.title}
+                    </h3>
+
+                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                      {c.desc}
+                    </p>
                   </div>
 
-                  <div className={`size-12 rounded-2xl ${c.badge} border border-current/20 flex items-center justify-center mb-6`}>
-                    <Icon className="size-6" />
+                  <div className="mt-8 pt-4 border-t border-border/40 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:underline">
+                      Explore {c.tag} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                    </span>
+                    <span className="text-[10px] uppercase font-mono text-muted-foreground tracking-widest">
+                      Enginow Standard
+                    </span>
                   </div>
-
-                  <h3 className="text-xl font-display font-semibold tracking-tight text-foreground">
-                    {c.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {c.desc}
-                  </p>
-                </div>
-
-                <div className="mt-8 pt-4 border-t border-border/40 flex items-center justify-between">
-                  <Link
-                    to="/events"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Learn more <ArrowRight className="size-3.5" />
-                  </Link>
-                  <span className="text-[10px] uppercase font-mono text-muted-foreground tracking-widest">
-                    Enginow Standard
-                  </span>
-                </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             );
           })}
         </div>

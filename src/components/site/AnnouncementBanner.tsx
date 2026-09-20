@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Megaphone, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { usePlatformStore } from "@/lib/platform-store";
 
 export function AnnouncementBanner() {
@@ -30,9 +31,13 @@ export function AnnouncementBanner() {
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-2.5 flex items-center gap-3">
           <Megaphone className="size-3.5 shrink-0" />
-          <p className="text-xs font-semibold flex-1 text-center">
-            {ann.title}: {ann.message}
-          </p>
+          <Link
+            to="/events"
+            className="text-xs font-semibold flex-1 text-center hover:underline cursor-pointer inline-flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
+          >
+            <span>{ann.title}: {ann.message}</span>
+            <span className="text-[10px] uppercase font-mono tracking-wider opacity-75">Learn more →</span>
+          </Link>
           <button
             onClick={() => setDismissed((prev) => new Set([...prev, ann.id]))}
             className="shrink-0 p-1 rounded hover:opacity-70 transition-opacity"

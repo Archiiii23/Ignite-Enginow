@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { canonical, pageMeta } from "@/lib/seo";
-import { Mail, MapPin, MessageCircle, Loader2 } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Loader2, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -23,18 +23,21 @@ const channels = [
     icon: Mail,
     title: "Email",
     value: "hello@enginow.ignite",
+    href: "mailto:hello@enginow.ignite",
     note: "Replies within 1 business day.",
   },
   {
     icon: MessageCircle,
     title: "Support",
     value: "support.enginow.ignite",
+    href: "mailto:support@enginow.ignite",
     note: "Priority for verified Igniters.",
   },
   {
     icon: MapPin,
     title: "Office",
     value: "Koramangala, Bengaluru",
+    href: "https://maps.google.com/?q=Koramangala,Bengaluru",
     note: "Visits by appointment.",
   },
 ];
@@ -107,19 +110,25 @@ function ContactPage() {
 
             <div className="mt-12 space-y-6">
               {channels.map((c) => (
-                <div
+                <a
                   key={c.title}
-                  className="flex items-start gap-4 p-5 rounded-2xl border border-border bg-card"
+                  href={c.href}
+                  target={c.href.startsWith("http") ? "_blank" : undefined}
+                  rel={c.href.startsWith("http") ? "noreferrer" : undefined}
+                  className="group flex items-start justify-between gap-4 p-5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 cursor-pointer block"
                 >
-                  <div className="size-10 rounded-lg bg-secondary grid place-items-center shrink-0">
-                    <c.icon className="size-4" />
+                  <div className="flex items-start gap-4">
+                    <div className="size-10 rounded-xl bg-secondary group-hover:bg-primary/10 group-hover:text-primary grid place-items-center shrink-0 transition-colors">
+                      <c.icon className="size-4" />
+                    </div>
+                    <div>
+                      <div className="text-caption text-muted-foreground">{c.title}</div>
+                      <div className="text-sm font-semibold mt-0.5 text-foreground group-hover:text-primary transition-colors">{c.value}</div>
+                      <div className="text-caption mt-1 text-muted-foreground">{c.note}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-caption text-muted-foreground">{c.title}</div>
-                    <div className="text-sm font-medium mt-0.5">{c.value}</div>
-                    <div className="text-caption mt-1">{c.note}</div>
-                  </div>
-                </div>
+                  <ArrowUpRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0" />
+                </a>
               ))}
             </div>
           </div>

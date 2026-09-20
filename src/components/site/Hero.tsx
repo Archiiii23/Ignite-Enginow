@@ -20,10 +20,10 @@ function useCountdown(target: Date) {
 }
 
 const stats = [
-  { value: "500k+", label: "Participants" },
-  { value: "12k+", label: "Events Hosted" },
-  { value: "85+", label: "Countries" },
-  { value: "$2M+", label: "Prizes Distributed" },
+  { value: "500k+", label: "Participants", to: "/events" as const },
+  { value: "12k+", label: "Events Hosted", to: "/events" as const },
+  { value: "85+", label: "Countries", to: "/about" as const },
+  { value: "$2M+", label: "Prizes Distributed", to: "/events" as const },
 ];
 
 const suggestions = [
@@ -100,14 +100,24 @@ export function Hero() {
             initial="hidden"
             animate="show"
             whileHover={{ scale: 1.03 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 backdrop-blur border border-primary/25 text-eyebrow text-primary font-semibold mb-8 shadow-sm cursor-default"
+            className="mb-8"
           >
-            <span className="relative flex size-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex rounded-full size-2 bg-primary" />
-            </span>
-            Next: Global AI Hackathon · {d}d {h.toString().padStart(2, "0")}h{" "}
-            {m.toString().padStart(2, "0")}m {s.toString().padStart(2, "0")}s
+            <Link
+              to="/events"
+              search={{ q: "Global AI" } as Record<string, string>}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 backdrop-blur border border-primary/25 text-eyebrow text-primary font-semibold shadow-sm hover:bg-primary/20 hover:border-primary/40 transition-all cursor-pointer group"
+              title="Click to view the Global AI Hackathon"
+            >
+              <span className="relative flex size-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full size-2 bg-primary" />
+              </span>
+              <span>
+                Next: Global AI Hackathon · {d}d {h.toString().padStart(2, "0")}h{" "}
+                {m.toString().padStart(2, "0")}m {s.toString().padStart(2, "0")}s
+              </span>
+              <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </motion.div>
 
           {/* Main Title */}
@@ -230,10 +240,17 @@ export function Hero() {
                 key={stat.label}
                 whileHover={{ y: -3 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col gap-1 items-start cursor-default"
               >
-                <span className="text-stat">{stat.value}</span>
-                <span className="text-eyebrow text-muted-foreground">{stat.label}</span>
+                <Link
+                  to={stat.to}
+                  className="group flex flex-col gap-1 items-start cursor-pointer"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-stat group-hover:text-primary transition-colors">{stat.value}</span>
+                    <ArrowRight className="size-3.5 text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
+                  </div>
+                  <span className="text-eyebrow text-muted-foreground group-hover:text-foreground transition-colors">{stat.label}</span>
+                </Link>
               </motion.div>
             ))}
           </motion.div>

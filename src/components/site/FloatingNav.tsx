@@ -5,7 +5,7 @@ import {
   ChevronDown, LayoutDashboard, Bell, CheckCircle2, Info, AlertTriangle, XCircle,
   Lock, RefreshCw,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/lib/auth-context";
@@ -49,6 +49,7 @@ function timeAgo(ts: number) {
 }
 
 export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
+  const navigate = useNavigate();
   const { user, isAuthenticated, logout, switchRole } = useAuth();
   const { notifications, unreadCount, markAllRead, clearNotification } = useNotifications();
   const [open, setOpen] = useState(false);
@@ -59,6 +60,20 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
   const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const handleNotificationClick = (n: (typeof notifications)[0]) => {
+    markAllRead();
+    setNotifOpen(false);
+    if (n.category === "registration_success" || n.category === "event_reminder" || n.category === "registration_closing") {
+      navigate({ to: "/dashboard" });
+    } else if (n.category === "approval_status" || n.category === "event_published") {
+      navigate({ to: user?.role === "admin" ? "/admin" : "/organizer" });
+    } else if (n.category === "event_rejected") {
+      navigate({ to: "/organizer" });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -245,14 +260,15 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                             return (
                               <div
                                 key={n.id}
-                                className={`flex items-start gap-3 p-3.5 hover:bg-secondary/40 transition-colors ${
+                                onClick={() => handleNotificationClick(n)}
+                                className={`flex items-start gap-3 p-3.5 hover:bg-secondary/60 transition-colors cursor-pointer group ${
                                   !n.read ? "bg-primary/5" : ""
                                 }`}
                               >
                                 <Icon className={`size-4 shrink-0 mt-0.5 ${notifColors[n.type]}`} />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                                    <div className="text-xs font-semibold text-foreground leading-tight">
+                                    <div className="text-xs font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
                                       {n.title}
                                     </div>
                                     {badge && (
@@ -266,12 +282,18 @@ export function FloatingNav({ overDark = false }: { overDark?: boolean }) {
                                   <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                                     {n.message}
                                   </div>
-                                  <div className="text-[10px] text-muted-foreground mt-1.5 font-medium">
-                                    {timeAgo(n.createdAt)}
+                                  <div className="text-[10px] text-muted-foreground mt-1.5 font-medium flex items-center justify-between">
+                                    <span>{timeAgo(n.createdAt)}</span>
+                                    <span className="text-[10px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                      View details →
+                                    </span>
                                   </div>
                                 </div>
                                 <button
-                                  onClick={() => clearNotification(n.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    clearNotification(n.id);
+                                  }}
                                   className="shrink-0 p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                                   title="Dismiss"
                                 >

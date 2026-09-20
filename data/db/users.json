@@ -134,13 +134,14 @@
       "name": "Alex Rivera",
       "email": "alex.rivera@gmail.com",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-      "role": "student",
+      "role": "organizer",
       "isRoleSelected": true,
       "roleChangeRequest": {
         "requestedRole": "organizer",
         "reason": "USER",
-        "status": "PENDING",
-        "requestedAt": "2026-09-20T07:08:16.504Z"
+        "status": "APPROVED",
+        "requestedAt": "2026-09-20T07:08:16.504Z",
+        "reviewedAt": "2026-09-20T13:40:09.846Z"
       }
     }
   }
