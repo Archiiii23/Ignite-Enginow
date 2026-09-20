@@ -241,9 +241,9 @@ export function Footer() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Archi Jain Pill - Pink Hover */}
-              <div className="group relative flex items-center justify-between px-6 py-4 rounded-2xl bg-secondary/40 border border-border/80 hover:border-pink-500/60 hover:bg-pink-500/[0.08] hover:shadow-[0_0_25px_rgba(236,72,153,0.18)] transition-all duration-300">
-                <span className="text-sm font-semibold text-foreground group-hover:text-pink-400 transition-colors">
+              {/* Archi Jain Pill - Soft Pink Hover */}
+              <div className="group relative flex items-center justify-between px-6 py-4 rounded-2xl bg-secondary/40 border border-border/80 hover:border-pink-300/60 hover:bg-pink-300/[0.07] hover:shadow-[0_0_25px_rgba(249,168,212,0.22)] transition-all duration-300">
+                <span className="text-sm font-semibold text-foreground group-hover:text-pink-300 transition-colors">
                   Archi Jain
                 </span>
                 <div className="flex items-center gap-2">
@@ -252,14 +252,14 @@ export function Footer() {
                       href="https://www.linkedin.com/in/archi-jain-8a9967332?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                       target="_blank"
                       rel="noreferrer"
-                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-500/40 hover:!bg-pink-600 hover:!text-white hover:!border-pink-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-300/40 hover:!bg-pink-300 hover:!text-neutral-900 hover:!border-pink-200 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(249,168,212,0.5)]"
                       title="LinkedIn: Archi Jain"
                       aria-label="Archi Jain LinkedIn"
                     >
                       <Linkedin className="size-3.5" />
                     </a>
                     {/* ID Tooltip */}
-                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-500/30 text-pink-400 shadow-lg z-20">
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-300/40 text-pink-300 shadow-lg z-20">
                       @archi-jain
                     </span>
                   </div>
@@ -269,14 +269,14 @@ export function Footer() {
                       href="https://github.com/Archiiii23"
                       target="_blank"
                       rel="noreferrer"
-                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-500/40 hover:!bg-pink-600 hover:!text-white hover:!border-pink-600 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                      className="size-8 rounded-full border border-border/80 bg-background/50 group-hover:border-pink-300/40 hover:!bg-pink-300 hover:!text-neutral-900 hover:!border-pink-200 grid place-items-center text-muted-foreground transition-all cursor-pointer hover:scale-110 hover:shadow-[0_0_12px_rgba(249,168,212,0.5)]"
                       title="GitHub: @Archiiii23"
                       aria-label="Archi Jain GitHub (@Archiiii23)"
                     >
                       <Github className="size-3.5" />
                     </a>
                     {/* ID Tooltip */}
-                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-500/30 text-pink-400 shadow-lg z-20">
+                    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity bg-background border border-pink-300/40 text-pink-300 shadow-lg z-20">
                       @Archiiii23
                     </span>
                   </div>
@@ -364,7 +364,7 @@ export function Footer() {
                     href="https://github.com/Archiiii23"
                     target="_blank"
                     rel="noreferrer"
-                    className="font-medium text-foreground hover:text-pink-400 transition-colors cursor-pointer underline underline-offset-2"
+                    className="font-medium text-foreground hover:text-pink-300 transition-colors cursor-pointer underline underline-offset-2"
                   >
                     Archi Jain
                   </a>{" "}
