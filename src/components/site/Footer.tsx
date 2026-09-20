@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Github, Instagram, Linkedin, Youtube, X, Shield, FileText, CheckCircle2 } from "lucide-react";
+import { Github, Instagram, Linkedin, Youtube, X, Shield, FileText, CheckCircle2, Code2, Heart, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { toast } from "sonner";
@@ -232,6 +232,101 @@ export function Footer() {
             </div>
           </div>
 
+          {/* Developer Credits Spotlight */}
+          <div className="border-t border-border/70 pt-8 pb-8 my-8 flex flex-col lg:flex-row items-center justify-between gap-6 bg-secondary/30 rounded-2xl p-6 border border-border/80 shadow-xs">
+            <div className="flex items-center gap-3.5">
+              <div className="size-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/25 text-primary grid place-items-center shrink-0 shadow-xs">
+                <Code2 className="size-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] uppercase tracking-wider font-mono font-bold text-primary flex items-center gap-1">
+                    <Sparkles className="size-3" /> Core Engineering Team
+                  </span>
+                </div>
+                <div className="text-sm font-bold text-foreground mt-0.5">
+                  Developed by <span className="text-primary font-display">Aarchi Jain</span> &amp;{" "}
+                  <span className="text-primary font-display">Pranya Patel</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Architected with modern full-stack performance, responsive motion, and modular design.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3.5">
+              {/* Aarchi Jain Profile Card */}
+              <div className="flex items-center gap-3 bg-card border border-border hover:border-primary/40 p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-xs group">
+                <div className="size-9 rounded-lg bg-primary/15 border border-primary/30 text-primary font-bold text-xs grid place-items-center shrink-0 group-hover:scale-105 transition-transform font-mono">
+                  AJ
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                    Aarchi Jain
+                  </div>
+                  <div className="text-[10px] text-muted-foreground font-mono">Full Stack Developer</div>
+                </div>
+                <div className="flex items-center gap-1.5 ml-2 border-l border-border pl-2.5">
+                  <a
+                    href="https://github.com/Archiiii23"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="size-7 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
+                    title="Aarchi Jain GitHub Profile"
+                    aria-label="Aarchi Jain GitHub Profile"
+                  >
+                    <Github className="size-3.5" />
+                  </a>
+                  <a
+                    href="https://linkedin.com/in/aarchijain"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="size-7 rounded-lg bg-secondary hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
+                    title="Aarchi Jain LinkedIn Profile"
+                    aria-label="Aarchi Jain LinkedIn Profile"
+                  >
+                    <Linkedin className="size-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Pranya Patel Profile Card */}
+              <div className="flex items-center gap-3 bg-card border border-border hover:border-emerald-500/40 p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-xs group">
+                <div className="size-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs grid place-items-center shrink-0 group-hover:scale-105 transition-transform font-mono">
+                  PP
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    Pranya Patel
+                  </div>
+                  <div className="text-[10px] text-muted-foreground font-mono">Full Stack Developer</div>
+                </div>
+                <div className="flex items-center gap-1.5 ml-2 border-l border-border pl-2.5">
+                  <a
+                    href="https://github.com/pranyapatel"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="size-7 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
+                    title="Pranya Patel GitHub Profile"
+                    aria-label="Pranya Patel GitHub Profile"
+                  >
+                    <Github className="size-3.5" />
+                  </a>
+                  <a
+                    href="https://linkedin.com/in/pranyapatel"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="size-7 rounded-lg bg-secondary hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-border grid place-items-center text-muted-foreground transition-all cursor-pointer"
+                    title="Pranya Patel LinkedIn Profile"
+                    aria-label="Pranya Patel LinkedIn Profile"
+                  >
+                    <Linkedin className="size-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="border-t border-border pt-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
             <div className="flex flex-col gap-4 max-w-md w-full">
               <span className="text-eyebrow text-muted-foreground">
@@ -262,8 +357,26 @@ export function Footer() {
                 <span>Theme:</span>
                 <ThemeToggle showLabel />
               </div>
-              <div>
-                © {new Date().getFullYear()} Enginow Ignite. Ignite Ideas. Build Communities. Create Impact.
+              <div className="text-muted-foreground text-xs text-left md:text-right">
+                © {new Date().getFullYear()} Enginow Ignite · Developed with{" "}
+                <Heart className="size-3 inline text-red-500 fill-red-500 mx-0.5" /> by{" "}
+                <a
+                  href="https://github.com/Archiiii23"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-primary/40 underline-offset-2"
+                >
+                  Aarchi Jain
+                </a>{" "}
+                &amp;{" "}
+                <a
+                  href="https://github.com/pranyapatel"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-primary/40 underline-offset-2"
+                >
+                  Pranya Patel
+                </a>
               </div>
             </div>
           </div>
