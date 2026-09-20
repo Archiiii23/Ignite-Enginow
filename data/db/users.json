@@ -124,5 +124,24 @@
       "role": "organizer",
       "isRoleSelected": true
     }
+  },
+  {
+    "id": "usr_google_tuw7ub9",
+    "email": "alex.rivera@gmail.com",
+    "passwordHash": "21397e29e7f603e2980030377eaf79d9:845f2fc03b871d1b7c3bca989d6f94ae0764e321354e1ac5c1778e7991afacc19f0cc16523cd8feba08486476d79ba11ac4cccdf7164d6a27d7a7706d509d00d",
+    "profile": {
+      "id": "usr_google_tuw7ub9",
+      "name": "Alex Rivera",
+      "email": "alex.rivera@gmail.com",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "role": "student",
+      "isRoleSelected": true,
+      "roleChangeRequest": {
+        "requestedRole": "organizer",
+        "reason": "USER",
+        "status": "PENDING",
+        "requestedAt": "2026-09-20T07:08:16.504Z"
+      }
+    }
   }
 ]
