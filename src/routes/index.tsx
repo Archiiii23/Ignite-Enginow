@@ -47,14 +47,23 @@ function Landing() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <div className="relative flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-          <div className="absolute w-7 h-7 rounded-full bg-primary/20 animate-pulse" />
+      <div className="min-h-screen bg-[#07070a] flex flex-col items-center justify-center relative overflow-hidden select-none">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute h-72 w-72 rounded-full bg-primary/20 blur-[100px] animate-pulse"
+        />
+        <div className="relative flex flex-col items-center">
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_30px_rgba(234,88,12,0.3)] backdrop-blur-xl">
+            <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/40 animate-[spin_8s_linear_infinite]" />
+            <div className="w-4 h-4 rounded-full bg-amber-400 animate-ping opacity-75" />
+          </div>
+          <span className="mt-5 font-display text-sm font-semibold tracking-wider uppercase text-white/90">
+            ENGINOW IGNITE
+          </span>
+          <p className="mt-1 text-xs font-mono text-muted-foreground tracking-widest uppercase animate-pulse">
+            Verifying secure session...
+          </p>
         </div>
-        <p className="mt-4 text-xs tracking-wider uppercase font-semibold text-muted-foreground animate-pulse">
-          Authenticating...
-        </p>
       </div>
     );
   }
