@@ -1,5 +1,38 @@
 [
   {
+    "id": "reg_1789726384702",
+    "eventId": "e-fest-1",
+    "eventTitle": "National Collegiate Tech Fest 'Ignite 26'",
+    "eventDate": "Dec 18 – 20, 2026",
+    "eventLocation": "IIT Madras Open Air Theatre & Grounds, Chennai",
+    "userId": "usr_admin_1",
+    "userName": "Sarah Chen (Admin)",
+    "userEmail": "sarah.chen@enginow.io",
+    "college": "IIT Madras",
+    "phone": "9876543210",
+    "degree": "B.Tech / B.E. Computer Science",
+    "yearOfStudy": "3rd Year",
+    "rollNumber": "23CS0148",
+    "githubUrl": "",
+    "linkedinUrl": "",
+    "experienceLevel": "Intermediate",
+    "skills": [
+      "React",
+      "TypeScript"
+    ],
+    "participationType": "solo",
+    "teamName": "",
+    "teamSize": 1,
+    "teamRole": "",
+    "reasonForAttending": "",
+    "tshirtSize": "L",
+    "dietaryPreference": "Vegetarian",
+    "registeredAt": "2026-09-18T10:13:04.702Z",
+    "status": "confirmed",
+    "ticketCode": "IGN-COL-2714",
+    "seatNumber": "COL-42"
+  },
+  {
     "id": "reg_1",
     "eventId": "e-hk-1",
     "eventTitle": "Quantum Hack 2026",
