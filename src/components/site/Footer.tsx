@@ -358,26 +358,7 @@ export function Footer() {
                 <ThemeToggle showLabel />
               </div>
               <div className="text-muted-foreground text-xs text-left md:text-right">
-                <p>
-                  &copy; {new Date().getFullYear()} Enginow Ignite · Developed with <Heart className="size-3 inline text-red-500 fill-red-500 mx-0.5" /> by{" "}
-                  <a
-                    href="https://github.com/Archiiii23"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-foreground hover:text-pink-300 transition-colors cursor-pointer underline underline-offset-2"
-                  >
-                    Archi Jain
-                  </a>{" "}
-                  &amp;{" "}
-                  <a
-                    href="https://github.com/Pranya15"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-foreground hover:text-blue-400 transition-colors cursor-pointer underline underline-offset-2"
-                  >
-                    Pranya Patel
-                  </a>
-                </p>
+                <p>&copy; {new Date().getFullYear()} Enginow Ignite. All rights reserved.</p>
               </div>
             </div>
           </div>
