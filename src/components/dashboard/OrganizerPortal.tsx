@@ -1263,7 +1263,9 @@ export function OrganizerPortal() {
                                 <div className="font-bold text-foreground text-sm flex items-center gap-1.5">
                                   <span>{reg.userName}</span>
                                   {isAttended && (
-                                    <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" title="Verified Attended" />
+                                    <span title="Verified Attended" className="inline-flex">
+                                      <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                                    </span>
                                   )}
                                 </div>
                                 <div className="text-muted-foreground font-mono text-[11px] truncate">{reg.userEmail}</div>
