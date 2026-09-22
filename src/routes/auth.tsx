@@ -1,7 +1,6 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@/lib/router";
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth, type UserRole } from "@/lib/auth-context";
 import {
   GoogleAccountChooserModal,
@@ -11,20 +10,7 @@ import {
 import { GraduationCap, Briefcase, ShieldCheck, CheckCircle2, Lock, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Sign in with Google",
-      description: "Sign in to Enginow Ignite with Google OAuth. Choose your role as Participant or Organizer.",
-      path: "/auth",
-      noindex: true,
-    }),
-    links: canonical("/auth"),
-  }),
-  component: AuthPage,
-});
-
-function AuthPage() {
+export default function AuthPage() {
   const navigate = useNavigate();
   const { loginWithGoogle, loginWithEmail, signupWithEmail, user, isAuthenticated, isLoading } = useAuth();
 

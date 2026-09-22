@@ -1,23 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { ArrowUpRight, Compass, Rocket, Shield, Users } from "lucide-react";
-
-export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: pageMeta({
-      title: "About",
-      description:
-        "Enginow Ignite is the premium platform for hackathons, workshops, webinars and community events — built by engineers, for engineers.",
-      socialDescription:
-        "Learn about the team, mission and craft behind Enginow Ignite — the operating system for technical communities.",
-      path: "/about",
-    }),
-    links: canonical("/about"),
-  }),
-  component: AboutPage,
-});
 
 const values = [
   {
@@ -49,7 +33,7 @@ const stats = [
   { value: "99.98%", label: "Uptime", to: "/events" as const, hint: "High-reliability platform" },
 ];
 
-function AboutPage() {
+export default function AboutPage() {
   return (
     <PageShell variant="dark">
       {/* Hero */}

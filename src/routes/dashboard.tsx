@@ -1,27 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth } from "@/lib/auth-context";
 import { StudentPortal } from "@/components/dashboard/StudentPortal";
 import { OrganizerPortal } from "@/components/dashboard/OrganizerPortal";
 import { AdminPortal } from "@/components/dashboard/AdminPortal";
 
-export const Route = createFileRoute("/dashboard")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Dashboard",
-      description: "Your Enginow Ignite command center — events, attendees, and analytics.",
-      socialDescription: "Manage events, attendees, and analytics from one premium dashboard.",
-      path: "/dashboard",
-      noindex: true,
-    }),
-    links: canonical("/dashboard"),
-  }),
-  component: Dashboard,
-});
-
-function Dashboard() {
+export default function Dashboard() {
   const { user } = useAuth();
 
   if (!user) {

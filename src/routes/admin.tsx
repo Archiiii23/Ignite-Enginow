@@ -1,25 +1,11 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@/lib/router";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth } from "@/lib/auth-context";
 import { AdminPortal } from "@/components/dashboard/AdminPortal";
 import { ShieldCheck, ShieldAlert, ArrowRight, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Admin Dashboard — Enginow Ignite",
-      description: "Platform governance, user management, organizer approvals, and event moderation.",
-      path: "/admin",
-      noindex: true,
-    }),
-    links: canonical("/admin"),
-  }),
-  component: AdminRoute,
-});
-
-function AdminRoute() {
+export default function AdminRoute() {
   const { user, isAuthenticated, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 

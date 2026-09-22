@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Megaphone, X } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { usePlatformStore } from "@/lib/platform-store";
 
 export function AnnouncementBanner() {

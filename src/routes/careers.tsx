@@ -1,7 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
-import { careersDescription } from "@/lib/seo-descriptions";
 import { ArrowUpRight, MapPin, X, CheckCircle2, Send, Sparkles, Briefcase } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -57,19 +55,7 @@ const roles = [
   },
 ];
 
-export const Route = createFileRoute("/careers")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Career",
-      description: careersDescription(roles),
-      socialDescription:
-        "Open roles at Enginow Ignite. Engineering, design, product, and community.",
-      path: "/careers",
-    }),
-    links: canonical("/careers"),
-  }),
-  component: CareersPage,
-});
+
 
 const perks = [
   { title: "Ownership from day one", body: "Small, senior teams. You'll ship something visible in your first week." },
@@ -78,7 +64,7 @@ const perks = [
   { title: "Learning stipend", body: "₹75,000 per year for books, courses, and conferences." },
 ];
 
-function CareersPage() {
+export default function CareersPage() {
   const [selectedRole, setSelectedRole] = useState<(typeof roles)[0] | null>(null);
   const [applicantEmail, setApplicantEmail] = useState("");
   const [applicantPortfolio, setApplicantPortfolio] = useState("");

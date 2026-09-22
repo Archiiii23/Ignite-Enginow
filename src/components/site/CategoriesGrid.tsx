@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { categoryMeta, categories } from "@/data/events";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 

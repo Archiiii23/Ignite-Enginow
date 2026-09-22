@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import Lenis from "lenis";
-import { useRouterState } from "@tanstack/react-router";
+import { useLocation } from "@/lib/router";
 import { gsap, ScrollTrigger } from "@/animations/scrollAnimations";
 import { lenisDefaultOptions, getPrefersReducedMotion } from "@/animations/motionConfig";
 
@@ -10,7 +10,7 @@ interface SmoothScrollProps {
 
 export function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
-  const routerState = useRouterState();
+  const location = useLocation();
 
   useEffect(() => {
     // Disable smooth scroll if reduced motion is requested or in SSR
@@ -51,7 +51,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         window.scrollTo(0, 0);
       }
     } catch {}
-  }, [routerState.location.pathname]);
+  }, [location.pathname]);
 
   return <>{children}</>;
 }

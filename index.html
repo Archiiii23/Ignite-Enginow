@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enginow Ignite — Ignite Ideas. Build Communities.</title>
+    <meta
+      name="description"
+      content="The premium platform to host hackathons, workshops, webinars, bootcamps and community events. Engineered for creators."
+    />
+    <meta property="og:title" content="Enginow Ignite — Ignite Ideas. Build Communities." />
+    <meta
+      property="og:description"
+      content="The premium platform to host hackathons, workshops, webinars, bootcamps and community events."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Theme Initialization to prevent flicker -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ignite-theme');
+          var isDark = stored === 'dark' || (!stored && true);
+          if (stored === 'system') {
+            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body class="bg-background text-foreground antialiased min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,8 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@/lib/router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { canonical, pageMeta } from "@/lib/seo";
-import { homeDescription } from "@/lib/seo-descriptions";
 import { FloatingNav } from "@/components/site/FloatingNav";
 import { AnnouncementBanner } from "@/components/site/AnnouncementBanner";
 import { Hero } from "@/components/site/Hero";
@@ -21,21 +19,7 @@ import { PinnedStorySection } from "@/components/motion/PinnedStorySection";
 import { HorizontalStorySection } from "@/components/motion/HorizontalStorySection";
 import { ThreeRoleEcosystem } from "@/components/motion/ThreeRoleEcosystem";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Home",
-      description: homeDescription(),
-      socialDescription:
-        "Discover and host hackathons, workshops and webinars on Enginow Ignite.",
-      path: "/",
-    }),
-    links: canonical("/"),
-  }),
-  component: Landing,
-});
-
-function Landing() {
+export default function Landing() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 

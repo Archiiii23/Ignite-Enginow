@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,

@@ -27,6 +27,7 @@ import announcementRoutes from "./routes/announcementRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 
@@ -141,6 +142,7 @@ app.use("/api/announcements", announcementRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Error Handling per Section 51
 app.use(notFoundHandler);

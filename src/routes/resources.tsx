@@ -1,7 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
-import { resourcesDescription } from "@/lib/seo-descriptions";
 import { ArrowUpRight, BookOpen, FileText, Play, Wrench, X, CheckCircle2, Download, ExternalLink, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,19 +10,7 @@ const categories = [
   { icon: Wrench, label: "Playbooks", count: 24, key: "Playbook" },
 ];
 
-export const Route = createFileRoute("/resources")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Resources",
-      description: resourcesDescription(categories),
-      socialDescription:
-        "Guides, templates, and playbooks for organizers and participants.",
-      path: "/resources",
-    }),
-    links: canonical("/resources"),
-  }),
-  component: ResourcesPage,
-});
+// Resources page definition
 
 const featured = [
   {
@@ -82,7 +67,7 @@ const featured = [
   },
 ];
 
-function ResourcesPage() {
+export default function ResourcesPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
   const [activeResource, setActiveResource] = useState<(typeof featured)[0] | null>(null);
 

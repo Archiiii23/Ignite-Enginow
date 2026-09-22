@@ -1,22 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { Mail, MapPin, MessageCircle, Loader2, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Contact",
-      description: "Get in touch with the Enginow Ignite team.",
-      socialDescription: "Reach out for partnerships, press, or platform support.",
-      path: "/contact",
-    }),
-    links: canonical("/contact"),
-  }),
-  component: ContactPage,
-});
 
 const channels = [
   {
@@ -42,7 +27,7 @@ const channels = [
   },
 ];
 
-function ContactPage() {
+export default function ContactPage() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",

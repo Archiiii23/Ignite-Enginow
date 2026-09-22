@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 
 export function CTA() {

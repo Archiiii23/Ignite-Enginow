@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { Github, Instagram, Linkedin, Youtube, X, Shield, FileText, CheckCircle2, Code2, Heart, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";

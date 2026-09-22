@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { useNavigate, Link } from "@/lib/router";
 import { fadeUp } from "@/animations/motionVariants";
 import { getPrefersReducedMotion } from "@/animations/motionConfig";
 

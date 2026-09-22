@@ -11,7 +11,7 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { motion } from "framer-motion";
 
 const capabilities = [

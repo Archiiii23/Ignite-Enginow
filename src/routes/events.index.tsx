@@ -1,9 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@/lib/router";
 import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
-import { breadcrumbLd, eventListLd, ldScript } from "@/lib/jsonld";
 import { events as staticEvents, categories, categoryMeta, eventTypes } from "@/data/events";
 import { usePlatformStore, type PlatformEvent } from "@/lib/platform-store";
 import { useAuth } from "@/lib/auth-context";
@@ -12,23 +10,6 @@ import {
   SlidersHorizontal, X, ChevronDown, CheckCircle2, Clock,
   Sparkles, GraduationCap, Building, Tag,
 } from "lucide-react";
-
-export const Route = createFileRoute("/events/")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Events",
-      description: "Browse hackathons, workshops, webinars, bootcamps and meetups happening on Enginow Ignite.",
-      socialDescription: "Discover premium hackathons, workshops, webinars, bootcamps and meetups on Enginow Ignite.",
-      path: "/events",
-    }),
-    links: canonical("/events"),
-    scripts: [
-      ldScript(eventListLd(staticEvents)),
-      ldScript(breadcrumbLd([{ name: "Home", path: "/" }, { name: "Events", path: "/events" }])),
-    ],
-  }),
-  component: EventsPage,
-});
 
 function SkeletonCard() {
   return (
@@ -48,7 +29,7 @@ function SkeletonCard() {
   );
 }
 
-function EventsPage() {
+export default function EventsPage() {
   const navigate = useNavigate();
   const { events: storeEvents, toggleFavorite, isFavorite, isRegistered } = usePlatformStore();
   const { user, isAuthenticated } = useAuth();

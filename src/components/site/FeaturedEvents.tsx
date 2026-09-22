@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, MapPin, Users, Star, Calendar, Sparkles } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { usePlatformStore } from "@/lib/platform-store";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 

@@ -1,25 +1,11 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@/lib/router";
 import { PageShell } from "@/components/site/PageShell";
-import { canonical, pageMeta } from "@/lib/seo";
 import { useAuth } from "@/lib/auth-context";
 import { OrganizerPortal } from "@/components/dashboard/OrganizerPortal";
 import { Briefcase, ShieldAlert, ArrowRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/organizer")({
-  head: () => ({
-    meta: pageMeta({
-      title: "Organizer Dashboard — Enginow Ignite",
-      description: "Manage events, review attendee rosters, track registrations, and monitor analytics.",
-      path: "/organizer",
-      noindex: true,
-    }),
-    links: canonical("/organizer"),
-  }),
-  component: OrganizerRoute,
-});
-
-function OrganizerRoute() {
+export default function OrganizerRoute() {
   const { user, isAuthenticated, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 

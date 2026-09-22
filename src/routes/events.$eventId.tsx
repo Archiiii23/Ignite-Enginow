@@ -1,10 +1,7 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@/lib/router";
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/site/PageShell";
 import { events, type EventItem } from "@/data/events";
-import { canonical, pageMeta } from "@/lib/seo";
-import { eventDescription } from "@/lib/seo-descriptions";
-import { breadcrumbLd, eventLd, ldScript } from "@/lib/jsonld";
 import {
   ArrowLeft, Calendar, Clock, MapPin, Trophy, Users, Heart, Ticket,
   CheckCircle2, XCircle, ChevronDown, ChevronUp, Mail, Tag, Mic,
@@ -16,70 +13,6 @@ import { useNotifications } from "@/lib/notifications";
 import { TicketModal } from "@/components/events/TicketModal";
 import { EventRegistrationModal } from "@/components/events/EventRegistrationModal";
 import { toast } from "sonner";
-
-export const Route = createFileRoute("/events/$eventId")({
-  loader: async ({ params }): Promise<{ event: EventItem }> => {
-    const event = events.find((e) => e.slug === params.eventId);
-    if (typeof window === "undefined" && event) return { event };
-
-    try {
-      const response = await fetch(`/api/events/${params.eventId}`);
-      if (response.ok) return { event: (await response.json()) as EventItem };
-    } catch {
-      // Use the seed event when the API is unavailable during local development.
-    }
-
-    if (!event) throw notFound();
-    return { event };
-  },
-  head: ({ params, loaderData }) => ({
-    meta: loaderData
-      ? pageMeta({
-          title: loaderData.event.title,
-          description: eventDescription(loaderData.event),
-          socialDescription: loaderData.event.tagline,
-          path: `/events/${params.eventId}`,
-          type: "article",
-        })
-      : pageMeta({
-          title: "Event",
-          description: "This event is unavailable.",
-          path: `/events/${params.eventId}`,
-          noindex: true,
-        }),
-    links: canonical(`/events/${params.eventId}`),
-    scripts: loaderData
-      ? [
-          ldScript(eventLd(loaderData.event)),
-          ldScript(breadcrumbLd([
-            { name: "Home", path: "/" },
-            { name: "Events", path: "/events" },
-            { name: loaderData.event.title, path: `/events/${params.eventId}` },
-          ])),
-        ]
-      : [],
-  }),
-  notFoundComponent: () => (
-    <PageShell>
-      <section className="pt-40 pb-32 px-4 md:px-6 text-center">
-        <p className="text-eyebrow text-muted-foreground mb-4">404</p>
-        <h1 className="text-section-title">This event doesn't exist.</h1>
-        <Link to="/events" className="mt-8 inline-flex items-center gap-2 text-sm underline underline-offset-4">
-          <ArrowLeft className="size-4" /> Back to events
-        </Link>
-      </section>
-    </PageShell>
-  ),
-  errorComponent: ({ error }) => (
-    <PageShell>
-      <section className="pt-40 pb-32 px-4 md:px-6 text-center">
-        <h1 className="text-section-title">Something broke.</h1>
-        <p className="text-lead mt-4">{(error as Error)?.message ?? "Unknown error"}</p>
-      </section>
-    </PageShell>
-  ),
-  component: EventDetail,
-});
 
 function useDeadlineCountdown(deadlineISO?: string) {
   const [timeLeft, setTimeLeft] = useState<{ d: number; h: number; m: number; s: number } | null>(null);
@@ -122,9 +55,9 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-function EventDetail() {
+export default function EventDetail() {
   const navigate = useNavigate();
-  const { event } = Route.useLoaderData() as { event: EventItem };
+  const { eventId } = useParams<{ eventId: string }>();
   const { user, isAuthenticated } = useAuth();
   const { addNotification } = useNotifications();
   const {
@@ -142,6 +75,24 @@ function EventDetail() {
   const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [activeRegistration, setActiveRegistration] = useState<Registration | null>(null);
   const [justRegistered, setJustRegistered] = useState(false);
+
+  const event =
+    platformEvents.find((e) => e.slug === eventId || e.id === eventId) ??
+    events.find((e) => e.slug === eventId || e.id === eventId);
+
+  if (!event) {
+    return (
+      <PageShell>
+        <section className="pt-40 pb-32 px-4 md:px-6 text-center">
+          <p className="text-eyebrow text-muted-foreground mb-4">404</p>
+          <h1 className="text-section-title">This event doesn't exist.</h1>
+          <Link to="/events" className="mt-8 inline-flex items-center gap-2 text-sm underline underline-offset-4">
+            <ArrowLeft className="size-4" /> Back to events
+          </Link>
+        </section>
+      </PageShell>
+    );
+  }
 
   const liveEvent = platformEvents.find((e) => e.id === event.id || e.slug === event.slug) ?? event;
   const capacityPct = Math.min(100, Math.round((liveEvent.registered / liveEvent.seats) * 100));
@@ -534,18 +485,18 @@ function EventDetail() {
                 <p className="text-eyebrow text-muted-foreground mb-3">Hosted by</p>
                 <div className="flex items-center gap-3">
                   <div className="size-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary-glow/20 border border-primary/20 overflow-hidden grid place-items-center text-sm font-bold text-primary shrink-0 shadow-sm">
-                    {event.host.avatar ? (
-                      <img src={event.host.avatar} alt={event.host.name} className="size-full object-cover" />
+                    {event.host?.avatar ? (
+                      <img src={event.host.avatar} alt={event.host?.name || "Host"} className="size-full object-cover" />
                     ) : (
-                      event.host.name[0]
+                      (event.host?.name || "E")[0]
                     )}
                   </div>
                   <div>
                     <div className="text-sm font-semibold flex items-center gap-1.5">
-                      {event.host.name}
+                      {event.host?.name || "Enginow Host"}
                       <CheckCircle2 className="size-3 text-primary" />
                     </div>
-                    <div className="text-caption text-muted-foreground">{event.host.role}</div>
+                    <div className="text-caption text-muted-foreground">{event.host?.role || "Event Coordinator"}</div>
                   </div>
                 </div>
               </div>
@@ -555,7 +506,7 @@ function EventDetail() {
       </section>
 
       <EventRegistrationModal
-        event={event}
+        event={event as EventItem}
         isOpen={registrationModalOpen}
         onClose={() => setRegistrationModalOpen(false)}
         onSubmitRegistration={handleCompleteRegistration}

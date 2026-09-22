@@ -40,7 +40,7 @@ import {
   Phone,
   QrCode,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { useAuth } from "@/lib/auth-context";
 import { usePlatformStore } from "@/lib/platform-store";
 import type { PlatformEvent } from "@/lib/platform-store";

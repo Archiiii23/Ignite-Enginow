@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { getPrefersReducedMotion } from "@/animations/motionConfig";

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ShieldCheck, Calendar, ArrowRight, ArrowUpRight, ExternalLink } from "lucide-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@/lib/router";
 import { usePlatformStore } from "@/lib/platform-store";
 
 export function PopularOrganizers() {

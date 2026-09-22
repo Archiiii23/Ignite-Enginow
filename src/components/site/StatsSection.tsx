@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { usePlatformStore } from "@/lib/platform-store";
 import { CalendarDays, Users, Building2, Star, ArrowUpRight } from "lucide-react";
 

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase, ShieldCheck, Zap, ArrowRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/lib/router";
 import { ScrollReveal } from "./ScrollReveal";
 
 const roles = [
