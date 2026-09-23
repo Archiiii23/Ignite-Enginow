@@ -81,14 +81,27 @@ export function EventRegistrationModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  // Pre-fill fields whenever modal opens or user updates
+  const handleQuickFill = () => {
+    setFullName(user?.name || "Aarav Sharma");
+    setEmail(user?.email || "aarav.sharma@campus.edu");
+    setPhone("+91 98765 43210");
+    setCollege(user?.college || "Indian Institute of Technology (IIT)");
+    setDegree("B.Tech Computer Science");
+    setYearOfStudy("3rd Year");
+    setRollNumber("IITB-2024-CS42");
+    setGithubUrl(user?.github || "https://github.com/aaravsharma");
+    setLinkedinUrl(user?.linkedin || "https://linkedin.com/in/aaravsharma");
+    setReasonForAttending("Excited to build innovative projects, learn new frameworks, and network with peers.");
+    setErrors({});
+  };
+
   useEffect(() => {
     if (isOpen) {
-      if (user) {
-        setFullName(user.name || "");
-        setEmail(user.email || "");
-        setCollege(user.college || "");
-      }
+      setFullName(user?.name || "Aarav Sharma");
+      setEmail(user?.email || "aarav.sharma@campus.edu");
+      setCollege(user?.college || "Indian Institute of Technology");
+      setPhone("+91 98765 43210");
+      setRollNumber("IIT-2024-88");
       setErrors({});
     }
   }, [isOpen, user]);
@@ -204,12 +217,21 @@ export function EventRegistrationModal({
           {/* Scrollable Form Body */}
           <form onSubmit={handleSubmit} className="overflow-y-auto px-6 py-6 space-y-7 flex-1">
             {/* Note banner */}
-            <div className="flex items-start gap-3 p-3.5 bg-primary/5 border border-primary/20 rounded-2xl text-xs text-muted-foreground">
-              <Sparkles className="size-4 text-primary shrink-0 mt-0.5" />
-              <span>
-                Please provide your complete, accurate student and event participation details.
-                These credentials will be verified during event check-in and printed on your official pass.
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-primary/5 border border-primary/20 rounded-2xl text-xs text-muted-foreground">
+              <div className="flex items-start gap-3">
+                <Sparkles className="size-4 text-primary shrink-0 mt-0.5" />
+                <span>
+                  Please verify your student & event participation credentials.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickFill}
+                className="shrink-0 px-3 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer"
+              >
+                <Sparkles className="size-3" />
+                <span>Quick Fill Sample Data</span>
+              </button>
             </div>
 
             {/* SECTION 1: Personal & Academic Credentials */}

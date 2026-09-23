@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase, ShieldCheck, Zap, ArrowRight } from "lucide-react";
-import { Link } from "@/lib/router";
+import { Link, useNavigate } from "@/lib/router";
 import { ScrollReveal } from "./ScrollReveal";
 
 const roles = [
@@ -55,6 +55,8 @@ const roles = [
 ];
 
 export function ThreeRoleEcosystem() {
+  const navigate = useNavigate();
+
   return (
     <section className="py-28 md:py-36 bg-background relative overflow-hidden border-t border-border">
       {/* Background radial glow */}
@@ -112,15 +114,17 @@ export function ThreeRoleEcosystem() {
                           <div
                             key={act.label}
                             onClick={(e) => {
-                              // allow bubbling to parent Link or direct navigation
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate({ to: act.to });
                             }}
-                            className="flex items-center justify-between text-xs font-medium text-foreground/80 bg-secondary/50 hover:bg-secondary/80 hover:text-foreground px-3 py-2 rounded-xl transition-colors"
+                            className="flex items-center justify-between text-xs font-medium text-foreground/80 bg-secondary/50 hover:bg-secondary/90 hover:text-foreground hover:border-primary/30 border border-transparent px-3 py-2 rounded-xl transition-all cursor-pointer group/pill"
                           >
                             <div className="flex items-center gap-2">
                               <Zap className="size-3 text-primary shrink-0" />
-                              <span>{act.label}</span>
+                              <span className="group-hover/pill:text-primary transition-colors">{act.label}</span>
                             </div>
-                            <ArrowRight className="size-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                            <ArrowRight className="size-3 opacity-40 group-hover/pill:opacity-100 group-hover/pill:translate-x-0.5 transition-all text-primary" />
                           </div>
                         ))}
                       </div>

@@ -8,7 +8,6 @@ import { PlatformStoreProvider } from "./lib/platform-store";
 import { NotificationProvider } from "./lib/notifications";
 import { SmoothScroll } from "./components/motion/SmoothScroll";
 import { Toaster } from "./components/ui/sonner";
-import { ComingSoonGate } from "./components/site/ComingSoonGate";
 
 // Pages
 import LandingPage from "./routes/index";
@@ -57,22 +56,20 @@ export default function App() {
               <Toaster />
               <BrowserRouter>
                 <SmoothScroll>
-                  <ComingSoonGate>
-                    <Routes>
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="/about" element={<AboutPage />} />
-                      <Route path="/events" element={<EventsIndexPage />} />
-                      <Route path="/events/:eventId" element={<EventDetailPage />} />
-                      <Route path="/dashboard" element={<DashboardPage />} />
-                      <Route path="/auth" element={<AuthPage />} />
-                      <Route path="/admin" element={<AdminPage />} />
-                      <Route path="/organizer" element={<OrganizerPage />} />
-                      <Route path="/resources" element={<ResourcesPage />} />
-                      <Route path="/careers" element={<CareersPage />} />
-                      <Route path="/contact" element={<ContactPage />} />
-                      <Route path="*" element={<NotFoundPage />} />
-                    </Routes>
-                  </ComingSoonGate>
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/events" element={<EventsIndexPage />} />
+                    <Route path="/events/:eventId" element={<EventDetailPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/organizer" element={<OrganizerPage />} />
+                    <Route path="/resources" element={<ResourcesPage />} />
+                    <Route path="/careers" element={<CareersPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
                 </SmoothScroll>
               </BrowserRouter>
             </NotificationProvider>
