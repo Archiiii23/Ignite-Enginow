@@ -49,6 +49,27 @@ export const connectDB = async () => {
     logger.info(`MongoDB connected successfully: ${conn.connection.host}/${conn.connection.name}`);
     return conn;
   } catch (error) {
+    if (process.env.NODE_ENV !== "production" && !memoryServerInstance) {
+      logger.warn(
+        `Failed to connect to primary MongoDB URI (${error.message}). Falling back to in-memory MongoDB for local development...`
+      );
+      try {
+        const { MongoMemoryServer } = await import("mongodb-memory-server");
+        memoryServerInstance = await MongoMemoryServer.create();
+        const fallbackUri = memoryServerInstance.getUri();
+        logger.info(`In-memory MongoDB started at: ${fallbackUri}`);
+        const conn = await mongoose.connect(fallbackUri, {
+          serverSelectionTimeoutMS: 5000,
+        });
+        logger.info(
+          `MongoDB connected successfully to in-memory development database: ${conn.connection.host}/${conn.connection.name}`
+        );
+        return conn;
+      } catch (fallbackError) {
+        logger.error(`Fallback to in-memory MongoDB also failed: ${fallbackError.message}`);
+      }
+    }
+
     logger.error(`Fatal MongoDB connection error: ${error.message}`);
     throw error;
   }
