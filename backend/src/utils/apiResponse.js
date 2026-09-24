@@ -36,3 +36,12 @@ export const paginatedResponse = (res, statusCode = 200, data = [], pagination =
     },
   });
 };
+
+export const ApiResponse = {
+  success: (res, data, message = "Operation successful", statusCode = 200) =>
+    successResponse(res, statusCode, message, data),
+  created: (res, data, message = "Resource created successfully") =>
+    successResponse(res, 201, message, data),
+  error: (res, message = "Operation failed", statusCode = 500, code = "SERVER_ERROR", details = null) =>
+    errorResponse(res, statusCode, message, code, details),
+};

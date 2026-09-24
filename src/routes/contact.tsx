@@ -61,8 +61,14 @@ export default function ContactPage() {
       });
       clearTimeout(timeoutId);
 
-      const result = (await response.json().catch(() => ({}))) as { error?: string; success?: boolean };
-      if (!response.ok) throw new Error(result.error || "Unable to send your message");
+      const result = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        message?: string;
+        success?: boolean;
+      };
+      if (!response.ok) {
+        throw new Error(result.message || result.error || "Unable to send your message");
+      }
       toast.success("Message sent successfully!", { description: "We'll be in touch shortly." });
       setForm({ firstName: "", lastName: "", email: "", topic: "Partnership", message: "" });
     } catch (error) {
@@ -70,7 +76,7 @@ export default function ContactPage() {
       const isAbort = error instanceof DOMException && error.name === "AbortError";
       toast.error("Message not sent", {
         description: isAbort
-          ? "Request timed out. Please try again."
+          ? "Request timed out. Please check if the backend server is running."
           : error instanceof Error
           ? error.message
           : "Please try again.",
